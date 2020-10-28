@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/Task2FD.dir/main.cpp.o CMakeFiles/Task2FD.dir/AddFunc.cpp.o  -o Task2FD 

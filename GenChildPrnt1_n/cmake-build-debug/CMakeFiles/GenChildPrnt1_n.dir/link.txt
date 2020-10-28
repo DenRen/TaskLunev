@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o  -o GenChildPrnt1_n 

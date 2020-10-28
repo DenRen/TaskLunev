@@ -1,0 +1,4 @@
+/opt/clion-2019.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug

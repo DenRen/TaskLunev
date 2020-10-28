@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/AddFunc.h
+cstdlib
+-
+cerrno
+-
+
+/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/main.cpp
+cstdio
+-
+unistd.h
+-
+sys/ipc.h
+-
+sys/msg.h
+-
+AddFunc.h
+/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/AddFunc.h
+

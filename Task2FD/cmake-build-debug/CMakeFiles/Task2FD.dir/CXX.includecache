@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tester/CLionProjects/Task2FD/AddFunc.h
+stdlib.h
+-
+
+/home/tester/CLionProjects/Task2FD/main.cpp
+cstdio
+-
+unistd.h
+-
+limits.h
+-
+fcntl.h
+-
+errno.h
+-
+sys/types.h
+-
+sys/stat.h
+-
+unistd.h
+-
+AddFunc.h
+/home/tester/CLionProjects/Task2FD/AddFunc.h
+
