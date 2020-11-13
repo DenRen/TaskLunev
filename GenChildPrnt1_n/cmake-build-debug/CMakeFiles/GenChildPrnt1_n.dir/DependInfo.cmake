@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/AddFunc.cpp" "/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o"
-  "/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/main.cpp" "/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o"
+  "/home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/AddFunc.cpp" "/home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o"
+  "/home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/main.cpp" "/home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

@@ -1,0 +1,3 @@
+/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/CMakeFiles/SuperFIFO.dir
+/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/CMakeFiles/edit_cache.dir

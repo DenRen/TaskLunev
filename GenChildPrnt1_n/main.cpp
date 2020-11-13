@@ -11,6 +11,9 @@ int main (int argc, char *argv[])
         printf ("Input failed\n");
         return EXIT_FAILURE;
     }
+
+    setvbuf (stdout, nullptr, _IONBF, 0);
+
     char *error = nullptr;
     errno = 0;
     int numberChilds = strtoll (argv[1], &error, 10);
@@ -32,19 +35,19 @@ int main (int argc, char *argv[])
     }
 
     int result = 0;
-    long msgType = 0;
 
     if (number != -1)   // Child
     {
+        long msgBuf = 0;
         if (number != 1) // First child
         {
-            result = msgrcv (msqid, &msgType, 0, number - 1, 0);
+            result = msgrcv (msqid, &msgBuf, 0, number - 1, 0);
             CHECK_ERROR (result);
         }
 
-        printf ("%d ", number);
+        printf ("%d ", number); // Это крит. секция: дети разделяют вывод в stdout
 
-        msgType = number;
+        long msgType = number;
         result = msgsnd (msqid, (void *) &msgType, 0, 0);
         CHECK_ERROR (result);
 
@@ -52,6 +55,7 @@ int main (int argc, char *argv[])
     }
     else
     {
+        long msgType = 0;
         if (numberChilds > 0)
         {
             result = msgrcv (msqid, (void *) &msgType, 0, numberChilds, 0);

@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/Signal.dir/main.cpp.o CMakeFiles/Signal.dir/home/tester/Documents/GitHub/TaskLunev/AddLib/AddFunc.cpp.o CMakeFiles/Signal.dir/wrrd.cpp.o  -o Signal 

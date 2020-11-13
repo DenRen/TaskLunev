@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/FWRonSemShm.dir/main.cpp.o CMakeFiles/FWRonSemShm.dir/home/tester/Documents/GitHub/TaskLunev/AddLib/AddFunc.cpp.o CMakeFiles/FWRonSemShm.dir/wrrd.cpp.o  -o FWRonSemShm 

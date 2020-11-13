@@ -1,4 +1,4 @@
-# Install script for directory: /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n
+# Install script for directory: /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

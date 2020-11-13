@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="SuperFIFO"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="SuperFIFO">
+				<Option output="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/SuperFIFO" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 SuperFIFO"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="SuperFIFO/fast">
+				<Option output="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/SuperFIFO" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 SuperFIFO/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/SmartFIFO.cpp">
+			<Option target="SuperFIFO"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/SmartFIFO.h">
+			<Option target="SuperFIFO"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/main.cpp">
+			<Option target="SuperFIFO"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/semaphore.cpp">
+			<Option target="SuperFIFO"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/semaphore.h">
+			<Option target="SuperFIFO"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/wrrd.cpp">
+			<Option target="SuperFIFO"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/wrrd.h">
+			<Option target="SuperFIFO"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

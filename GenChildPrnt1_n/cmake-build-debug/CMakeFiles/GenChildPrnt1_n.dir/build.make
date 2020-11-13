@@ -43,10 +43,10 @@ RM = /opt/clion-2019.2/bin/cmake/linux/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n
+CMAKE_SOURCE_DIR = /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug
+CMAKE_BINARY_DIR = /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug
 
 # Include any dependencies generated for this target.
 include CMakeFiles/GenChildPrnt1_n.dir/depend.make
@@ -59,29 +59,29 @@ include CMakeFiles/GenChildPrnt1_n.dir/flags.make
 
 CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o: CMakeFiles/GenChildPrnt1_n.dir/flags.make
 CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o: ../main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o -c /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o -c /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/main.cpp
 
 CMakeFiles/GenChildPrnt1_n.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/GenChildPrnt1_n.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/main.cpp > CMakeFiles/GenChildPrnt1_n.dir/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/main.cpp > CMakeFiles/GenChildPrnt1_n.dir/main.cpp.i
 
 CMakeFiles/GenChildPrnt1_n.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/GenChildPrnt1_n.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/main.cpp -o CMakeFiles/GenChildPrnt1_n.dir/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/main.cpp -o CMakeFiles/GenChildPrnt1_n.dir/main.cpp.s
 
 CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o: CMakeFiles/GenChildPrnt1_n.dir/flags.make
 CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o: ../AddFunc.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o -c /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/AddFunc.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o -c /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/AddFunc.cpp
 
 CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/AddFunc.cpp > CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/AddFunc.cpp > CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.i
 
 CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/AddFunc.cpp -o CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/AddFunc.cpp -o CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.s
 
 # Object files for target GenChildPrnt1_n
 GenChildPrnt1_n_OBJECTS = \
@@ -95,7 +95,7 @@ GenChildPrnt1_n: CMakeFiles/GenChildPrnt1_n.dir/main.cpp.o
 GenChildPrnt1_n: CMakeFiles/GenChildPrnt1_n.dir/AddFunc.cpp.o
 GenChildPrnt1_n: CMakeFiles/GenChildPrnt1_n.dir/build.make
 GenChildPrnt1_n: CMakeFiles/GenChildPrnt1_n.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable GenChildPrnt1_n"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable GenChildPrnt1_n"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/GenChildPrnt1_n.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -108,6 +108,6 @@ CMakeFiles/GenChildPrnt1_n.dir/clean:
 .PHONY : CMakeFiles/GenChildPrnt1_n.dir/clean
 
 CMakeFiles/GenChildPrnt1_n.dir/depend:
-	cd /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug /home/tester/CLionProjects/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles/GenChildPrnt1_n.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug /home/tester/Documents/GitHub/TaskLunev/GenChildPrnt1_n/cmake-build-debug/CMakeFiles/GenChildPrnt1_n.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/GenChildPrnt1_n.dir/depend
 

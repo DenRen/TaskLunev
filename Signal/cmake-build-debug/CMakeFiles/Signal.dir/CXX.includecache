@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tester/Documents/GitHub/TaskLunev/AddLib/AddFunc.h
+cstdlib
+-
+cstdio
+-
+cerrno
+-
+
+/home/tester/Documents/GitHub/TaskLunev/Signal/main.cpp
+cstdio
+-
+unistd.h
+-
+sys/wait.h
+-
+/home/tester/Documents/GitHub/TaskLunev/AddLib/AddFunc.h
+-
+wrrd.h
+/home/tester/Documents/GitHub/TaskLunev/Signal/wrrd.h
+
+/home/tester/Documents/GitHub/TaskLunev/Signal/wrrd.cpp
+fcntl.h
+-
+unistd.h
+-
+csignal
+-
+wrrd.h
+/home/tester/Documents/GitHub/TaskLunev/Signal/wrrd.h
+../AddLib/AddFunc.h
+/home/tester/Documents/GitHub/TaskLunev/AddLib/AddFunc.h
+
+/home/tester/Documents/GitHub/TaskLunev/Signal/wrrd.h
+

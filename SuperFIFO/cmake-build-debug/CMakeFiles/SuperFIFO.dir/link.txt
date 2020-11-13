@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/SuperFIFO.dir/SmartFIFO.cpp.o CMakeFiles/SuperFIFO.dir/semaphore.cpp.o CMakeFiles/SuperFIFO.dir/main.cpp.o CMakeFiles/SuperFIFO.dir/wrrd.cpp.o  -o SuperFIFO 

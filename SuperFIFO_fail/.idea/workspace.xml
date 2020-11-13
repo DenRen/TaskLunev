@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="SuperFIFO" targetName="SuperFIFO" />
+    </generated>
+  </component>
+  <component name="CMakeSettings" AUTO_RELOAD="true">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="d0c1c1a4-0e90-4348-b519-1126db7df81f" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/SuperFIFO.dir/CXX.includecache" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/SuperFIFO.dir/CXX.includecache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/SuperFIFO" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/SuperFIFO" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wrrd.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/wrrd.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wrrd.h" beforeDir="false" afterPath="$PROJECT_DIR$/wrrd.h" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/wrrd.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/main_old.cpp" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
+  <component name="ProjectId" id="1i0hBnNMmV1PT7wbPg8hwX5SGPu" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration name="SuperFIFO" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="CMakeCache.txt" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SuperFIFO" TARGET_NAME="SuperFIFO" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SuperFIFO" RUN_TARGET_NAME="SuperFIFO">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d0c1c1a4-0e90-4348-b519-1126db7df81f" name="Default Changelist" comment="" />
+      <created>1601050283934</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1601050283934</updated>
+      <workItem from="1601050285413" duration="16812000" />
+      <workItem from="1601073660307" duration="8322000" />
+      <workItem from="1601123612173" duration="3808000" />
+      <workItem from="1601226538529" duration="13000" />
+      <workItem from="1601659895610" duration="7350000" />
+      <workItem from="1601713444872" duration="599000" />
+      <workItem from="1601744871678" duration="599000" />
+      <workItem from="1601755626725" duration="1213000" />
+      <workItem from="1601849720186" duration="1951000" />
+      <workItem from="1601896423427" duration="599000" />
+      <workItem from="1602011232377" duration="7187000" />
+      <workItem from="1602019810016" duration="21716000" />
+      <workItem from="1602099252058" duration="50285000" />
+      <workItem from="1602319595539" duration="27479000" />
+      <workItem from="1602712253575" duration="7297000" />
+      <workItem from="1603135171444" duration="200000" />
+      <workItem from="1603463923822" duration="3983000" />
+      <workItem from="1603745921660" duration="37000" />
+      <workItem from="1603811762461" duration="9000" />
+      <workItem from="1603811787210" duration="872000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
