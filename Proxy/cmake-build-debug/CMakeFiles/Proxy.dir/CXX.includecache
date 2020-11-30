@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h
+cstdlib
+-
+cerrno
+-
+
+/home/tester/Documents/GitHub/TaskLunev/Proxy/main.cpp
+cstdio
+-
+cstdlib
+-
+cerrno
+-
+unistd.h
+-
+cmath
+-
+cstring
+-
+poll.h
+-
+AddFunc.h
+/home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h
+

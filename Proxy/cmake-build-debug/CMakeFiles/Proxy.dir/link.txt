@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/Proxy.dir/main.cpp.o CMakeFiles/Proxy.dir/AddFunc.cpp.o  -o Proxy 

@@ -26,11 +26,9 @@ int writer (const char conn_str[], const char name_file[]) {
     CHECK_ERROR (fd_reader);
     CHECK_ERROR (SetBlock (fd_reader));
 
-    /*
-    int _temp = '_EDA';
+    int _temp = '_EDA';                                 // For fifo
     ret = write (fd_reader, &_temp, sizeof (_temp));
     CHECK_ERROR (ret);
-    */
 
     int fd_file = open (name_file, O_RDONLY);
     CHECK_ERROR (fd_file);
@@ -80,11 +78,9 @@ int reader (const char conn_str[]) {
         return EXIT_FAILURE;
     }
 
-    /*
-    int _temp = 0;
+    int _temp = 0;                                      // For fifo
     ret = read (fd_pers, &_temp, sizeof (_temp));
     CHECK_ERROR (ret);
-    */
 
     char buf[PIPE_BUF] = "";
     while ((ret = read (fd_pers, buf, PIPE_BUF))) {

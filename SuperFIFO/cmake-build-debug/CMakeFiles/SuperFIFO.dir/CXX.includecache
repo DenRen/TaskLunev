@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/SmartFIFO.h
+fcntl.h
+-
+unistd.h
+-
+sys/stat.h
+-
+cstdio
+-
+cstdlib
+-
+cassert
+-
+cerrno
+-
+random
+-
+
+/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/wrrd.cpp
+wrrd.h
+/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/wrrd.h
+unistd.h
+-
+climits
+-
+SmartFIFO.h
+/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/SmartFIFO.h
+poll.h
+-
+wait.h
+-
+
+/home/tester/Documents/GitHub/TaskLunev/SuperFIFO/wrrd.h
+
