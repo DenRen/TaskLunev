@@ -27,6 +27,12 @@ cstring
 -
 poll.h
 -
+fcntl.h
+-
+cassert
+-
+climits
+-
 AddFunc.h
 /home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h
 
