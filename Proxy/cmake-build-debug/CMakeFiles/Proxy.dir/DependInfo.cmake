@@ -5,6 +5,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.cpp" "/home/tester/Documents/GitHub/TaskLunev/Proxy/cmake-build-debug/CMakeFiles/Proxy.dir/AddFunc.cpp.o"
+  "/home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.cpp" "/home/tester/Documents/GitHub/TaskLunev/Proxy/cmake-build-debug/CMakeFiles/Proxy.dir/DebugFunc.cpp.o"
+  "/home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.cpp" "/home/tester/Documents/GitHub/TaskLunev/Proxy/cmake-build-debug/CMakeFiles/Proxy.dir/LocalProxy.cpp.o"
   "/home/tester/Documents/GitHub/TaskLunev/Proxy/main.cpp" "/home/tester/Documents/GitHub/TaskLunev/Proxy/cmake-build-debug/CMakeFiles/Proxy.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

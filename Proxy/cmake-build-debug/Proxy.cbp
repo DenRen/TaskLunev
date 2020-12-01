@@ -90,6 +90,18 @@
 		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h">
 			<Option target="Proxy"/>
 		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.cpp">
+			<Option target="Proxy"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.h">
+			<Option target="Proxy"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.cpp">
+			<Option target="Proxy"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.h">
+			<Option target="Proxy"/>
+		</Unit>
 		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/main.cpp">
 			<Option target="Proxy"/>
 		</Unit>

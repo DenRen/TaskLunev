@@ -150,6 +150,60 @@ AddFunc.cpp.s:
 	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/AddFunc.cpp.s
 .PHONY : AddFunc.cpp.s
 
+DebugFunc.o: DebugFunc.cpp.o
+
+.PHONY : DebugFunc.o
+
+# target to build an object file
+DebugFunc.cpp.o:
+	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/DebugFunc.cpp.o
+.PHONY : DebugFunc.cpp.o
+
+DebugFunc.i: DebugFunc.cpp.i
+
+.PHONY : DebugFunc.i
+
+# target to preprocess a source file
+DebugFunc.cpp.i:
+	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/DebugFunc.cpp.i
+.PHONY : DebugFunc.cpp.i
+
+DebugFunc.s: DebugFunc.cpp.s
+
+.PHONY : DebugFunc.s
+
+# target to generate assembly for a file
+DebugFunc.cpp.s:
+	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/DebugFunc.cpp.s
+.PHONY : DebugFunc.cpp.s
+
+LocalProxy.o: LocalProxy.cpp.o
+
+.PHONY : LocalProxy.o
+
+# target to build an object file
+LocalProxy.cpp.o:
+	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/LocalProxy.cpp.o
+.PHONY : LocalProxy.cpp.o
+
+LocalProxy.i: LocalProxy.cpp.i
+
+.PHONY : LocalProxy.i
+
+# target to preprocess a source file
+LocalProxy.cpp.i:
+	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/LocalProxy.cpp.i
+.PHONY : LocalProxy.cpp.i
+
+LocalProxy.s: LocalProxy.cpp.s
+
+.PHONY : LocalProxy.s
+
+# target to generate assembly for a file
+LocalProxy.cpp.s:
+	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/LocalProxy.cpp.s
+.PHONY : LocalProxy.cpp.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -189,6 +243,12 @@ help:
 	@echo "... AddFunc.o"
 	@echo "... AddFunc.i"
 	@echo "... AddFunc.s"
+	@echo "... DebugFunc.o"
+	@echo "... DebugFunc.i"
+	@echo "... DebugFunc.s"
+	@echo "... LocalProxy.o"
+	@echo "... LocalProxy.i"
+	@echo "... LocalProxy.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

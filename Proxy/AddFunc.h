@@ -4,28 +4,11 @@
 #include <cstdlib>
 #include <cerrno>
 
-void NOP ();
-
 void close (int count, int first, ...);
 
-#define CHECK_ERROR(ret)                    \
-    if (ret == -1) {                        \
-        printf ("LINE:  %d\n", __LINE__);   \
-        printf ("errno: %d\n", errno);      \
-        perror ("");                        \
-        return -1;                          \
-    } else {                                \
-        errno = 0;                          \
-    } NOP ()
+long GetNumber (const char *str);
 
-#define CHECK_TRUE(val)                     \
-    if (val == false) {                     \
-        printf ("LINE: %d\n", __LINE__);    \
-        printf ("errno: %d\n", errno);      \
-        perror ("");                        \
-        return -1;                          \
-    } else {                                \
-        errno = 0;                          \
-    } NOP ()
+#define ZERO_ARRAY(array) memset (array, 0, sizeof (array))
+#define SET_IN_ZERO(mem)  memset (&mem, 0, sizeof (mem))
 
 #endif //TASK2FD_ADDFUNC_H
