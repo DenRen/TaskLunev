@@ -1,5 +1,9 @@
 #include "LocalProxy.h"
+#include <csignal>
+#include <experimental/filesystem>
 
+namespace fs = std::experimental::filesystem;
+/*
 {
 pid_t pid = 0;
 int sizeBuf = 0, ret = 0;
@@ -248,7 +252,7 @@ POLLHUP &&counterInputData
 break;
 }
 }
-
+*/
 
 /*int sizeDataFile = 0;
 while ((sizeDataFile = read (channels[0].m_fdRead, channels[0].m_buf, channels[0].m_sizeBuf))) {
@@ -302,9 +306,188 @@ while ((sizeDataFile = read (channels[0].m_fdRead, channels[0].m_buf, channels[0
             channels[numberChild - 1].m_curPos = 0;
         }
     }
-}*/
+}
 
 CloseChannels (channels, numberChild
 );
 //printf ("Parent finished\numberChild");
+}*/
+
+inline int CalcSizeBuf (int i, int n) {
+    MYASSERT (i >= 0);
+    MYASSERT (i < n);
+
+    return pow (3, n - i) * 1000;
+}
+
+int StartProxy (ProxyServer *proxyServer, int numberClient) {
+
+    if (VerifierProxy (proxyServer) == true) {
+        errno = EEXIST;
+        DUMP_DEBUG_INFO;
+        return -1;
+    }
+
+    // Allocate proxy server ----------------------------------------------------------------------
+
+    proxyServer->m_channels = (ProxyChannel *) calloc (numberClient, sizeof (ProxyChannel));
+    if (proxyServer->m_channels == nullptr) {
+        errno = ENOMEM;
+        DUMP_DEBUG_INFO;
+        return -1;
+    }
+    ProxyChannel *channels = proxyServer->m_channels;
+
+    int totalSizeBuf = 0;
+    for (int i = 0; i < numberClient; i++) {
+        int curSizeBuf = CalcSizeBuf (i, numberClient);
+
+        channels[i].m_sizeBuf = curSizeBuf;
+        totalSizeBuf += curSizeBuf;
+    }
+
+    proxyServer->m_buffers = (char *) calloc (totalSizeBuf, sizeof (char));
+    if (proxyServer->m_buffers == nullptr) {
+        errno = ENOMEM;
+        DUMP_DEBUG_INFO;
+        return -1;
+    }
+    proxyServer->m_sizeBuf = totalSizeBuf;
+
+    char *buffers = proxyServer->m_buffers;
+    for (int i = 0; i < numberClient; i++) {
+        channels[i].m_buf = buffers;
+        buffers += channels[i].m_sizeBuf;
+    }
+
+    //  -----------------------------------------------------------------------------
+
+    int ret = 0;
+    int fdClientServer[2] = {}, fdServerClient[2] = {};
+    for (int i = 0; i < numberClient; i++) {
+        CHECK_ERROR (pipe (fdServerClient) || pipe (fdClientServer));
+
+        ret = fork ();
+        CHECK_ERROR (ret);
+
+        if (ret == 0) {                     // Child
+/*
+            char path[128] = "";
+            sprintf (path, "/proc/%d/fd/", getpid ());
+            fs::directory_iterator it (path);
+            int count = 0;
+            for (auto &p : it) {
+                printf ("%s ", p.path ().filename ().c_str ());
+                count++;
+            }
+            printf ("-> %d\n", count);
+*/
+            for (int j = 0; j < i; j++) {
+                close (channels[j].m_fdWrite);
+                close (channels[j].m_fdRead);
+            }
+
+            close (fdServerClient[1]);
+            close (fdClientServer[0]);
+/*
+            sprintf (path, "/proc/%d/fd/", getpid ());
+            fs::directory_iterator it2 (path);
+            count = 0;
+            for (auto &p : it2) {
+                printf ("%s ", p.path ().filename ().c_str ());
+                count++;
+            }
+            printf ("-> %d\n", count);
+
+            printf ("-------------\n");
+*/
+            ProxyClient proxyClient = {};
+            proxyClient.m_fdWrite = fdClientServer[1];
+            proxyClient.m_fdRead  = fdServerClient[0];
+
+            StartClient (proxyClient, i == 0);
+            return 1;
+        }
+
+        //sleep (2);
+
+        close (fdServerClient[0]);
+        close (fdClientServer[1]);
+
+        channels[i].m_fdWrite = fdServerClient[1];
+        channels[i].m_fdRead  = fdClientServer[0];
+    }
+
+    return 0;
+}
+
+void CloseProxy (ProxyServer *proxyServer) {
+    if (proxyServer->m_buffers  != nullptr &&
+        proxyServer->m_channels != nullptr) {
+
+        for (int i = 0; i < proxyServer->m_numberChannels; i++) {
+            close (proxyServer->m_channels[i].m_fdRead);
+            close (proxyServer->m_channels[i].m_fdWrite);
+        }
+    }
+
+    free (proxyServer->m_buffers);
+    free (proxyServer->m_channels);
+
+    proxyServer->m_buffers = nullptr;
+    proxyServer->m_channels = nullptr;
+    proxyServer->m_sizeBuf = 0;
+}
+
+int SendFile (const ProxyServer proxyServer, const char *pathFile) {
+    return 0;
+}
+
+int VerifierProxy (const ProxyServer *const proxyServer) {
+    return proxyServer->m_sizeBuf  > 0        &&
+           proxyServer->m_buffers  != nullptr &&
+           proxyServer->m_channels != nullptr;
+}
+
+void sigPIPE (int) {
+    printf ("%d: I'am get SIGPIPE\n", getpid ());
+}
+
+int StartClient (ProxyClient proxyClient, bool isFirstChild) {
+    if (isFirstChild) {
+        printf ("First ");
+    } else {
+
+        int ret = 0;
+        while (true) {
+            printf ("r: %d, w: %d\n", proxyClient.m_fdRead,  proxyClient.m_fdWrite);
+            fflush (stdout);
+
+            char buf[128] = "";
+            //ret = read (proxyClient.m_fdRead, buf, 20);
+
+            struct sigaction sa = {0};
+            sa.sa_handler = sigPIPE;
+            sigfillset (&sa.sa_mask);
+            sa.sa_flags = 0;
+            CHECK_ERROR (sigaction (SIGPIPE, &sa, nullptr));
+
+            ret = splice (proxyClient.m_fdRead,  nullptr,
+                          proxyClient.m_fdWrite, nullptr,
+                          20, SPLICE_F_MOVE);
+
+            if (ret == -1) {
+                printf ("Aaaaaaa\n");
+                fflush (stdout);
+            }
+
+            CHECK_ERROR (ret);
+
+            if (ret == 0) {
+                break;
+            }
+        }
+    }
+
+    return 0;
 }

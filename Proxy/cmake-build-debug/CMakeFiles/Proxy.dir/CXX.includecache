@@ -12,7 +12,21 @@ cstdlib
 cerrno
 -
 
-/home/tester/Documents/GitHub/TaskLunev/Proxy/main.cpp
+/home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.h
+cerrno
+-
+stdexcept
+-
+
+/home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.cpp
+LocalProxy.h
+/home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.h
+csignal
+-
+experimental/filesystem
+-
+
+/home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.h
 cstdio
 -
 cstdlib
@@ -35,4 +49,6 @@ climits
 -
 AddFunc.h
 /home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h
+DebugFunc.h
+/home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.h
 

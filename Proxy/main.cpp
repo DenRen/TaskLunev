@@ -2,6 +2,10 @@
 
 #include "LocalProxy.h"
 
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
+
 struct channel_t {
     int m_fdRead;
     int m_fdWrite;
@@ -10,13 +14,6 @@ struct channel_t {
     int m_curPos;
     char *m_buf;
 };
-
-inline int SizeBuf (int i, int n) {
-    assert (i >= 0);
-    assert (i < n);
-
-    return pow (3, n - i) * 1000;
-}
 
 void CloseChannels (channel_t *channels, int size) {
     assert (size >= 0);
@@ -32,6 +29,23 @@ const int timeConnect = 1000;
 
 int main (int argc, char *argv[]) {
 
+/*
+    printf ("%d\n", getpid ());
+    sleep (60);
+
+    char path[128] = "";
+    sprintf (path, "/proc/%d/fd/", getpid ());
+    fs::directory_iterator it (path);
+    int count = 0;
+    for (auto &p : it) {
+        printf ("%s ", p.path ().filename ().c_str ());
+        count++;
+    }
+    printf ("-> %d\n", count);
+    printf ("++++++++++++++++\n");
+    printf ("%d\n", getpid ());
+    sleep (60);
+*/
     if (argc != 3) {
         printf ("Error input. Please enter: numberChild pathFile\n");
         return 0;
@@ -45,12 +59,20 @@ int main (int argc, char *argv[]) {
     }
 
     ProxyServer proxyServer = {};
+    proxyServer.m_channels = nullptr;
+    proxyServer.m_buffers  = nullptr;
+
     const char *pathFile = argv[2];
 
-    if (StartProxy (&proxyServer, numberChild) == -1) {
+    int ret = StartProxy (&proxyServer, numberChild);
+    if (ret == -1) {
         CloseProxy (&proxyServer);
 
         printf ("Failed to create proxy\n");
+        return 0;
+    } else if (ret == 1) {  // Return proxy client
+        printf ("Return child\n");
+        fflush (stdout);
         return 0;
     }
 

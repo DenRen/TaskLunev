@@ -4,6 +4,16 @@
 CMakeFiles/Proxy.dir/AddFunc.cpp.o
  /home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.cpp
  /home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h
+CMakeFiles/Proxy.dir/DebugFunc.cpp.o
+ /home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.cpp
+ /home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.h
+CMakeFiles/Proxy.dir/LocalProxy.cpp.o
+ /home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h
+ /home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.h
+ /home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.cpp
+ /home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.h
 CMakeFiles/Proxy.dir/main.cpp.o
  /home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h
+ /home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.h
+ /home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.h
  /home/tester/Documents/GitHub/TaskLunev/Proxy/main.cpp
