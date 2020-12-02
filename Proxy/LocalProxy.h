@@ -25,7 +25,9 @@ struct ProxyChannel {
     int m_fdWrite;
     int m_fdRead;
 
-    CircBuffer m_buf;
+    char *m_buf;
+    int m_size;
+    int m_capacity;
 
     bool m_full;
 };
@@ -33,6 +35,9 @@ struct ProxyChannel {
 struct ProxyServer {
     ProxyChannel *m_channels;
     int m_numberChannels;
+
+    int m_totalSizeBuf;
+    char *m_totalBuffer;
 };
 
 int StartProxy (ProxyServer *proxyServer, int numberClient);
@@ -40,6 +45,8 @@ void CloseProxy (ProxyServer *proxyServer);
 int StartClient (ProxyClient proxyClient, bool isFirstChild = false);
 int SendFile (const ProxyServer proxyServer, const char *pathFile);
 int VerifierProxy (const ProxyServer * const proxyServer);
+
+void DumpProxy (const ProxyServer *proxyServer);
 
 int SetFlag (int fd, unsigned flag);
 int RemoveFlag (int fd, unsigned flag);
