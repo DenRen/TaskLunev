@@ -14,6 +14,7 @@
 
 #include "AddFunc.h"
 #include "DebugFunc.h"
+#include "CircBuffer.h"
 
 struct ProxyClient {
     int m_fdWrite;
@@ -24,16 +25,14 @@ struct ProxyChannel {
     int m_fdWrite;
     int m_fdRead;
 
-    int m_sizeBuf;
-    char *m_buf;
+    CircBuffer m_buf;
+
+    bool m_full;
 };
 
 struct ProxyServer {
     ProxyChannel *m_channels;
     int m_numberChannels;
-
-    int m_sizeBuf;
-    char *m_buffers;
 };
 
 int StartProxy (ProxyServer *proxyServer, int numberClient);
@@ -42,4 +41,9 @@ int StartClient (ProxyClient proxyClient, bool isFirstChild = false);
 int SendFile (const ProxyServer proxyServer, const char *pathFile);
 int VerifierProxy (const ProxyServer * const proxyServer);
 
+int SetFlag (int fd, unsigned flag);
+int RemoveFlag (int fd, unsigned flag);
+
+int SetBlock (int fd);
+int SetNonBlock (int fd);
 #endif //PROXY_LOCALPROXY_H

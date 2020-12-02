@@ -150,6 +150,33 @@ AddFunc.cpp.s:
 	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/AddFunc.cpp.s
 .PHONY : AddFunc.cpp.s
 
+CircBuffer.o: CircBuffer.cpp.o
+
+.PHONY : CircBuffer.o
+
+# target to build an object file
+CircBuffer.cpp.o:
+	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/CircBuffer.cpp.o
+.PHONY : CircBuffer.cpp.o
+
+CircBuffer.i: CircBuffer.cpp.i
+
+.PHONY : CircBuffer.i
+
+# target to preprocess a source file
+CircBuffer.cpp.i:
+	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/CircBuffer.cpp.i
+.PHONY : CircBuffer.cpp.i
+
+CircBuffer.s: CircBuffer.cpp.s
+
+.PHONY : CircBuffer.s
+
+# target to generate assembly for a file
+CircBuffer.cpp.s:
+	$(MAKE) -f CMakeFiles/Proxy.dir/build.make CMakeFiles/Proxy.dir/CircBuffer.cpp.s
+.PHONY : CircBuffer.cpp.s
+
 DebugFunc.o: DebugFunc.cpp.o
 
 .PHONY : DebugFunc.o
@@ -243,6 +270,9 @@ help:
 	@echo "... AddFunc.o"
 	@echo "... AddFunc.i"
 	@echo "... AddFunc.s"
+	@echo "... CircBuffer.o"
+	@echo "... CircBuffer.i"
+	@echo "... CircBuffer.s"
 	@echo "... DebugFunc.o"
 	@echo "... DebugFunc.i"
 	@echo "... DebugFunc.s"

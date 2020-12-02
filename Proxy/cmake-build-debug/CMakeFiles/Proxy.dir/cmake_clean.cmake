@@ -3,6 +3,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/Proxy.dir/AddFunc.cpp.o"
   "CMakeFiles/Proxy.dir/DebugFunc.cpp.o"
   "CMakeFiles/Proxy.dir/LocalProxy.cpp.o"
+  "CMakeFiles/Proxy.dir/CircBuffer.cpp.o"
   "Proxy.pdb"
   "Proxy"
 )

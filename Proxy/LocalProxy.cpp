@@ -1,8 +1,6 @@
 #include "LocalProxy.h"
+#include "CircBuffer.h"
 #include <csignal>
-#include <experimental/filesystem>
-
-namespace fs = std::experimental::filesystem;
 /*
 {
 pid_t pid = 0;
@@ -338,31 +336,16 @@ int StartProxy (ProxyServer *proxyServer, int numberClient) {
     }
     ProxyChannel *channels = proxyServer->m_channels;
 
-    int totalSizeBuf = 0;
+    int ret = 0;
     for (int i = 0; i < numberClient; i++) {
-        int curSizeBuf = CalcSizeBuf (i, numberClient);
-
-        channels[i].m_sizeBuf = curSizeBuf;
-        totalSizeBuf += curSizeBuf;
+        ret = CircBufferInitialize (&channels[i].m_buf, CalcSizeBuf (i, numberClient));
+        CHECK_ERROR (ret);
+        channels[i].m_full = false;
     }
-
-    proxyServer->m_buffers = (char *) calloc (totalSizeBuf, sizeof (char));
-    if (proxyServer->m_buffers == nullptr) {
-        errno = ENOMEM;
-        DUMP_DEBUG_INFO;
-        return -1;
-    }
-    proxyServer->m_sizeBuf = totalSizeBuf;
-
-    char *buffers = proxyServer->m_buffers;
-    for (int i = 0; i < numberClient; i++) {
-        channels[i].m_buf = buffers;
-        buffers += channels[i].m_sizeBuf;
-    }
+    proxyServer->m_numberChannels = numberClient;
 
     //  -----------------------------------------------------------------------------
 
-    int ret = 0;
     int fdClientServer[2] = {}, fdServerClient[2] = {};
     for (int i = 0; i < numberClient; i++) {
         CHECK_ERROR (pipe (fdServerClient) || pipe (fdClientServer));
@@ -371,17 +354,6 @@ int StartProxy (ProxyServer *proxyServer, int numberClient) {
         CHECK_ERROR (ret);
 
         if (ret == 0) {                     // Child
-/*
-            char path[128] = "";
-            sprintf (path, "/proc/%d/fd/", getpid ());
-            fs::directory_iterator it (path);
-            int count = 0;
-            for (auto &p : it) {
-                printf ("%s ", p.path ().filename ().c_str ());
-                count++;
-            }
-            printf ("-> %d\n", count);
-*/
             for (int j = 0; j < i; j++) {
                 close (channels[j].m_fdWrite);
                 close (channels[j].m_fdRead);
@@ -389,31 +361,20 @@ int StartProxy (ProxyServer *proxyServer, int numberClient) {
 
             close (fdServerClient[1]);
             close (fdClientServer[0]);
-/*
-            sprintf (path, "/proc/%d/fd/", getpid ());
-            fs::directory_iterator it2 (path);
-            count = 0;
-            for (auto &p : it2) {
-                printf ("%s ", p.path ().filename ().c_str ());
-                count++;
-            }
-            printf ("-> %d\n", count);
 
-            printf ("-------------\n");
-*/
             ProxyClient proxyClient = {};
             proxyClient.m_fdWrite = fdClientServer[1];
             proxyClient.m_fdRead  = fdServerClient[0];
 
             StartClient (proxyClient, i == 0);
-            return 1;
-        }
 
-        //sleep (2);
+            exit (EXIT_SUCCESS);
+        }
 
         close (fdServerClient[0]);
         close (fdClientServer[1]);
 
+        SetNonBlock (fdServerClient[1]);
         channels[i].m_fdWrite = fdServerClient[1];
         channels[i].m_fdRead  = fdClientServer[0];
     }
@@ -422,64 +383,170 @@ int StartProxy (ProxyServer *proxyServer, int numberClient) {
 }
 
 void CloseProxy (ProxyServer *proxyServer) {
-    if (proxyServer->m_buffers  != nullptr &&
-        proxyServer->m_channels != nullptr) {
+    ProxyChannel *channels = proxyServer->m_channels;
 
+    if (channels != nullptr) {
         for (int i = 0; i < proxyServer->m_numberChannels; i++) {
-            close (proxyServer->m_channels[i].m_fdRead);
-            close (proxyServer->m_channels[i].m_fdWrite);
+
+            CircBufferRelease (&channels[i].m_buf);
+            close (channels[i].m_fdRead);
+            close (channels[i].m_fdWrite);
         }
     }
 
-    free (proxyServer->m_buffers);
     free (proxyServer->m_channels);
 
-    proxyServer->m_buffers = nullptr;
     proxyServer->m_channels = nullptr;
-    proxyServer->m_sizeBuf = 0;
 }
 
 int SendFile (const ProxyServer proxyServer, const char *pathFile) {
-    return 0;
+    CHECK_TRUE (VerifierProxy (&proxyServer));
+    MYASSERT (pathFile != nullptr);
+
+    int ret = 0;
+
+    ret = write (proxyServer.m_channels[0].m_fdWrite, pathFile, strlen (pathFile));
+    CHECK_ERROR (ret);
+    CHECK_TRUE (ret != strlen (pathFile) + 1);
+
+    const int numberChannels = proxyServer.m_numberChannels;
+    ProxyChannel *channels = proxyServer.m_channels;
+
+    pollfd polls[2 * numberChannels];
+    memset (polls, 0, sizeof (polls));
+
+    for (int i = 0; i < numberChannels; i++) {
+        polls[2 * i].fd = proxyServer.m_channels[i].m_fdWrite;
+        polls[2 * i].events = POLLHUP;
+
+        polls[2 * i + 1].fd = proxyServer.m_channels[i].m_fdRead;
+        polls[2 * i + 1].fd = POLLHUP;
+    }
+
+    polls[0].events = 0;
+    polls[1].events = 0;
+
+    while (true) {
+        for (int i = 1; i < numberChannels; i++) {
+            if (CircBufferHaveSize (&channels[i - 1].m_buf) && channels[i - 1].m_full == false) {
+                polls[2 * i].events |= POLLOUT;
+            } else {
+                polls[2 * i].events &= ~POLLOUT;
+            }
+
+            if (CircBufferHaveEmpty (&channels[i].m_buf)) {
+                polls[2 * i + 1].events |= POLLIN;
+            } else {
+                polls[2 * i + 1].events &= ~POLLIN;
+            }
+        }
+
+        if (CircBufferHaveEmpty (&channels[0].m_buf)) {
+            polls[1].events |= POLLIN;
+        } else {
+            polls[1].events &= ~POLLIN;
+        }
+
+        ret = poll (polls, numberChannels, 10000);
+        CHECK_ERROR (ret);
+
+        if (ret == 0) {
+            printf ("Time is out\n");
+            CHECK_TRUE (false);
+        }
+
+        for (int i = 0; i < numberChannels; i++)
+        {
+            for (int j = 2 * i; j <= 2 * i + 1; j++)
+            {
+                short revents = polls[j].revents;
+
+                if (revents & POLLIN) {
+                    char *writer = nullptr;
+                    int empty = CircBufferGetEmpty (&channels[i].m_buf, &writer);
+                    MYASSERT (empty >= 0);
+
+                    ret = read (polls[j].fd, writer, empty);
+                    CHECK_ERROR (ret);
+
+                    CircBufferChangeSize (&channels[i].m_buf, ret);
+
+                } else if (revents & POLLOUT) {
+
+                    char *reader = nullptr;
+                    int size = CircBufferGetSize (&channels[i - 1].m_buf, &reader);
+                    MYASSERT (size >= 0);
+
+                    int len = 16;
+                    while (size > 0) {
+                        if (size < len)
+                            len = size;
+
+                        ret = write (polls[j].fd, reader, len);
+                        if (ret == -1) {
+                            if (errno == EAGAIN) {
+                                channels[i].m_full = true;
+                                break;
+                            }
+                            else
+                                CHECK_ERROR (ret);
+                        }
+
+                        size -= len;
+
+                        CircBufferChangeSize (&channels[i - 1].m_buf, -len);
+                    }
+                }
+
+                if (revents & POLLHUP) {
+                    printf ("Some channel is out\n");
+                    return 0;
+                }
+            }
+        }
+    }
 }
 
 int VerifierProxy (const ProxyServer *const proxyServer) {
-    return proxyServer->m_sizeBuf  > 0        &&
-           proxyServer->m_buffers  != nullptr &&
-           proxyServer->m_channels != nullptr;
-}
-
-void sigPIPE (int) {
-    printf ("%d: I'am get SIGPIPE\n", getpid ());
+    return proxyServer->m_channels != nullptr;
 }
 
 int StartClient (ProxyClient proxyClient, bool isFirstChild) {
+    int ret = 0;
+
     if (isFirstChild) {
-        printf ("First ");
-    } else {
 
-        int ret = 0;
+        char nameFile[256] = "";
+
         while (true) {
-            printf ("r: %d, w: %d\n", proxyClient.m_fdRead,  proxyClient.m_fdWrite);
-            fflush (stdout);
+            ret = read (proxyClient.m_fdRead, nameFile, 256);
+            CHECK_ERROR (ret);
+            if (ret == 0) {
+                return 0;
+            }
 
-            char buf[128] = "";
-            //ret = read (proxyClient.m_fdRead, buf, 20);
+            int fdFile = open (nameFile, O_RDONLY);
+            CHECK_ERROR (fdFile);
 
-            struct sigaction sa = {0};
-            sa.sa_handler = sigPIPE;
-            sigfillset (&sa.sa_mask);
-            sa.sa_flags = 0;
-            CHECK_ERROR (sigaction (SIGPIPE, &sa, nullptr));
+            while (true) {
+                ret = splice (fdFile,                nullptr,
+                              proxyClient.m_fdWrite, nullptr,
+                              1024 * 16, SPLICE_F_MOVE);
+
+                CHECK_ERROR (ret);
+
+                if (ret == 0) {
+                    break;
+                }
+            }
+        }
+
+    } else {
+        while (true) {
 
             ret = splice (proxyClient.m_fdRead,  nullptr,
                           proxyClient.m_fdWrite, nullptr,
-                          20, SPLICE_F_MOVE);
-
-            if (ret == -1) {
-                printf ("Aaaaaaa\n");
-                fflush (stdout);
-            }
+                          1024 * 16, SPLICE_F_MOVE);
 
             CHECK_ERROR (ret);
 
@@ -487,7 +554,42 @@ int StartClient (ProxyClient proxyClient, bool isFirstChild) {
                 break;
             }
         }
-    }
 
-    return 0;
+        return 0;
+    }
+}
+
+
+int SetFlag (int fd, unsigned flag) {
+    int flags = fcntl (fd, F_GETFL, 0);
+    CHECK_ERROR (flags);
+
+    if ((flags & flag) == false) {
+        flags |= flag;
+
+        flags = fcntl (fd, F_SETFL, 0);
+        CHECK_ERROR (flags);
+    }
+    return EXIT_SUCCESS;
+}
+
+int RemoveFlag (int fd, unsigned flag) {
+    int flags = fcntl (fd, F_GETFL, 0);
+    CHECK_ERROR (flags);
+
+    if (flags & flag) {
+        flags &= ~flag;
+
+        flags = fcntl (fd, F_SETFL, 0);
+        CHECK_ERROR (flags);
+    }
+    return EXIT_SUCCESS;
+}
+
+int SetBlock (int fd) {
+    return RemoveFlag (fd, O_NONBLOCK);
+}
+
+int SetNonBlock (int fd) {
+    return SetFlag (fd, O_NONBLOCK);
 }

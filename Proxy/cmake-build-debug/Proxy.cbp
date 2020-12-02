@@ -90,6 +90,12 @@
 		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h">
 			<Option target="Proxy"/>
 		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/CircBuffer.cpp">
+			<Option target="Proxy"/>
+		</Unit>
+		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/CircBuffer.h">
+			<Option target="Proxy"/>
+		</Unit>
 		<Unit filename="/home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.cpp">
 			<Option target="Proxy"/>
 		</Unit>

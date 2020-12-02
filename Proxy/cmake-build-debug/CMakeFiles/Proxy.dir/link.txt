@@ -1,1 +1,1 @@
-/usr/bin/c++  -g   CMakeFiles/Proxy.dir/main.cpp.o CMakeFiles/Proxy.dir/AddFunc.cpp.o CMakeFiles/Proxy.dir/DebugFunc.cpp.o CMakeFiles/Proxy.dir/LocalProxy.cpp.o  -o Proxy -lstdc++fs 
+/usr/bin/c++  -g   CMakeFiles/Proxy.dir/main.cpp.o CMakeFiles/Proxy.dir/AddFunc.cpp.o CMakeFiles/Proxy.dir/DebugFunc.cpp.o CMakeFiles/Proxy.dir/LocalProxy.cpp.o CMakeFiles/Proxy.dir/CircBuffer.cpp.o  -o Proxy -lstdc++fs 

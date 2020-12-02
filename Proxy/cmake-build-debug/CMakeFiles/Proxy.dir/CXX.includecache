@@ -12,6 +12,8 @@ cstdlib
 cerrno
 -
 
+/home/tester/Documents/GitHub/TaskLunev/Proxy/CircBuffer.h
+
 /home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.h
 cerrno
 -
@@ -21,9 +23,9 @@ stdexcept
 /home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.cpp
 LocalProxy.h
 /home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.h
+CircBuffer.h
+/home/tester/Documents/GitHub/TaskLunev/Proxy/CircBuffer.h
 csignal
--
-experimental/filesystem
 -
 
 /home/tester/Documents/GitHub/TaskLunev/Proxy/LocalProxy.h
@@ -51,4 +53,6 @@ AddFunc.h
 /home/tester/Documents/GitHub/TaskLunev/Proxy/AddFunc.h
 DebugFunc.h
 /home/tester/Documents/GitHub/TaskLunev/Proxy/DebugFunc.h
+CircBuffer.h
+/home/tester/Documents/GitHub/TaskLunev/Proxy/CircBuffer.h
 
