@@ -36,13 +36,16 @@ struct ProxyServer {
     ProxyChannel *m_channels;
     int m_numberChannels;
 
+    int m_fdAddClientServer;
+
     int m_totalSizeBuf;
     char *m_totalBuffer;
 };
 
 int StartProxy (ProxyServer *proxyServer, int numberClient);
 void CloseProxy (ProxyServer *proxyServer);
-int StartClient (ProxyClient proxyClient, bool isFirstChild = false);
+int StartFirstClient (ProxyClient proxyClient, int fdAddClientServer);
+int StartClient (ProxyClient proxyClient);
 int SendFile (const ProxyServer proxyServer, const char *pathFile);
 int VerifierProxy (const ProxyServer * const proxyServer);
 

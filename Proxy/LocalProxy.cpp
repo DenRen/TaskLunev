@@ -340,9 +340,12 @@ int StartProxy (ProxyServer *proxyServer, int numberClient) {
     //  -----------------------------------------------------------------------------
 
     int ret = 0;
-    int fdClientServer[2] = {}, fdServerClient[2] = {};
+    int fdClientServer[2] = {}, fdServerClient[2] = {}, fdAddClientServer[2] = {};
     for (int i = 0; i < numberClient; i++) {
         CHECK_ERROR (pipe (fdServerClient) || pipe (fdClientServer));
+        if (i == 0) {
+            CHECK_ERROR (pipe (fdAddClientServer));
+        }
 
         ret = fork ();
         CHECK_ERROR (ret);
@@ -360,9 +363,19 @@ int StartProxy (ProxyServer *proxyServer, int numberClient) {
             proxyClient.m_fdWrite = fdClientServer[1];
             proxyClient.m_fdRead  = fdServerClient[0];
 
-            StartClient (proxyClient, i == 0);
+            if (i == 0) {
+                close (fdAddClientServer[0]);
+                StartFirstClient (proxyClient, fdAddClientServer[1]);
+            } else {
+                StartClient (proxyClient);
+            }
 
             exit (EXIT_SUCCESS);
+        }
+
+        if (i == 0) {
+            close (fdAddClientServer[1]);
+            proxyServer->m_fdAddClientServer = fdAddClientServer[0];
         }
 
         close (fdServerClient[0]);
@@ -425,10 +438,12 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
 
     int ret = 0;
 
+    // Send path file first client ----------------------------------------------------------------
     ret = write (proxyServer.m_channels[0].m_fdWrite, pathFile, strlen (pathFile));
     CHECK_ERROR (ret);
     CHECK_TRUE (ret != strlen (pathFile) + 1);
 
+    // Start system send file ---------------------------------------------------------------------
     const int numberChannels = proxyServer.m_numberChannels;
     ProxyChannel *channels = proxyServer.m_channels;
 
@@ -443,14 +458,14 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
         polls[2 * i + 1].events = POLLHUP;
     }
 
-    polls[0].events = 0;
-    polls[1].events = 0;
+    polls[0].fd = proxyServer.m_fdAddClientServer;
 
-    int counter = 0;    // For count input and output byte
-    int offset = 0;     // For ignore dead first
+    long counter = 0;
+    long sizeFile = LONG_MAX;
+    bool endFile = false;
 
-    while (true) {
-        for (int i = 1; i < numberChannels; i++) {
+    while (counter < sizeFile) {
+        for (int i = 0; i < numberChannels; i++) {
 
             if (channels[i - 1].m_size != 0)
                 polls[2 * i].events |= POLLOUT;
@@ -462,26 +477,27 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
             else
                 polls[2 * i + 1].events &= ~POLLIN;
         }
+        polls[0].events |= POLLIN;
 
-        if (channels[0].m_size == 0)
-            polls[1].events |= POLLIN;
-        else
-            polls[1].events &= ~POLLIN;
-
-        if (counter == 0 && offset != 0) {
-            return 0;
-        }
-        // todo: неправильные условия выхода
-        int numPolls = poll (polls + 2 * offset, 2 * (numberChannels - offset), 1000);
+        int numPolls = poll (polls, 2 * numberChannels, 1000);
         CHECK_ERROR (numPolls);
 
         if (numPolls == 0) {
-            printf ("\nTime is out\n");
+            printf ("\n------------------ Time is out --------------------\n");
             CHECK_TRUE (false);
+        }
+
+        if (polls[0].revents & POLLIN) {
+            CHECK_ERROR (read (polls[0].fd, &sizeFile, sizeof (sizeFile)));
         }
 
         for (int i = 0; i < numberChannels && numPolls; i++)
         {
+            if (polls[2 * i].revents & POLLHUP || polls[2 * i + 1].revents & POLLHUP) {
+                printf ("%d: channel is out\n", i);
+                return 0;
+            }
+
             if (polls[2 * i + 1].revents & POLLIN) {
 
                 ret = read (channels[i].m_fdRead, channels[i].m_buf, channels[i].m_capacity);
@@ -490,16 +506,12 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
                 }
                 channels[i].m_size = ret;
 
-                if (i == 0) {
-                    counter += ret;
-                }
-
                 if (i == numberChannels - 1) {
                     ret  = write (STDOUT_FILENO, channels[i].m_buf, ret);
                     CHECK_ERROR (ret);
 
                     channels[i].m_size -= ret;
-                    counter -= ret;
+                    counter += ret;
                 }
 
                 numPolls--;
@@ -507,45 +519,41 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
 
             if (polls[2 * i].revents & POLLOUT) {
 
-                int size  = channels[i - 1].m_size;
-                char *buf = channels[i - 1].m_buf;
-                int len = 16;
-                while (size > 0) {
-                    if (size < len)
-                        len = size;
+                if (i == 0) {
+                    endFile = true;
+                } else {
 
-                    ret = write (channels[i].m_fdWrite, buf, len);
-                    if (ret == -1) {
-                        if (errno == EAGAIN) {
-                            channels[i].m_full = true;
-                            break;
+                    int size  = channels[i - 1].m_size;
+                    char *buf = channels[i - 1].m_buf;
+                    int len = 16;
+                    while (size > 0) {
+                        if (size < len)
+                            len = size;
+
+                        ret = write (channels[i].m_fdWrite, buf, len);
+                        if (ret == -1) {
+                            if (errno == EAGAIN) {
+                                channels[i].m_full = true;
+                                break;
+                            } else CHECK_ERROR (ret);
                         }
-                        else
-                            CHECK_ERROR (ret);
+
+                        buf += ret;
+                        size -= ret;
                     }
 
-                    buf += ret;
-                    size -= ret;
+                    channels[i - 1].m_size = size;
                 }
 
-                channels[i - 1].m_size = size;
                 numPolls--;
-            }
-
-            if (polls[2 * i].revents & POLLHUP || polls[2 * i + 1].revents & POLLHUP) {
-                if (i != 0) {
-                    printf ("%d: channel is out\n", i);
-                    return 0;
-                } else {
-                    offset = 0;
-                    polls[0].revents = 0;
-                    polls[1].revents = 0;
-                    break;
-                }
             }
 
             polls[2 * i].revents = 0;
             polls[2 * i + 1].revents = 0;
+        }
+
+        if (endFile && counter == 0) {
+            return 0;
         }
     }
 }
@@ -554,56 +562,57 @@ int VerifierProxy (const ProxyServer *const proxyServer) {
     return proxyServer->m_channels != nullptr;
 }
 
-int StartClient (ProxyClient proxyClient, bool isFirstChild) {
+int StartFirstClient (ProxyClient proxyClient, int fdAddClientServer) {
     int ret = 0;
 
-    if (isFirstChild) {
+    char nameFile[256] = "";
 
-        char nameFile[256] = "";
-
-        while (true) {
-            ret = read (proxyClient.m_fdRead, nameFile, 256);
-            CHECK_ERROR (ret);
-            if (ret == 0) {
-                return 0;
-            }
-
-            int fdFile = open (nameFile, O_RDONLY);
-            CHECK_ERROR (fdFile);
-
-            while (true) {
-                ret = splice (fdFile,                nullptr,
-                              proxyClient.m_fdWrite, nullptr,
-                              1024 * 16, SPLICE_F_MOVE);
-                CHECK_ERROR (ret);
-
-                if (ret == 0) {
-                    break;
-                }
-            }
-
-            char check = '\0';
-            ret = read (proxyClient.m_fdRead, &check, sizeof (check));
-            CHECK_ERROR (ret);
+    while (true) {
+        ret = read (proxyClient.m_fdRead, nameFile, 256);
+        CHECK_ERROR (ret);
+        if (ret == 0) {
+            return 0;
         }
 
-    } else {
+        int fdFile = open (nameFile, O_RDONLY);
+        CHECK_ERROR (fdFile);
+        long sizeFile = 0;
         while (true) {
-
-            ret = splice (proxyClient.m_fdRead,  nullptr,
+            ret = splice (fdFile,                nullptr,
                           proxyClient.m_fdWrite, nullptr,
                           1024 * 16, SPLICE_F_MOVE);
             CHECK_ERROR (ret);
 
+            sizeFile += ret;
+
             if (ret == 0) {
-                printf ("%d: finished\n", getpid ());
-                fflush (stdout);
                 break;
             }
         }
 
-        return 0;
+        ret = write (fdAddClientServer, &sizeFile, sizeof (sizeFile));
+        CHECK_ERROR (ret);
     }
+
+}
+
+int StartClient (ProxyClient proxyClient) {
+    int ret = 0;
+    while (true) {
+
+        ret = splice (proxyClient.m_fdRead,  nullptr,
+                      proxyClient.m_fdWrite, nullptr,
+                      1024 * 16, SPLICE_F_MOVE);
+        CHECK_ERROR (ret);
+
+        if (ret == 0) {
+            printf ("%d: finished\n", getpid ());
+            fflush (stdout);
+            break;
+        }
+    }
+
+    return 0;
 }
 
 int SetFlag (int fd, unsigned flag) {
