@@ -22,7 +22,6 @@ void CloseChannels (channel_t *channels, int size) {
 }
 
 int main (int argc, char *argv[]) {
-
     if (argc != 3) {
         printf ("Error input. Please enter: numberChild pathFile\n");
         return 0;

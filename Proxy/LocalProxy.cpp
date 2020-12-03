@@ -444,6 +444,9 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
     polls[0].events = 0;
     polls[1].events = 0;
 
+    int counter = 0;    // For count input and output byte
+    int offset = 0;     // For ignore dead first
+
     while (true) {
         for (int i = 1; i < numberChannels; i++) {
 
@@ -463,7 +466,11 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
         else
             polls[1].events &= ~POLLIN;
 
-        int numPolls = poll (polls, numberChannels, 1000);
+        if (counter == 0 && offset != 0) {
+            return 0;
+        }
+
+        int numPolls = poll (polls + 2 * offset, 2 * (numberChannels - offset), 1000);
         CHECK_ERROR (numPolls);
 
         if (numPolls == 0) {
@@ -474,8 +481,15 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
         for (int i = 0; i < numberChannels && numPolls; i++)
         {
             if (polls[2 * i].revents & POLLHUP || polls[2 * i + 1].revents & POLLHUP) {
-                printf ("Some channel is out\n");
-                return 0;
+                if (i != 0) {
+                    printf ("%d: channel is out\n", i);
+                    return 0;
+                } else {
+                    offset = 1;
+                    polls[0].revents = 0;
+                    polls[1].revents = 0;
+                    break;
+                }
             }
 
             if (polls[2 * i + 1].revents & POLLIN) {
@@ -484,6 +498,17 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
                 CHECK_ERROR (ret);
 
                 channels[i].m_size = ret;
+
+                if (i == 0) {
+                    counter += ret;
+                }
+
+                if (i == numberChannels - 1) {
+                    ret  = write (STDOUT_FILENO, channels[i].m_buf, ret);
+                    CHECK_ERROR (ret);
+
+                    counter -= ret;
+                }
 
                 numPolls--;
             }
@@ -517,11 +542,7 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
 
             polls[2 * i].revents = 0;
             polls[2 * i + 1].revents = 0;
-
-            CHECK_ERROR (write (STDOUT_FILENO, channels[i].m_buf, ret));
-            printf ("\n");
         }
-        printf ("------------------\n");
     }
 }
 
@@ -553,9 +574,12 @@ int StartClient (ProxyClient proxyClient, bool isFirstChild) {
                 CHECK_ERROR (ret);
 
                 if (ret == 0) {
-                    break;
+                    //break;
+                    return 0;
                 }
             }
+
+
         }
 
     } else {
@@ -567,6 +591,8 @@ int StartClient (ProxyClient proxyClient, bool isFirstChild) {
             CHECK_ERROR (ret);
 
             if (ret == 0) {
+                printf ("%d: finished\n", getpid ());
+                fflush (stdout);
                 break;
             }
         }
@@ -574,7 +600,6 @@ int StartClient (ProxyClient proxyClient, bool isFirstChild) {
         return 0;
     }
 }
-
 
 int SetFlag (int fd, unsigned flag) {
     int flags = fcntl (fd, F_GETFL, 0);
