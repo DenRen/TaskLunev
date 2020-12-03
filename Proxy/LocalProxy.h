@@ -26,6 +26,7 @@ struct ProxyChannel {
     int m_fdRead;
 
     char *m_buf;
+    char *m_curPos;
     int m_size;
     int m_capacity;
 

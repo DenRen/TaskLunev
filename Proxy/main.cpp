@@ -47,6 +47,8 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
+    // You can send any number of files, f.e. one
+
     if (SendFile (proxyServer, pathFile) == -1) {
         CloseProxy (&proxyServer);
 
