@@ -315,7 +315,7 @@ inline int CalcSizeBuf (int i, int n) {
     MYASSERT (i >= 0);
     MYASSERT (i < n);
 
-    return pow (3, n - i) * 1000;
+    return pow (3, n - i) * 10;
 }
 
 int StartProxy (ProxyServer *proxyServer, int numberClient) {
@@ -326,7 +326,7 @@ int StartProxy (ProxyServer *proxyServer, int numberClient) {
         return -1;
     }
 
-    // Allocate proxy server ----------------------------------------------------------------------
+    // Allocate proxy server p.1 ------------------------------------------------------------------
 
     proxyServer->m_channels = (ProxyChannel *) calloc (numberClient, sizeof (ProxyChannel));
     if (proxyServer->m_channels == nullptr) {
@@ -336,29 +336,6 @@ int StartProxy (ProxyServer *proxyServer, int numberClient) {
     }
     proxyServer->m_numberChannels = numberClient;
     ProxyChannel *channels = proxyServer->m_channels;
-
-    int totalSizeBuf = 0;
-    for (int i = 0; i < numberClient; i++) {
-        int curSizeBuf = CalcSizeBuf (i, numberClient);
-
-        channels[i].m_capacity = curSizeBuf;
-        channels[i].m_size = 0;
-        totalSizeBuf += curSizeBuf;
-    }
-    proxyServer->m_totalSizeBuf = totalSizeBuf;
-
-    proxyServer->m_totalBuffer = (char *) calloc (totalSizeBuf, sizeof (char));
-    if (proxyServer->m_totalBuffer == nullptr) {
-        errno = ENOMEM;
-        DUMP_DEBUG_INFO;
-        return -1;
-    }
-
-    char *buffers = proxyServer->m_totalBuffer;
-    for (int i = 0; i < numberClient; i++) {
-        channels[i].m_buf = buffers;
-        buffers += channels[i].m_capacity;
-    }
 
     //  -----------------------------------------------------------------------------
 
@@ -394,6 +371,31 @@ int StartProxy (ProxyServer *proxyServer, int numberClient) {
         SetNonBlock (fdServerClient[1]);
         channels[i].m_fdWrite = fdServerClient[1];
         channels[i].m_fdRead  = fdClientServer[0];
+    }
+
+    //Allocate proxy server p.2 ------------------------------------------------------------------
+
+    int totalSizeBuf = 0;
+    for (int i = 0; i < numberClient; i++) {
+        int curSizeBuf = CalcSizeBuf (i, numberClient);
+
+        channels[i].m_capacity = curSizeBuf;
+        channels[i].m_size = 0;
+        totalSizeBuf += curSizeBuf;
+    }
+    proxyServer->m_totalSizeBuf = totalSizeBuf;
+
+    proxyServer->m_totalBuffer = (char *) calloc (totalSizeBuf, sizeof (char));
+    if (proxyServer->m_totalBuffer == nullptr) {
+        errno = ENOMEM;
+        DUMP_DEBUG_INFO;
+        return -1;
+    }
+
+    char *buffers = proxyServer->m_totalBuffer;
+    for (int i = 0; i < numberClient; i++) {
+        channels[i].m_buf = buffers;
+        buffers += channels[i].m_capacity;
     }
 
     return 0;
@@ -469,34 +471,23 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
         if (counter == 0 && offset != 0) {
             return 0;
         }
-
+        // todo: неправильные условия выхода
         int numPolls = poll (polls + 2 * offset, 2 * (numberChannels - offset), 1000);
         CHECK_ERROR (numPolls);
 
         if (numPolls == 0) {
-            printf ("Time is out\n");
+            printf ("\nTime is out\n");
             CHECK_TRUE (false);
         }
 
         for (int i = 0; i < numberChannels && numPolls; i++)
         {
-            if (polls[2 * i].revents & POLLHUP || polls[2 * i + 1].revents & POLLHUP) {
-                if (i != 0) {
-                    printf ("%d: channel is out\n", i);
-                    return 0;
-                } else {
-                    offset = 1;
-                    polls[0].revents = 0;
-                    polls[1].revents = 0;
-                    break;
-                }
-            }
-
             if (polls[2 * i + 1].revents & POLLIN) {
 
                 ret = read (channels[i].m_fdRead, channels[i].m_buf, channels[i].m_capacity);
-                CHECK_ERROR (ret);
-
+                if (ret == -1) {
+                    CHECK_ERROR (ret);
+                }
                 channels[i].m_size = ret;
 
                 if (i == 0) {
@@ -507,6 +498,7 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
                     ret  = write (STDOUT_FILENO, channels[i].m_buf, ret);
                     CHECK_ERROR (ret);
 
+                    channels[i].m_size -= ret;
                     counter -= ret;
                 }
 
@@ -538,6 +530,18 @@ int SendFile (const ProxyServer proxyServer, const char *pathFile) {
 
                 channels[i - 1].m_size = size;
                 numPolls--;
+            }
+
+            if (polls[2 * i].revents & POLLHUP || polls[2 * i + 1].revents & POLLHUP) {
+                if (i != 0) {
+                    printf ("%d: channel is out\n", i);
+                    return 0;
+                } else {
+                    offset = 0;
+                    polls[0].revents = 0;
+                    polls[1].revents = 0;
+                    break;
+                }
             }
 
             polls[2 * i].revents = 0;
@@ -574,12 +578,13 @@ int StartClient (ProxyClient proxyClient, bool isFirstChild) {
                 CHECK_ERROR (ret);
 
                 if (ret == 0) {
-                    //break;
-                    return 0;
+                    break;
                 }
             }
 
-
+            char check = '\0';
+            ret = read (proxyClient.m_fdRead, &check, sizeof (check));
+            CHECK_ERROR (ret);
         }
 
     } else {
