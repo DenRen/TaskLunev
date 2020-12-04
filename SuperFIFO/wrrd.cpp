@@ -84,11 +84,10 @@ int reader (const char conn_str[]) {
 
     char buf[PIPE_BUF] = "";
     while ((ret = read (fd_pers, buf, PIPE_BUF))) {
-        CHECK_ERROR (fwrite (buf, ret, 1, stdout)); // К.с., т.к. два reader могут быть запущены в одной консоли
-                                                    // и вывод в консоли будет блоками до PIPE_BUF байт
+        CHECK_ERROR (fwrite (buf, ret, 1, stdout));
     }
 
     close (2, fd_conn, fd_pers);
-
+    
     return EXIT_SUCCESS;
 }
