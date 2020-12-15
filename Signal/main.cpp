@@ -37,21 +37,3 @@ int main (int argc, char *argv[])
 
     return result;
 }
-/*
-    struct sigaction act = {};
-    act.sa_handler = SigTERMHandler;
-    sigfillset (&act.sa_mask);
-    act.sa_flags = SA_RESTART;
-    CHECK_ERROR (sigaction (SIGTERM, &act, nullptr));
-    printf ("%d\n", SIGRTMAX);
-    act.sa_handler = SigTTINHandler;
-    act.sa_mask.__val[0] = 0;
-    act.sa_flags = 0;
-    CHECK_ERROR (sigaction (SIGTTIN, &act, nullptr));
-
-    //siginfo_t
-
-    printf ("mypid: %d\n", getpid ());
-
-    int _temp = 0;
-    int res = scanf ("%d", &_temp);*/

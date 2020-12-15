@@ -100,7 +100,7 @@ int writer (int readerPID, char *fileName)
 
     // ------------------------------------------------------------------
 
-    sigset_t maskConfirm = {0};
+    sigset_t maskConfirm = {};
     sigfillset (&maskConfirm);
     sigdelset (&maskConfirm, SIGUSR1);
     sigdelset (&maskConfirm, SIGALRM);
@@ -110,10 +110,7 @@ int writer (int readerPID, char *fileName)
 
     char buf[SIZE_BUF] = "";
     int curSize = 0;
-    // Начло к.с. между функцией read этого процесса и любой другой функцией другого, которая работает
-    // с этим файлом на запись.
-    // Например, какой-то процесс может писать в этот файл, либо этот файл вообще FIFO, открытый многими процессами
-    // на запись, либо ещё что-то.
+
     while ((curSize = read (fd, &buf, SIZE_BUF)) != 0)
     {
         CHECK_ERROR (curSize);
@@ -145,7 +142,6 @@ int writer (int readerPID, char *fileName)
             }
         }
     }
-    // Конец к.с.
 
     return curSize;
 }
