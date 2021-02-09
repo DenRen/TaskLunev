@@ -3,34 +3,45 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 /*
 Tasks:
     Full methods:
-        Нормальный поиск
         Вставка,
 
     Logs,
     Test,
 
-    Optimize _baSetValue
+    Optimize _baSetValue, baFind_True
 */
 
 struct BinArray {
     uint8_t* buf_;
-    int num_bits_;
+    size_t num_bits_;
 };
 
-int baRetain  (struct BinArray* arr, int num_bits);
-int baResize  (struct BinArray* arr, int new_num_bits);
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+int baRetain  (struct BinArray* arr, size_t num_bits);
+int baResize  (struct BinArray* arr, size_t new_num_bits);
 int baRelease (struct BinArray* arr);
 
-int baGetValue (const struct BinArray arr, int num_bit);
-int baSetValue (struct BinArray arr, int num_bit, bool val);
+int baGetValue (const struct BinArray arr, size_t num_bit);
+int baSetValue (struct BinArray arr, size_t num_bit, bool val);
 
 int baFind (struct BinArray arr, bool val);
 int baFind_True (struct BinArray arr);
 
-void baDumpBuf (const struct BinArray arr, int num_bytes);
+int baFill_One  (struct BinArray arr);
+int baFill_Zero (struct BinArray arr);
+
+void baDumpBuf (const struct BinArray arr, size_t num_bytes);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* BINARRAY_H */
