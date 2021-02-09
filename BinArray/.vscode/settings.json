@@ -7,6 +7,7 @@
         "ranges": "c",
         "utility": "c",
         "cstdlib": "c",
-        "*.txx": "c"
+        "*.txx": "c",
+        "binarray.h": "c"
     }
 }
