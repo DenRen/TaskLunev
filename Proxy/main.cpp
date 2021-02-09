@@ -29,15 +29,13 @@ int main (int argc, char *argv[]) {
 
     const int numberChild = GetNumber (argv[1]);
     if (errno || numberChild <= 0) {
-        printf ("Error input. Please enter: numberChild > 0 pathFile\n");
+        printf ("Error input. Please enter: numberChild pathFile\n");
         errno = 0;
         return 0;
     }
 
     ProxyServer proxyServer = {};
     proxyServer.m_channels = nullptr;
-
-    const char *pathFile = argv[2];
 
     int ret = StartProxy (&proxyServer, numberChild);
     if (ret == -1) {
@@ -48,6 +46,7 @@ int main (int argc, char *argv[]) {
     }
 
     // You can send any number of files, f.e. one
+    const char *pathFile = argv[2];
 
     if (SendFile (proxyServer, pathFile) == -1) {
         CloseProxy (&proxyServer);

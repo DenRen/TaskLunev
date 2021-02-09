@@ -296,7 +296,11 @@ int StartClient (ProxyClient proxyClient) {
 
     SetBlock (proxyClient.m_fdRead);
     while (true) {
-
+/*
+        timespec _time = {};
+        _time.tv_nsec = 1000 * 1000;
+        nanosleep (&_time, nullptr);
+*/
         ret = splice (proxyClient.m_fdRead,  nullptr,
                       proxyClient.m_fdWrite, nullptr,
                       1024 * 16, SPLICE_F_MOVE);
