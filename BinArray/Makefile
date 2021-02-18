@@ -1,13 +1,17 @@
 #https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html
 
 CC = g++
+CXX = g++
 LD = g++
 
 OPTIM_FLAGS = -O0
-TEST_FLAGS  = -g
+GTEST_FLAGS = -lgtest -pthread -g
+GCOV_FLAGS = -fprofile-arcs -ftest-coverage
+LD_GCOV_FLAGS = -lgcov
 
-CFLAGS 	 = $(OPTIM_FLAGS) $(TEST_FLAGS)
-CXXFLAGS = $(OPTIM_FLAGS) $(TEST_FLAGS)
+CFLAGS 	 = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS)
+CXXFLAGS = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS)
+LDFLAGS  = $(LD_GCOV_FLAGS)
 
 OBJS = main.o BinArray.o
 TEST_DIR = tests
@@ -33,13 +37,13 @@ $(TEST_DIR)/test.out:
 valgrind:
 	valgrind ./main.out
 
-test_valgrind: clean test
+test_valgrind: clean test_build
 	valgrind ./$(TEST_DIR)/tests.out
 
 # Clean -------------------------
 
 clean:
-	$(RM) main.out $(OBJS)
+	$(RM) main.out $(OBJS) *.gcno *.gcda *.info
 	$(MAKE) -C $(TEST_DIR) clean
 
 .PHONY: clean all tests valgrind

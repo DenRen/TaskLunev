@@ -1,29 +1,31 @@
 #ifndef TESTFUNC_HPP
 #define TESTFUNC_HPP
 
-#include "../BinArray.h"
 #include <cstddef>
+#include "../BinArray.h"
 
-struct BinArray* GetArrayBA (size_t num);
+BinArray** GetArrayBA (size_t num);
 
-void RandRetainArrayBA (struct BinArray arrs[], size_t num, 
+void RandRetainArrayBA (BinArray* arrs[], size_t num, 
                         size_t size_from, size_t size_to);
 
-void RandResizeArrayBA (struct BinArray arrs[], size_t num, 
+void RandResizeArrayBA (BinArray* arrs[], size_t num, 
                         size_t size_from, size_t size_to);
 
-void ReleaseArrayBA (struct BinArray arrs[], size_t num);
+void ReleaseArrayBA (BinArray* arrs[], size_t num);
 
-void FillOneArrayBA  (struct BinArray arrs[], size_t num);
-void FillZeroArrayBA (struct BinArray arrs[], size_t num);
+void FillOneArrayBA  (BinArray* arrs[], size_t num);
+void FillZeroArrayBA (BinArray* arrs[], size_t num);
+void FillRandArrayBA (BinArray* arrs[], size_t num);
 
-void CheckOneArrayBA  (struct BinArray arrs[], size_t num) ;
-void CheckZeroArrayBA (struct BinArray arrs[], size_t num);
+void CheckOneArrayBA  (BinArray* arrs[], size_t num) ;
+void CheckZeroArrayBA (BinArray* arrs[], size_t num);
 
-void CheckOneFromGetValueArrayBA  (struct BinArray arrs[], size_t num);
-void CheckZeroFromGetValueArrayBA (struct BinArray arrs[], size_t num);
+void CheckSetAndGetOneArrayBA  (BinArray* arrs[], size_t num);
+void CheckSetAndGetZeroArrayBA (BinArray* arrs[], size_t num);
 
-void CheckSetAndGetOneArrayBA  (struct BinArray arrs[], size_t num);
-void CheckSetAndGetZeroArrayBA (struct BinArray arrs[], size_t num);
+void CheckFindOne  (BinArray* arrs[], size_t num, const float koef_num_check);
+void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check);
+void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check);
 
 #endif /* TESTFUNC_HPP */

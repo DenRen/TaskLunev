@@ -32,3 +32,5 @@
 *.app
 Proxy/cmake-build-debug/Proxy
 Proxy/cmake-build-debug/x
+*.gcda
+*.gcno
