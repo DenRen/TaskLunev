@@ -8,7 +8,7 @@ BinArray** GetArrayBA (size_t num) {
     return new BinArray*[num];
 }
 
-void RandRetainArrayBA (BinArray* arrs[], size_t num, 
+void RandCreateArrayBA (BinArray* arrs[], size_t num, 
                         size_t size_from, size_t size_to)
 {
     std::random_device rd;
@@ -37,7 +37,7 @@ void RandResizeArrayBA (BinArray* arrs[], size_t num,
     }
 }
 
-void ReleaseArrayBA (BinArray* arrs[], size_t num) {
+void DestroyArrayBA (BinArray* arrs[], size_t num) {
     for (size_t i = 0; i < num; ++i) {
         ASSERT_EQ (baDestroy (&arrs[i]), 0);
     }

@@ -30,15 +30,15 @@ TEST (BIN_ARRAY, True_Create_Resize_Release) {
     // --------------------------------------------------
 
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
-    ReleaseArrayBA (arrs, num_arr);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    DestroyArrayBA (arrs, num_arr);
 
     // --------------------------------------------------
 
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
     RandResizeArrayBA (arrs, num_arr, 1, max_size_arr_g);
-    ReleaseArrayBA (arrs, num_arr);
+    DestroyArrayBA (arrs, num_arr);
 
     // --------------------------------------------------
 
@@ -54,7 +54,7 @@ TEST (BIN_ARRAY, GetCLone) {
     // --------------------------------------------------
 
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
     // --------------------------------------------------
 
@@ -88,22 +88,22 @@ TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
     // --------------------------------------------------
 
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
     FillOneArrayBA (arrs, num_arr);
     CheckOneArrayBA (arrs, num_arr);
 
-    ReleaseArrayBA (arrs, num_arr);
+    DestroyArrayBA (arrs, num_arr);
 
     // --------------------------------------------------
 
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
     FillZeroArrayBA (arrs, num_arr);
     CheckZeroArrayBA (arrs, num_arr);
 
-    ReleaseArrayBA (arrs, num_arr);
+    DestroyArrayBA (arrs, num_arr);
 
     // --------------------------------------------------
 
@@ -121,20 +121,20 @@ TEST (BIN_ARRAY, Setting_And_GettingOne_OrZero) {
     // --------------------------------------------------
 
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
     CheckSetAndGetOneArrayBA (arrs, num_arr);
 
-    ReleaseArrayBA (arrs, num_arr);
+    DestroyArrayBA (arrs, num_arr);
 
     // --------------------------------------------------
 
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
     CheckSetAndGetZeroArrayBA (arrs, num_arr);
 
-    ReleaseArrayBA (arrs, num_arr);
+    DestroyArrayBA (arrs, num_arr);
 
     // --------------------------------------------------
 
@@ -152,7 +152,7 @@ TEST (BIN_ARRAY, Tetsting_Find) {
     // --------------------------------------------------
     
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
     // --------------------------------------------------
 
@@ -192,7 +192,7 @@ TEST (BIN_ARRAY, foreach) {
     // --------------------------------------------------
 
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
     // --------------------------------------------------
 
@@ -222,7 +222,7 @@ TEST (BIN_ARRAY, foreach) {
 
     // --------------------------------------------------
 
-    ReleaseArrayBA (arrs, num_arr);
+    DestroyArrayBA (arrs, num_arr);
 
     delete [] arrs;
 }
@@ -238,7 +238,7 @@ TEST (BIN_ARRAY, Find) {
     // --------------------------------------------------
     
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
     // --------------------------------------------------
 
@@ -261,7 +261,7 @@ TEST (BIN_ARRAY, Invert_And_GetInvert) {
     // --------------------------------------------------
     
     arrs = GetArrayBA (num_arr);
-    RandRetainArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
     // Invert -------------------------------------------
 

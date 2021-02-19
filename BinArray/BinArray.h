@@ -32,7 +32,9 @@ extern "C" {
 BinArray *baCreate  (size_t num_bits);
 int baResize  (BinArray* arr, size_t new_num_bits);
 int baDestroy (BinArray** arr);
-BinArray *baGetClone (BinArray * arr);
+
+BinArray *baGetClone (BinArray* arr);
+BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len);
 
 size_t baGetNumBits (BinArray* arr);
 
@@ -45,7 +47,18 @@ int64_t baFind     (BinArray* arr, bool val);
 int64_t baFindOne  (BinArray* arr);
 int64_t baFindZero (BinArray* arr);
 
-int baFillOne  (BinArray* arr);
+/*
+int64_t baFind     (BinArray* arr, size_t begin, ssize_t len, bool val);
+int64_t baFindOne  (BinArray* arr, size_t begin, ssize_t len);
+int64_t baFindZero (BinArray* arr, size_t begin, ssize_t len);
+
+int baFillOne  (BinArray* arr, size_t begin, ssize_t len);
+int baFillZero (BinArray* arr, size_t begin, ssize_t len);
+
+int baDumpBuf  (BinArray* arr, size_t begin, ssize_t len);
+*/
+
+int baFillOne  (BinArray* arr, size_t begin, ssize_t len);
 int baFillZero (BinArray* arr);
 
 int baDumpBuf  (BinArray* arr, ssize_t num_bytes);
@@ -56,6 +69,8 @@ int foreach (BinArray* arr,
 
 int baInvert (BinArray* arr); //ffs
 BinArray* baGetInvert (BinArray* arr);
+
+void print_byte (uint8_t byte);
 
 #ifdef __cplusplus
 }
