@@ -403,10 +403,6 @@ int baFillOne (BinArray* arr, size_t begin, ssize_t len) {
 
         *buf++ |= (uint8_t) 0xFF >> lshift;
 
-        printf (")_");
-        print_byte (((signed) 0xFF) >> 2);
-        printf ("\n");
-
         len -= 8 - lshift;
         size_t num_full_bytes = len / 8;
         uint8_t num_add_bits  = len % 8;

@@ -6,4 +6,5 @@
 
 int main () {
     Tutorial_BinShift_Casting ();
+    //Tutorial_BinShift ();
 }

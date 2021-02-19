@@ -93,10 +93,16 @@ void Tutorial_BinShift_Casting () {
     printf ("\n");
     scanf ("%c", &temp_scanf);
 
-    printf ("Okey. Let's add type casting:\n\n");
+    printf ("Okey. Let's add type casting:\n");
+    scanf ("%c", &temp_scanf);
+
+	printf ("Simple:\n(int8_t) 0xFF >> 2: ");
+	print_byte ((int8_t) 0xFF >> 2);
+    printf (" <-- Wow! Amazing, the casting work!\n");
+    scanf ("%c", &temp_scanf);
 
     LINE_EXAMPLE (ubyte = 0xFF;, 0);
-    printf ("(int_8t) ubyte >> 2: ");
+    printf ("(int8_t) ubyte >> 2: ");
     print_byte ((int8_t) ubyte >> 2);
     printf ("\n");
     scanf ("%c", &temp_scanf);
