@@ -401,7 +401,7 @@ int baFillOne (BinArray* arr, size_t begin, ssize_t len) {
         *buf |= ((uint8_t)(0xFF << (8 - len))) >> lshift;
     } else {
 
-        *buf++ |= 0xFF >> lshift;
+        *buf++ |= (uint8_t) 0xFF >> lshift;
 
         printf (")_");
         print_byte (((signed) 0xFF) >> 2);

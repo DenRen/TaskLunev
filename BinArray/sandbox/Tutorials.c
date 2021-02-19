@@ -4,16 +4,10 @@
 #include <stdint.h>
 #include "binlib.h"
 
-#define LINE_EXAMPLE(str, ntabs)    \
-    for (int i = 0; i < ntabs; ++i) \
-        printf ("\t");              \
-    printf ("%s\n", #str);          \
-    str
-
-void Tutorial_BinShif () {
+void Tutorial_BinShift () {
     char temp_scanf = '\0';
     
-    printf ("Hello everyone. In this program, I'll show you "
+    printf ("Hello everyone.\nIn this program, I'll show you "
             "that you need to be very careful when using shifts in C. \n");
     
     printf ("Let's start?\n");
@@ -75,4 +69,43 @@ void Tutorial_BinShif () {
     // 3 ---------
 }
 
-#undef LINE_EXAMPLE
+void Tutorial_BinShift_Casting () {
+    char temp_scanf = '\0';
+
+	printf ("Hello everyone!\n"
+			"Now we will see how type casting\n"
+			"affects the bitwise shift operation.\n");
+	
+	printf ("Simple:\n0xFF >> 2: ");
+	print_byte (0xFF >> 2);
+    printf ("\n");
+    scanf ("%c", &temp_scanf);
+
+    LINE_EXAMPLE (uint8_t ubyte = 0xFF;, 0);
+    printf ("ubyte >> 2: ");
+    print_byte (ubyte >> 2);
+    printf ("\n");
+    scanf ("%c", &temp_scanf);
+
+    LINE_EXAMPLE (int8_t sbyte = 0xFF;, 0);
+    printf ("sbyte >> 2: ");
+    print_byte (sbyte >> 2);
+    printf ("\n");
+    scanf ("%c", &temp_scanf);
+
+    printf ("Okey. Let's add type casting:\n\n");
+
+    LINE_EXAMPLE (ubyte = 0xFF;, 0);
+    printf ("(int_8t) ubyte >> 2: ");
+    print_byte ((int8_t) ubyte >> 2);
+    printf ("\n");
+    scanf ("%c", &temp_scanf);
+
+    LINE_EXAMPLE (sbyte = 0xFF;, 0);
+    printf ("(uint8_t) sbyte >> 2: ");
+    print_byte ((uint8_t) sbyte >> 2);
+    printf ("\n");
+    scanf ("%c", &temp_scanf);
+
+    printf ("Types casting works!\n");
+}

@@ -15,6 +15,7 @@ LDFLAGS  = $(LD_GCOV_FLAGS)
 
 OBJS = main.o BinArray.o
 TEST_DIR = tests
+SANDBOX_DIR = sandbox
 
 # Main -------------------------
 
@@ -45,5 +46,6 @@ test_valgrind: clean test_build
 clean:
 	$(RM) main.out $(OBJS) *.gcno *.gcda *.info
 	$(MAKE) -C $(TEST_DIR) clean
+	$(MAKE) -C $(SANDBOX_DIR) clean
 
 .PHONY: clean all tests valgrind

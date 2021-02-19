@@ -60,6 +60,9 @@
         "typeinfo": "cpp",
         "stdlib.h": "c",
         "stdbool.h": "c",
-        "binlib.h": "c"
+        "binlib.h": "c",
+        "tutorials.h": "c",
+        "stdio.h": "c",
+        "stdint.h": "c"
     }
 }
