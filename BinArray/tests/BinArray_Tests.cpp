@@ -181,7 +181,7 @@ static int find_min (BinArray* arr, bool el, void* data) {
     return 0;
 }
 
-TEST (BIN_ARRAY, foreach) {
+TEST (BIN_ARRAY, baForeach) {
 
     const float koef_num_arr = 0.1;
 
@@ -198,7 +198,7 @@ TEST (BIN_ARRAY, foreach) {
 
     for (int i = 0; i < num_arr; ++i) {
         bool max = false;
-        foreach (arrs[i], find_max, &max);
+        baForeach (arrs[i], find_max, &max);
 
         if (baFindOne (arrs[i]) == -1) {
             ASSERT_FALSE (max);
@@ -211,7 +211,7 @@ TEST (BIN_ARRAY, foreach) {
 
     for (int i = 0; i < num_arr; ++i) {
         bool min = true;
-        foreach (arrs[i], find_min, &min);
+        baForeach (arrs[i], find_min, &min);
 
         if (baFindZero (arrs[i]) == -1) {
             ASSERT_TRUE (min);

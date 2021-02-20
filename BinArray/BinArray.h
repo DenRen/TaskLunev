@@ -15,12 +15,10 @@
 /*
 Tasks:
 
-    Дописать поиск False
-
     Logs,
     Test,
 
-    Optimize _baSetValue, baFind_One
+    Optimize, baFindOne
 */
 
 typedef struct bin_array BinArray;
@@ -28,49 +26,77 @@ typedef struct bin_array BinArray;
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
-BinArray *baCreate  (size_t num_bits);
-int baResize  (BinArray* arr, size_t new_num_bits);
+
+// ===================\\
+// Secondary functions --------------------------------------------------------
+// ===================//
+
+static inline size_t baBits2Bytes (size_t num_bits);
+inline size_t _baGetNumBits (BinArray* arr);
+
+void print_byte (uint8_t byte);
+void print_byte_nl (uint8_t byte);
+void bprint (uint8_t* bytes, size_t num_bytes);
+
+// ==================\\
+// Creation functions ---------------------------------------------------------
+// ==================//
+
+BinArray* baCreate (size_t num_bits);
+int baResize (BinArray* arr, size_t new_num_bits);
 int baDestroy (BinArray** arr);
-
-BinArray *baGetClone (BinArray* arr);
+BinArray* baGetClone (BinArray* arr);
 BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len);
-
 size_t baGetNumBits (BinArray* arr);
+
+// =============================\\
+// Getters and setters functions ----------------------------------------------
+// =============================//
 
 int baGetValue (BinArray *arr, size_t num_bit);
 int baSetValue (BinArray* arr, size_t num_bit, bool val);
 int baSetOne   (BinArray* arr, size_t num_bit);
 int baSetZero  (BinArray* arr, size_t num_bit);
 
-int64_t baFind     (BinArray* arr, bool val);
-int64_t baFindOne  (BinArray* arr);
-int64_t baFindZero (BinArray* arr);
+// ==============\\
+// Find functions -------------------------------------------------------------
+// ==============//
 
-/*
-int64_t baFind     (BinArray* arr, size_t begin, ssize_t len, bool val);
-int64_t baFindOne  (BinArray* arr, size_t begin, ssize_t len);
-int64_t baFindZero (BinArray* arr, size_t begin, ssize_t len);
+ssize_t baFind (BinArray* arr, size_t begin, ssize_t len, bool val);
+ssize_t baFindOne  (BinArray* arr, size_t begin, ssize_t len);
+ssize_t baFindZero (BinArray* arr, size_t begin, ssize_t len);
+
+// ==============\\
+// Fill functions -------------------------------------------------------------
+// ==============//
 
 int baFillOne  (BinArray* arr, size_t begin, ssize_t len);
 int baFillZero (BinArray* arr, size_t begin, ssize_t len);
 
-int baDumpBuf  (BinArray* arr, size_t begin, ssize_t len);
-*/
+int baFillZeroFull (BinArray* arr);
+int baFillOneFull  (BinArray* arr);
 
-int baFillOne  (BinArray* arr, size_t begin, ssize_t len);
-int baFillZero (BinArray* arr);
+// ==============\\
+// Dump functions -------------------------------------------------------------
+// ==============//
 
-int baDumpBuf  (BinArray* arr, ssize_t num_bytes);
+int baDumpBuf (BinArray* arr, size_t begin, ssize_t len);
+int baDumpBufFull (BinArray* arr);
 
-int foreach (BinArray* arr,
+// ================\\
+// Foreach function -----------------------------------------------------------
+// ================//
+
+int baForeach (BinArray* arr,
              int (*cb) (BinArray* arr, bool element, void* data),
              void* data);
 
-int baInvert (BinArray* arr); //ffs
-BinArray* baGetInvert (BinArray* arr);
+// ================\\
+// Invert functions -----------------------------------------------------------
+// ================//
 
-void print_byte (uint8_t byte);
+int baInvert (BinArray* arr);
+BinArray* baGetInvert (BinArray* arr);
 
 #ifdef __cplusplus
 }
