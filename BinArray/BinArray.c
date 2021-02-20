@@ -27,7 +27,7 @@ typedef struct proxy_bin_array {
 // Secondary functions --------------------------------------------------------
 // ===================//
 
-inline size_t baBits2Bytes (size_t num_bits) {
+size_t baBits2Bytes (size_t num_bits) {
     return num_bits / 8 + (num_bits % 8 != 0);
 }
 inline size_t _baGetNumBits (BinArray* arr) {
@@ -581,10 +581,12 @@ int baFillOne  (BinArray* arr, size_t begin, ssize_t len) {
 
         len -= 8 - lshift;
         size_t num_full_bytes = len / 8;
-        uint8_t num_add_bits  = len % 8;
+        uint8_t num_rest_bits  = len % 8;
 
         memset (buf, 0xFF, num_full_bytes);
-        *(buf + num_full_bytes) |= 0xFF << (8 - num_add_bits);
+
+        if (num_rest_bits)
+            *(buf + num_full_bytes) |= 0xFF << (8 - num_rest_bits);
     }
 
     return 0;
@@ -604,10 +606,11 @@ int baFillZero (BinArray* arr, size_t begin, ssize_t len) {
 
         len -= 8 - lshift;
         size_t num_full_bytes = len / 8;
-        uint8_t num_add_bits  = len % 8;
+        uint8_t num_rest_bits  = len % 8;
 
         memset (buf, 0x00, num_full_bytes);
-        *(buf + num_full_bytes) &= ~(0xFF << (8 - num_add_bits));
+        if (num_rest_bits)
+            *(buf + num_full_bytes) &= ~(0xFF << (8 - num_rest_bits));
     }
 
     return 0;

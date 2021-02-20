@@ -1,13 +1,18 @@
 #https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html
 
-CC = g++
+CC  = g++
 CXX = g++
-LD = g++
+LD  = g++
 
-OPTIM_FLAGS = -O0
+OPTIM_FLAGS = -O3
 GTEST_FLAGS = -lgtest -pthread -g
-#GCOV_FLAGS = -fprofile-arcs -ftest-coverage
+GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 LD_GCOV_FLAGS = -lgcov
+
+FLAGS  = OPTIM_FLAGS=$(OPTIM_FLAGS)
+#FLAGS += GTEST_FLAGS=$(GTEST_FLAGS)
+#FLAGS += GCOV_FLAGS=$(GCOV_FLAGS)
+#FLAGS += LD_GCOV_FLAGS=$(LD_GCOV_FLAGS)
 
 CFLAGS 	 = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS)
 CXXFLAGS = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS)
@@ -20,6 +25,7 @@ SANDBOX_DIR = sandbox
 # Main -------------------------
 
 all: main.out
+	echo $(FLAGS)
 
 main.out: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
@@ -33,7 +39,7 @@ test: test_build
 	./$(TEST_DIR)/tests.out
 
 $(TEST_DIR)/test.out:
-	$(MAKE) -C $(TEST_DIR) all
+	$(MAKE) -C $(TEST_DIR) $(FLAGS)
 
 valgrind:
 	valgrind ./main.out

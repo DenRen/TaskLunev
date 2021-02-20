@@ -34,3 +34,6 @@ Proxy/cmake-build-debug/Proxy
 Proxy/cmake-build-debug/x
 *.gcda
 *.gcno
+BinArray/sandbox/.swp
+BinArray/sandbox/vim
+BinArray/sandbox/vim

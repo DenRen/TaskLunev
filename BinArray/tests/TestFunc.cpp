@@ -7,7 +7,7 @@
 void ReadFromStdoutToBuf (char* buf, uint8_t size) {
     fflush (stdout);
     fseek (stdout, 0, SEEK_SET);
-    fread (buf, sizeof (char), size, stdout);
+    int ret = fread (buf, sizeof (char), size, stdout);
     fseek (stdout, 0, SEEK_SET);
 }
 
@@ -50,13 +50,13 @@ void DestroyArrayBA (BinArray* arrs[], size_t num) {
     }
 }
 
-void FillOneArrayBA (BinArray* arrs[], size_t num) {
+void FillOneFullArrayBA (BinArray* arrs[], size_t num) {
     for (size_t i = 0; i < num; ++i) {
         ASSERT_EQ (baFillOneFull (arrs[i]), 0);
     }
 }
 
-void FillZeroArrayBA (BinArray* arrs[], size_t num) {
+void FillZeroFullArrayBA (BinArray* arrs[], size_t num) {
     for (size_t i = 0; i < num; ++i) {
         ASSERT_EQ (baFillZeroFull (arrs[i]), 0);
     }
@@ -78,26 +78,44 @@ void FillRandArrayBA (BinArray* arrs[], size_t num) {
     }
 }
 
-void CheckOneArrayBA (BinArray* arrs[], size_t num) {
-    for (size_t i = 0; i < num; ++i) {
-        BinArray* arr = arrs[i];
-        
-        size_t num_bits = baGetNumBits (arr);
-        for (size_t j = 0; j < num_bits; ++j) {
-            ASSERT_EQ (baGetValue (arr, j), 1);
-        }
+void CheckFillOneBA (size_t num_bits, size_t begin, ssize_t len) {
+    BinArray* arr = baCreate (num_bits);
+    ASSERT_TRUE (arr != NULL);
+
+    ASSERT_EQ (baFillZeroFull (arr), 0);
+    ASSERT_EQ (baFillOne (arr, begin, len), 0);
+
+    BinArray* result = baGetSubArray (arr, begin, len);
+    ASSERT_TRUE (result != NULL);
+
+    CheckOneFullBA (result);
+
+    baDestroy (&result);
+    baDestroy (&arr);
+}
+
+void CheckOneFullBA (BinArray* arr) {
+    size_t num_bits = baGetNumBits (arr);
+    for (size_t j = 0; j < num_bits; ++j) {
+        ASSERT_EQ (baGetValue (arr, j), 1) << baDumpBufFull (arr);
     }
 }
 
-void CheckZeroArrayBA (BinArray* arrs[], size_t num) {
-    for (size_t i = 0; i < num; ++i) {
-        BinArray*arr = arrs[i];
-        
-        size_t num_bits = baGetNumBits (arr);
-        for (size_t j = 0; j < num_bits; ++j) {
-            ASSERT_EQ (baGetValue (arr, j), 0);
-        }
+void CheckOneFullArrayBA (BinArray* arrs[], size_t num) {
+    for (size_t i = 0; i < num; ++i)
+        CheckOneFullBA (arrs[i]);
+}
+
+void CheckZeroFullBA (BinArray* arr) {
+    size_t num_bits = baGetNumBits (arr);
+    for (size_t j = 0; j < num_bits; ++j) {
+        ASSERT_EQ (baGetValue (arr, j), 0) << baDumpBufFull (arr);
     }
+}
+
+void CheckZeroFullArrayBA (BinArray* arrs[], size_t num) {
+    for (size_t i = 0; i < num; ++i)
+        CheckZeroFullBA (arrs[i]);
 }
 
 void CheckSetAndGetOneArrayBA (BinArray* arrs[], size_t num) {
@@ -125,7 +143,7 @@ void CheckSetAndGetZeroArrayBA (BinArray* arrs[], size_t num) {
 }
 
 void CheckFindOne  (BinArray* arrs[], size_t num, const float koef_num_check) {
-    FillZeroArrayBA (arrs, num);
+    FillZeroFullArrayBA (arrs, num);
 
     std::random_device rd;
     std::mt19937_64 gen (rd ());
@@ -158,7 +176,7 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
 
     // ------------------------------------------------------------
 
-    FillZeroArrayBA (arrs, num);
+    FillZeroFullArrayBA (arrs, num);
 
     for (int iarr = 0; iarr < num; ++iarr) {
 
@@ -179,7 +197,7 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
 
     // ------------------------------------------------------------
 
-    FillOneArrayBA (arrs, num);
+    FillOneFullArrayBA (arrs, num);
 
     for (int iarr = 0; iarr < num; ++iarr) {
 
@@ -200,7 +218,7 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
 }
 
 void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check) {
-    FillOneArrayBA (arrs, num);
+    FillOneFullArrayBA (arrs, num);
 
     std::random_device rd;
     std::mt19937_64 gen (rd ());

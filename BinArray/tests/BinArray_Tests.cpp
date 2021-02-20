@@ -4,8 +4,8 @@
 #include "../BinArray.h"
 #include "TestFunc.hpp"
 
-const size_t num_arr_g = 5000                / 2;
-const size_t max_size_arr_g = UINT16_MAX * 4 / 2;
+const size_t num_arr_g = 5000                / 1;
+const size_t max_size_arr_g = UINT16_MAX * 4 / 1;
 
 // ===================\\
 // Secondary functions --------------------------------------------------------
@@ -234,6 +234,21 @@ TEST (BIN_ARRAY, GetSubArray) {
 // ==============//
 
 TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
+    ASSERT_EQ (baFillOneFull  (NULL), -1);
+    ASSERT_EQ (baFillZeroFull (NULL), -1);
+
+    ASSERT_EQ (baFillOne  (NULL, 1, 1), -1);
+    ASSERT_EQ (baFillZero (NULL, 1, 1), -1);
+
+    // ---------------------------------------
+
+    CheckFillOneBA (  8, 3,  4);
+    CheckFillOneBA (  6, 0,  2);
+    CheckFillOneBA (800, 3, -1);
+    CheckFillOneBA (78,  3, -1);
+}
+
+TEST (BIN_ARRAY, Rand_Filling_And_Getting_One_And_Zero) {
 
     const float koef_num_arr = 0.05f;
 
@@ -246,8 +261,8 @@ TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
     arrs = GetArrayBA (num_arr);
     RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
-    FillOneArrayBA (arrs, num_arr);
-    CheckOneArrayBA (arrs, num_arr);
+    FillOneFullArrayBA (arrs, num_arr);
+    CheckOneFullArrayBA (arrs, num_arr);
 
     DestroyArrayBA (arrs, num_arr);
 
@@ -256,8 +271,8 @@ TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
     arrs = GetArrayBA (num_arr);
     RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
 
-    FillZeroArrayBA (arrs, num_arr);
-    CheckZeroArrayBA (arrs, num_arr);
+    FillZeroFullArrayBA (arrs, num_arr);
+    CheckZeroFullArrayBA (arrs, num_arr);
 
     DestroyArrayBA (arrs, num_arr);
 

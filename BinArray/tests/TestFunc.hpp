@@ -16,12 +16,18 @@ void RandResizeArrayBA (BinArray* arrs[], size_t num,
 
 void DestroyArrayBA (BinArray* arrs[], size_t num);
 
-void FillOneArrayBA  (BinArray* arrs[], size_t num);
-void FillZeroArrayBA (BinArray* arrs[], size_t num);
+void FillOneFullArrayBA  (BinArray* arrs[], size_t num);
+void FillZeroFullArrayBA (BinArray* arrs[], size_t num);
 void FillRandArrayBA (BinArray* arrs[], size_t num);
 
-void CheckOneArrayBA  (BinArray* arrs[], size_t num) ;
-void CheckZeroArrayBA (BinArray* arrs[], size_t num);
+void CheckFillOneBA  (size_t num_bits, size_t begin, ssize_t len);
+void CheckFillZeroBA (size_t num_bits, size_t begin, ssize_t len);
+
+void CheckOneFullBA  (BinArray* arr);
+void CheckZeroFullBA (BinArray* arr);
+
+void CheckOneFullArrayBA  (BinArray* arrs[], size_t num) ;
+void CheckZeroFullArrayBA (BinArray* arrs[], size_t num);
 
 void CheckSetAndGetOneArrayBA  (BinArray* arrs[], size_t num);
 void CheckSetAndGetZeroArrayBA (BinArray* arrs[], size_t num);
