@@ -32,6 +32,7 @@ extern "C" {
 // ===================//
 
 size_t baBits2Bytes (size_t num_bits);
+size_t baGetNumBits (BinArray* arr);
 
 void print_byte (uint8_t byte);
 void print_byte_nl (uint8_t byte);
@@ -46,7 +47,6 @@ int baResize (BinArray* arr, size_t new_num_bits);
 int baDestroy (BinArray** arr);
 BinArray* baGetClone (BinArray* arr);
 BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len);
-size_t baGetNumBits (BinArray* arr);
 
 // =============================\\
 // Getters and setters functions ----------------------------------------------

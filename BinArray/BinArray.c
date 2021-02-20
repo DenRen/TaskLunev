@@ -48,16 +48,16 @@ void print_byte_nl (uint8_t byte) {
 }
 void bprint (uint8_t* bytes, size_t num_bytes) {
     for (int i = 0; i < num_bytes; ++i) {
-        print_byte (bytes[i]);
-        
-        if (i % 8 == 0)
-            printf (" ");
+        print_byte (bytes[i]);  
+        printf (" ");
     }
 }
 
 // ===============\\
 // Check functions ------------------------------------------------------------
 // ===============//
+
+// Может быть уже нет смысла в baCheckArr?
 
 inline bool baCheckArr (BinArray arr) {
     return (arr.buf_ != NULL) && (arr.buf_ != 0);
@@ -209,22 +209,39 @@ BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len) {
         memcpy (clone->buf_, buf, baBits2Bytes (len));
     } else {
         union reg_u16 {
-            uint8_t  bits[2];
+            uint8_t  bytes[2];
             uint16_t word;
         };
 
         clone_buf[0] = buf[0] << lshift;
+        
+        ssize_t num_rest_bits = len - (8 - lshift); // rest - остальные
+        if (num_rest_bits <= 0)
+            return clone;
 
         union reg_u16 reg;
-        const size_t num_full_bytes = baBits2Bytes (len - (8 - lshift));
+        const size_t num_full_bytes = num_rest_bits / 8;
         for (size_t i = 1; i < num_full_bytes + 1; ++i) {
-            reg.bits[0] = buf[i];
-            reg.bits[1] = 0;
+            reg.bytes[0] = buf[i];
+            reg.bytes[1] = 0;
 
             reg.word <<= lshift;
 
-            clone_buf[i - 0]  = reg.bits[0];
-            clone_buf[i - 1] |= reg.bits[1];
+            clone_buf[i - 0]  = reg.bytes[0];
+            clone_buf[i - 1] |= reg.bytes[1];
+        }
+
+        num_rest_bits %= 8;
+        if (num_rest_bits) {
+            reg.bytes[0] = buf[num_full_bytes + 1];
+            reg.bytes[1] = 0;
+
+            reg.word <<= lshift;
+
+            clone_buf[num_full_bytes] |= reg.bytes[1];
+
+            if (num_rest_bits > lshift)
+                clone_buf[num_full_bytes + 1]  = reg.bytes[0];
         }
     }
 
@@ -543,55 +560,6 @@ ssize_t baFindZero (BinArray* arr, size_t begin, ssize_t len) {
         else
             return -1;
     }
-
-    /*const uint64_t *buf_u64 = (uint64_t*) arr->buf_;
-    const size_t num_bits = arr->num_bits_; // For speed
-
-    size_t num_u64 = num_bits / (8 * 8);
-    size_t i = 0, path = 0;
-
-    for (; i < num_u64; ++i)
-        if (~buf_u64[i])
-            break;
-
-    path = i * 64;
-
-    if (i == num_u64) {
-        const int num_u8 = (num_bits - 64 * num_u64) / 8 + 1;
-        const uint8_t *buf_u8 = (const uint8_t *)(buf_u64 + i);
-
-        for (i = 0; i < num_u8; ++i) {
-            uint8_t byte = ~buf_u8[i];
-
-            if (byte) {
-                path += i * 8;
-
-                int path_bit = _baFindBiteOneInByte (byte);
-
-                if (path + path_bit >= num_bits)
-                    return -1;
-                else
-                    return path + path_bit;
-            }
-        }
-
-        return -1;
-    }
-    else
-    {
-        const uint8_t *buf_u8 = (uint8_t *)(buf_u64 + i);
-
-        for (i = 0; i < 8; ++i) {
-            uint8_t byte = ~buf_u8[i];
-
-            if (byte)
-            {
-                path += i * 8;
-
-                return path + _baFindBiteOneInByte (byte);
-            }
-        }
-    }*/
 }
 
 // ==============\\
@@ -685,8 +653,20 @@ int baDumpBuf (BinArray* arr, size_t begin, ssize_t len) {
 int baDumpBufFull (BinArray* arr) {
     CHECK_PBA (arr);
 
-    const size_t num_bits = _baGetNumBits (arr);
-    bprint (arr->buf_, num_bits);
+    const size_t num_full_bytes = _baGetNumBits (arr) / 8;
+    const size_t num_rest_bits  = _baGetNumBits (arr) % 8;
+
+    bprint (arr->buf_, num_full_bytes);
+    
+    if (num_rest_bits) {
+        uint8_t rest_byte = arr->buf_[num_full_bytes]; 
+        for (int i = 0; i < num_rest_bits; ++i)
+            printf ("%d", (rest_byte & ((uint8_t) (1U << 7) >> i)) == 1);
+    }
+
+    printf ("\n");
+
+    return 0;
 }
 
 // ================\\

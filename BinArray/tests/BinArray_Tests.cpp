@@ -4,8 +4,12 @@
 #include "../BinArray.h"
 #include "TestFunc.hpp"
 
-const size_t num_arr_g = 5000                / 1;
-const size_t max_size_arr_g = UINT16_MAX * 4 / 1;
+const size_t num_arr_g = 5000                / 2;
+const size_t max_size_arr_g = UINT16_MAX * 4 / 2;
+
+// ===================\\
+// Secondary functions --------------------------------------------------------
+// ===================//
 
 TEST (BIN_ARRAY, Secondary_Functions) {
     ASSERT_EQ (baBits2Bytes (0),  0);
@@ -19,20 +23,20 @@ TEST (BIN_ARRAY, Secondary_Functions) {
 
     // Testing stdout through intercepting a stream
 
-    const char nameTempFile[] = "test_Secondary_Functions.tmp"; 
+    const char nameTempFile[] = "test_Secondary_Functions.txt"; 
     
     fflush (stdout);
     FILE* save_stdout = stdout;
-    stdout = (FILE*) fopen (nameTempFile, "w+");
+    stdout = (FILE*) fopen (nameTempFile, "wb+");
     ASSERT_TRUE (stdout != nullptr) << nameTempFile << " " << strerror (errno);
     
     char buf[32] = "";
 
     uint8_t byte = 0;
 
-    #define TEST_PRINT_BYTE(byte)                   \
-    print_byte (0b##byte);                          \
-    ReadFromStdoutToBuf (buf, 8);                   \
+    #define TEST_PRINT_BYTE(byte)                       \
+    print_byte (0b##byte);                              \
+    ReadFromStdoutToBuf (buf, 8);                       \
     ASSERT_TRUE (strncmp (buf, #byte, 8) == 0) << buf;
 
     TEST_PRINT_BYTE (00000000);
@@ -57,18 +61,60 @@ TEST (BIN_ARRAY, Secondary_Functions) {
 
     #undef TEST_PRINT_BYTE
 
+    /* I don't understand how test print_byte_nl and dump
+    #define TEST_PRINT_BYTE_NL(byte)                        \
+    print_byte_nl (0b##byte);                               \
+    ReadFromStdoutToBuf (buf, 10);                          \
+    ASSERT_TRUE (strncmp (buf, "01100101\n", 9) == 0);
+
+    TEST_PRINT_BYTE_NL (01100101);
+    
+    #undef TEST_PRINT_BYTE_NL
+    */
+
     fclose (stdout);
     remove (nameTempFile);
 
     stdout = save_stdout;
 }
 
+TEST (BIN_ARRAY, GetNumBits) {
 
-TEST (BIN_ARRAY, Error_Create_Resize_Release) { 
+    const size_t num_bits = 1456465;
+
+    BinArray* arr = baCreate (num_bits);
+    ASSERT_TRUE (arr != NULL);
+
+    ASSERT_EQ (baGetNumBits (arr), num_bits);
+    baDestroy (&arr);
+}
+
+// ===============\\
+// Check functions ------------------------------------------------------------
+// ===============//
+
+TEST (BIN_ARRAY, baCheckCalcArg) {
+    BinArray* arr = baCreate (2);
+    ASSERT_TRUE (arr != NULL);
+
+    ASSERT_TRUE (baGetSubArray (NULL, 4, -2) == NULL);
+    ASSERT_TRUE (baGetSubArray (arr,  4, -2) == NULL);
+    ASSERT_TRUE (baGetSubArray (arr,  2,  3) == NULL);
+    ASSERT_TRUE (baGetSubArray (arr,  0,  3) == NULL);
+
+    baDestroy (&arr);
+}
+
+// ==================\\
+// Creation functions ---------------------------------------------------------
+// ==================//
+
+TEST (BIN_ARRAY, Create_Resize_Release) { 
     ASSERT_TRUE (baCreate (0) == NULL);
     ASSERT_TRUE (baCreate (0) == NULL);
 
     BinArray* arr = baCreate (1);
+    ASSERT_TRUE (arr != NULL);
     ASSERT_TRUE (baResize (arr,  0) == -1);
     ASSERT_TRUE (baResize (NULL, 0) == -1);
     baDestroy (&arr);
@@ -76,7 +122,7 @@ TEST (BIN_ARRAY, Error_Create_Resize_Release) {
     ASSERT_TRUE (baDestroy (NULL) == -1);
 }
 
-TEST (BIN_ARRAY, True_Create_Resize_Release) {
+TEST (BIN_ARRAY, Rand_Create_Resize_Release) {
     
     const float koef_num_arr = 50;
 
@@ -102,6 +148,10 @@ TEST (BIN_ARRAY, True_Create_Resize_Release) {
 }
 
 TEST (BIN_ARRAY, GetCLone) {
+    ASSERT_TRUE (baGetClone (NULL) == NULL);
+}
+
+TEST (BIN_ARRAY, Rand_GetCLone) {
     const float koef_num_arr = 0.02;
 
     const size_t num_arr = koef_num_arr * num_arr_g;
@@ -132,6 +182,56 @@ TEST (BIN_ARRAY, GetCLone) {
 
     delete [] arrs;
 }
+
+TEST (BIN_ARRAY, GetSubArray) {
+    ASSERT_TRUE (baGetSubArray (NULL, 4, 3) == NULL);
+
+    BinArray* arr = baCreate (8);
+    ASSERT_TRUE (arr != NULL);
+
+    BinArray* sub_arr = baGetSubArray (arr, 0, 3);
+    ASSERT_TRUE (sub_arr != NULL);
+    baDestroy (&sub_arr);
+
+    sub_arr = baGetSubArray (arr, 1, 3);
+    ASSERT_TRUE (sub_arr != NULL);
+    baDestroy (&sub_arr);
+
+    ASSERT_TRUE (baResize (arr, 100) != -1);
+
+    sub_arr = baGetSubArray (arr, 10, 80);
+    ASSERT_TRUE (sub_arr != NULL);
+    baDestroy (&sub_arr);
+
+    // Across fill 
+
+    baFillOneFull (arr);
+    sub_arr = baGetSubArray (arr, 10, 80);
+    ASSERT_TRUE (sub_arr != NULL);
+
+    for (int i = 0; i < 80; ++i) {
+        ASSERT_EQ (baGetValue (sub_arr, i), 1) << i
+                                               << " " << baDumpBufFull (sub_arr);
+    }
+    baDestroy (&sub_arr);
+
+    baFillZeroFull (arr);
+    sub_arr = baGetSubArray (arr, 10, 80);
+    ASSERT_TRUE (sub_arr != NULL);
+
+    for (int i = 0; i < 80; ++i) {
+        ASSERT_EQ (baGetValue (sub_arr, i), 0) << i 
+                                               << " " << baDumpBufFull (sub_arr);
+    }
+    baDestroy (&sub_arr);
+
+    baDestroy (&arr);
+}
+
+// =============================\\
+// Getters and setters functions ----------------------------------------------
+// Fill functions //============//
+// ==============//
 
 TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
 
@@ -197,9 +297,37 @@ TEST (BIN_ARRAY, Setting_And_GettingOne_OrZero) {
     delete [] arrs;
 }
 
+// ==============\\
+// Find functions -------------------------------------------------------------
+// ==============//
+
+TEST (BIN_ARRAY, Find) {
+    const float koef_num_arr = 0.01;
+    const float koef_num_check = 0.03;
+
+    const size_t num_arr = koef_num_arr * num_arr_g;
+
+    BinArray** arrs = nullptr;
+
+    // --------------------------------------------------
+    
+    arrs = GetArrayBA (num_arr);
+    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
+
+    // --------------------------------------------------
+
+    CheckFindOne  (arrs, num_arr, koef_num_check);
+    CheckFindZero (arrs, num_arr, koef_num_check);
+    CheckFind     (arrs, num_arr, koef_num_check);
+    
+    // --------------------------------------------------
+
+    delete [] arrs;
+}
+
 TEST (BIN_ARRAY, Tetsting_Find) {
-    const float koef_num_arr = 0.02;
-    const float koef_num_check = 0.02;
+    const float koef_num_arr = 0.01;
+    const float koef_num_check = 0.01;
 
     const size_t num_arr = koef_num_arr * num_arr_g;
     
@@ -220,6 +348,10 @@ TEST (BIN_ARRAY, Tetsting_Find) {
 
     delete [] arrs;
 }
+
+// ================\\
+// Foreach function -----------------------------------------------------------
+// ================//
 
 static int find_max (BinArray* arr, bool el, void* data) {
     bool max = *(bool*) data;
@@ -283,29 +415,10 @@ TEST (BIN_ARRAY, baForeach) {
     delete [] arrs;
 }
 
-TEST (BIN_ARRAY, Find) {
-    const float koef_num_arr = 0.05;
-    const float koef_num_check = 0.03;
+// ================\\
+// Invert functions -----------------------------------------------------------
+// ================//
 
-    const size_t num_arr = koef_num_arr * num_arr_g;
-
-    BinArray** arrs = nullptr;
-
-    // --------------------------------------------------
-    
-    arrs = GetArrayBA (num_arr);
-    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
-
-    // --------------------------------------------------
-
-    CheckFindOne  (arrs, num_arr, koef_num_check);
-    CheckFindZero (arrs, num_arr, koef_num_check);
-    CheckFind     (arrs, num_arr, koef_num_check);
-    
-    // --------------------------------------------------
-
-    delete [] arrs;
-}
 
 TEST (BIN_ARRAY, Invert_And_GetInvert) {
     const float koef_num_arr = 0.01;
