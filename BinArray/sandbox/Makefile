@@ -1,6 +1,6 @@
-CC  = gcc
-CXX = gcc
-LD  = gcc
+CC  = g++
+CXX = g++
+LD  = g++
 
 OPTIM_FLAGS = -O0
 

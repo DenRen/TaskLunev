@@ -4,6 +4,13 @@
 #include <random>
 #include <cassert>
 
+void ReadFromStdoutToBuf (char* buf, uint8_t size) {
+    fflush (stdout);
+    fseek (stdout, 0, SEEK_SET);
+    fread (buf, sizeof (char), size, stdout);
+    fseek (stdout, 0, SEEK_SET);
+}
+
 BinArray** GetArrayBA (size_t num) {
     return new BinArray*[num];
 }
@@ -45,13 +52,13 @@ void DestroyArrayBA (BinArray* arrs[], size_t num) {
 
 void FillOneArrayBA (BinArray* arrs[], size_t num) {
     for (size_t i = 0; i < num; ++i) {
-        ASSERT_EQ (baFillOne (arrs[i]), 0);
+        ASSERT_EQ (baFillOneFull (arrs[i]), 0);
     }
 }
 
 void FillZeroArrayBA (BinArray* arrs[], size_t num) {
     for (size_t i = 0; i < num; ++i) {
-        ASSERT_EQ (baFillZero (arrs[i]), 0);
+        ASSERT_EQ (baFillZeroFull (arrs[i]), 0);
     }
 }
 
@@ -134,7 +141,7 @@ void CheckFindOne  (BinArray* arrs[], size_t num, const float koef_num_check) {
             size_t num_bit = rand_num_bit (gen);
             baSetOne (arr, num_bit);
 
-            int64_t num_from_find = baFindOne (arr);
+            int64_t num_from_find = baFindOne (arr, 0, -1);
             ASSERT_EQ (num_bit, num_from_find);
 
             baSetZero (arr, num_bit);
@@ -163,7 +170,7 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
             size_t num_bit = rand_num_bit (gen);
             baSetOne (arr, num_bit);
 
-            int64_t num_from_find = baFindOne (arr);
+            int64_t num_from_find = baFindOne (arr, 0, -1);
             ASSERT_EQ (num_bit, num_from_find);
 
             baSetZero (arr, num_bit);
@@ -184,8 +191,8 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
             size_t num_bit = rand_num_bit (gen);
             baSetZero (arr, num_bit);
 
-            int64_t num_from_find = baFindZero (arr);
-            ASSERT_EQ (num_bit, num_from_find);
+            int64_t num_from_find = baFindZero (arr, 0, -1);
+            ASSERT_EQ (num_bit, num_from_find) << "Zero";
 
             baSetOne (arr, num_bit);
         }
@@ -209,7 +216,7 @@ void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check) {
             size_t num_bit = rand_num_bit (gen);
             baSetZero (arr, num_bit);
 
-            int64_t num_from_find = baFind (arr, 0);
+            int64_t num_from_find = baFind (arr, 0, -1, 0);
             ASSERT_EQ (num_bit, num_from_find)  
             << baGetNumBits (arr) << " " << num_bit << " " << num_from_find;
 

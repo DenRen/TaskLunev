@@ -12,6 +12,8 @@ int find_max (BinArray* c, bool el, void* data) {
     return 0;
 }
 
+// todo dump
+
 int main () {
     size_t num_bits = 17;
     BinArray* arr = baCreate (num_bits), *index = baCreate (num_bits);

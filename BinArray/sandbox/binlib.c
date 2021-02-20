@@ -1,5 +1,6 @@
 #include "binlib.h"
 
+
 #include <stdio.h>
 
 void print_byte (uint8_t byte) {
@@ -9,6 +10,7 @@ void print_byte (uint8_t byte) {
 
     str[8] = '\0';
     printf ("%s", str);
+    //std::cout << str;
 }
 
 void print_byte_nl (uint8_t byte) {

@@ -31,8 +31,7 @@ extern "C" {
 // Secondary functions --------------------------------------------------------
 // ===================//
 
-static inline size_t baBits2Bytes (size_t num_bits);
-inline size_t _baGetNumBits (BinArray* arr);
+size_t baBits2Bytes (size_t num_bits);
 
 void print_byte (uint8_t byte);
 void print_byte_nl (uint8_t byte);

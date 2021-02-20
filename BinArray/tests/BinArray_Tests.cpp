@@ -7,6 +7,62 @@
 const size_t num_arr_g = 5000                / 1;
 const size_t max_size_arr_g = UINT16_MAX * 4 / 1;
 
+TEST (BIN_ARRAY, Secondary_Functions) {
+    ASSERT_EQ (baBits2Bytes (0),  0);
+    ASSERT_EQ (baBits2Bytes (2),  1);
+    ASSERT_EQ (baBits2Bytes (5),  1);
+    ASSERT_EQ (baBits2Bytes (8),  1);
+    ASSERT_EQ (baBits2Bytes (15), 2);
+    ASSERT_EQ (baBits2Bytes (16), 2);
+    ASSERT_EQ (baBits2Bytes (17), 3);
+    ASSERT_EQ (baBits2Bytes (8 * 1024 * 1024 + 3), 1024 * 1024 + 1);
+
+    // Testing stdout through intercepting a stream
+
+    const char nameTempFile[] = "test_Secondary_Functions.tmp"; 
+    
+    fflush (stdout);
+    FILE* save_stdout = stdout;
+    stdout = (FILE*) fopen (nameTempFile, "w+");
+    ASSERT_TRUE (stdout != nullptr) << nameTempFile << " " << strerror (errno);
+    
+    char buf[32] = "";
+
+    uint8_t byte = 0;
+
+    #define TEST_PRINT_BYTE(byte)                   \
+    print_byte (0b##byte);                          \
+    ReadFromStdoutToBuf (buf, 8);                   \
+    ASSERT_TRUE (strncmp (buf, #byte, 8) == 0) << buf;
+
+    TEST_PRINT_BYTE (00000000);
+    TEST_PRINT_BYTE (11111111);
+
+    TEST_PRINT_BYTE (10000000);
+    TEST_PRINT_BYTE (01000000);
+    TEST_PRINT_BYTE (00100000);
+    TEST_PRINT_BYTE (00010000);
+    TEST_PRINT_BYTE (00001000);
+    TEST_PRINT_BYTE (00000100);
+    TEST_PRINT_BYTE (00000010);
+    TEST_PRINT_BYTE (00000001);
+
+    TEST_PRINT_BYTE (00000001);
+    TEST_PRINT_BYTE (00110101);
+    TEST_PRINT_BYTE (00110001);
+    TEST_PRINT_BYTE (00000001);
+    TEST_PRINT_BYTE (00001101);
+    TEST_PRINT_BYTE (11100101);
+    TEST_PRINT_BYTE (01100101);
+
+    #undef TEST_PRINT_BYTE
+
+    fclose (stdout);
+    remove (nameTempFile);
+
+    stdout = save_stdout;
+}
+
 
 TEST (BIN_ARRAY, Error_Create_Resize_Release) { 
     ASSERT_TRUE (baCreate (0) == NULL);
@@ -200,7 +256,7 @@ TEST (BIN_ARRAY, baForeach) {
         bool max = false;
         baForeach (arrs[i], find_max, &max);
 
-        if (baFindOne (arrs[i]) == -1) {
+        if (baFindOne (arrs[i], 0, -1) == -1) {
             ASSERT_FALSE (max);
         } else {
             ASSERT_TRUE (max);
@@ -213,7 +269,7 @@ TEST (BIN_ARRAY, baForeach) {
         bool min = true;
         baForeach (arrs[i], find_min, &min);
 
-        if (baFindZero (arrs[i]) == -1) {
+        if (baFindZero (arrs[i], 0, -1) == -1) {
             ASSERT_TRUE (min);
         } else {
             ASSERT_FALSE (min);
@@ -228,8 +284,8 @@ TEST (BIN_ARRAY, baForeach) {
 }
 
 TEST (BIN_ARRAY, Find) {
-    const float koef_num_arr = 0.01;
-    const float koef_num_check = 0.02;
+    const float koef_num_arr = 0.05;
+    const float koef_num_check = 0.03;
 
     const size_t num_arr = koef_num_arr * num_arr_g;
 

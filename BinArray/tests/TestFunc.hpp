@@ -4,6 +4,8 @@
 #include <cstddef>
 #include "../BinArray.h"
 
+void ReadFromStdoutToBuf (char* buf, uint8_t size);
+
 BinArray** GetArrayBA (size_t num);
 
 void RandCreateArrayBA (BinArray* arrs[], size_t num, 

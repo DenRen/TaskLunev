@@ -23,6 +23,38 @@ typedef struct proxy_bin_array {
     BinArray arr;
 } proxyBinArray;
 
+// ===================\\
+// Secondary functions --------------------------------------------------------
+// ===================//
+
+inline size_t baBits2Bytes (size_t num_bits) {
+    return num_bits / 8 + (num_bits % 8 != 0);
+}
+inline size_t _baGetNumBits (BinArray* arr) {
+    return arr->num_bits_;
+}
+
+void print_byte (uint8_t byte) {
+    char str[9] = "";
+    for (uint8_t i = 0; i < 8; ++i)
+        str[i] = '0' + ((byte & ((1U << 7) >> i)) != 0);
+
+    str[8] = '\0';
+    printf ("%s", str);
+}
+void print_byte_nl (uint8_t byte) {
+    print_byte (byte);
+    printf ("\n");
+}
+void bprint (uint8_t* bytes, size_t num_bytes) {
+    for (int i = 0; i < num_bytes; ++i) {
+        print_byte (bytes[i]);
+        
+        if (i % 8 == 0)
+            printf (" ");
+    }
+}
+
 // ===============\\
 // Check functions ------------------------------------------------------------
 // ===============//
@@ -88,39 +120,6 @@ static void _mynop() {}
         return -1;                      \
     }                                   \
     _mynop()
-
-// ===================\\
-// Secondary functions --------------------------------------------------------
-// ===================//
-
-static inline size_t baBits2Bytes (size_t num_bits) {
-    return num_bits / 8 + (num_bits % 8 != 0);
-}
-
-inline size_t _baGetNumBits (BinArray* arr) {
-    return arr->num_bits_;
-}
-
-void print_byte (uint8_t byte) {
-    char str[9] = "";
-    for (uint8_t i = 0; i < 8; ++i)
-        str[i] = '0' + ((byte & ((1U << 7) >> i)) != 0);
-
-    str[8] = '\0';
-    printf ("%s", str);
-}
-void print_byte_nl (uint8_t byte) {
-    print_byte (byte);
-    printf ("\n");
-}
-void bprint (uint8_t* bytes, size_t num_bytes) {
-    for (int i = 0; i < num_bytes; ++i) {
-        print_byte (bytes[i]);
-        
-        if (i % 8 == 0)
-            printf (" ");
-    }
-}
 
 // ==================\\
 // Creation functions ---------------------------------------------------------
@@ -461,7 +460,7 @@ static inline int8_t _baFindBiteZeroInQWord (uint64_t qword) {
         {
             path += i * 8;
 
-            return path + _baFindBiteOneInByte (buf_u8[i]);
+            return path + _baFindBiteZeroInByte (buf_u8[i]);
         }
     return -1;
 }
