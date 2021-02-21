@@ -636,9 +636,6 @@ int baFillOneFull (BinArray* arr) {
 // ==============//
 
 int baDumpBuf (BinArray* arr, size_t begin, ssize_t len) {
-    if (len + begin > baGetNumBits (arr))
-        len = baGetNumBits (arr) - begin;
-
     if (baCheckCalcArg (arr, begin, &len) == false)
         return -1;
 
@@ -664,7 +661,7 @@ int baDumpBufFull (BinArray* arr) {
     if (num_rest_bits) {
         uint8_t rest_byte = arr->buf_[num_full_bytes]; 
         for (int i = 0; i < num_rest_bits; ++i)
-            printf ("%d", (rest_byte & ((uint8_t) (1U << 7) >> i)) == 1);
+            printf ("%d", (rest_byte & ((uint8_t) (1U << 7) >> i)) != 0);
     }
 
     printf ("\n");

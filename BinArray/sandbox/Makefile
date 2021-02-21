@@ -8,7 +8,7 @@ CGLAGS 	 = $(OPTIM_FLAGS)
 CXXFLAGS = $(OPTIM_FLAGS)
 LDFLAGS  = $(OPTIM_FLAGS)
 
-OBJS = main.o binlib.o Tutorials.o
+OBJS = main.o binlib.o Tutorials.o ../BinArray.o
 
 all: main.out
 

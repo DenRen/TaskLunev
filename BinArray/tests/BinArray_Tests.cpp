@@ -4,7 +4,7 @@
 #include "../BinArray.h"
 #include "TestFunc.hpp"
 
-const size_t num_arr_g = 1000                / 1;
+const size_t num_arr_g = 5000                / 1;
 const size_t max_size_arr_g = UINT16_MAX * 4 / 1;
 
 // ===================\\
@@ -539,4 +539,34 @@ TEST (BIN_ARRAY, Rand_Invert_And_GetInvert) {
     // --------------------------------------------------
 
     delete [] arrs;
+}
+
+// ==============\\
+// Dump functions -------------------------------------------------------------
+// ==============//
+
+TEST (BIN_ARRAY, Dump) {
+
+    BinArray* arr = baCreate (5);
+    ASSERT_TRUE (arr != NULL);
+
+    baFillZeroFull (arr);
+    ASSERT_EQ (Check_Dump (arr, 6, -1, "00000"), 0);
+    ASSERT_EQ (Check_Dump (arr, 0, -1, "00000"), 1);
+    ASSERT_EQ (Check_Dump (arr, 0,  2, "00"   ), 1);
+    ASSERT_EQ (Check_Dump (arr, 1,  2, "00"   ), 1);
+    ASSERT_EQ (Check_Dump (arr, 3, -1, "00"   ), 1);
+    ASSERT_EQ (Check_Dump (arr, 0,  1, "0"    ), 1);
+    ASSERT_EQ (Check_Dump (arr, 3, 2,  "00"   ), 1);
+
+    baFillOneFull (arr);
+    ASSERT_EQ (Check_Dump (arr, 6, -1, "11111"), 0);
+    ASSERT_EQ (Check_Dump (arr, 0, -1, "11111"), 1);
+    ASSERT_EQ (Check_Dump (arr, 0,  2, "11"   ), 1);
+    ASSERT_EQ (Check_Dump (arr, 1,  2, "11"   ), 1);
+    ASSERT_EQ (Check_Dump (arr, 3, -1, "11"   ), 1);
+    ASSERT_EQ (Check_Dump (arr, 0,  1, "1"    ), 1);
+    ASSERT_EQ (Check_Dump (arr, 3, 2,  "11"   ), 1);
+
+    baDestroy (&arr);
 }

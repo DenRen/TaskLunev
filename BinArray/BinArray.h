@@ -15,10 +15,8 @@
 /*
 Tasks:
 
-    Logs,
-    Test,
-
-    Optimize, baFindOne
+    test calloc
+    Optimize ffs, baFindOne
 */
 
 typedef struct bin_array BinArray;

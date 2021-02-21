@@ -428,3 +428,51 @@ void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check) {
         }
     }
 }
+
+bool Check_Dump (BinArray* arr, size_t begin, ssize_t len, const char* str) {
+    const char nameTempFile[] = "test_Secondary_Functions.tmp"; 
+
+    pid_t pid_child = fork ();
+    if (pid_child == -1) {
+        perror ("fork");
+        return -1;
+    }
+
+    if (pid_child != 0) {
+        int wstatus = 0;
+        if (wait (&wstatus) == -1) {
+            perror ("wait");
+            return -1;
+        }
+
+        return WEXITSTATUS (wstatus) == 0;
+
+    } else {
+
+        stdout = (FILE*) freopen (nameTempFile, "w+", stdout);
+        if (stdout == nullptr) {
+            perror ("fopen");
+            return -1;
+        }
+
+        char buf[128] = "";
+
+        baDumpBuf (arr, begin, len);
+        fflush (stdout);
+        sync ();
+
+        fseek (stdout, 0, SEEK_SET);
+        
+        size_t len = strlen (str);
+        int ret = fread (buf, sizeof (char), len, stdout);
+        if (ret == 0) {
+            perror ("fread");
+            exit (-1);
+        }
+
+        fclose (stdout);
+        remove (nameTempFile);
+
+        exit (strncmp (buf, str, len));
+    }
+}

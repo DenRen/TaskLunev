@@ -40,4 +40,7 @@ void CheckFindOne  (BinArray* arrs[], size_t num, const float koef_num_check);
 void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check);
 void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check);
 
+bool Check_Dump      (BinArray* arr, size_t begin, ssize_t len, const char* str);
+bool Check_Dump_Full (BinArray* arr, const char* str);
+
 #endif /* TESTFUNC_HPP */
