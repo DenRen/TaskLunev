@@ -29,6 +29,12 @@ extern "C" {
 // Secondary functions --------------------------------------------------------
 // ===================//
 
+#define PROBABLE_FAULT_ALLOCATORS
+
+#ifdef PROBABLE_FAULT_ALLOCATORS
+    #define KILL_ALLOCATOR 165641546145144896ULL
+#endif
+
 size_t baBits2Bytes (size_t num_bits);
 size_t baGetNumBits (BinArray* arr);
 

@@ -11,6 +11,18 @@ const size_t max_size_arr_g = UINT16_MAX * 4 / 1;
 // Secondary functions --------------------------------------------------------
 // ===================//
 
+#ifdef PROBABLE_FAULT_ALLOCATORS
+TEST (BIN_ARRAY, Fault_Allocate) {
+    ASSERT_TRUE (baCreate (KILL_ALLOCATOR) == NULL);
+
+    BinArray* arr = baCreate (2);
+    ASSERT_TRUE (arr != NULL);
+
+    ASSERT_TRUE (baResize (arr, KILL_ALLOCATOR) == -1);
+    baDestroy (&arr);
+}
+#endif
+
 TEST (BIN_ARRAY, Secondary_Functions) {
     ASSERT_EQ (baBits2Bytes (0),  0);
     ASSERT_EQ (baBits2Bytes (2),  1);

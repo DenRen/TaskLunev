@@ -27,6 +27,32 @@ typedef struct proxy_bin_array {
 // Secondary functions --------------------------------------------------------
 // ===================//
 
+#ifdef PROBABLE_FAULT_ALLOCATORS
+void* ba_calloc (size_t nmemb, size_t size) {
+    if (size == baBits2Bytes (KILL_ALLOCATOR))
+        return NULL;
+    else
+    
+#else
+void* ba_calloc (size_t nmemb, size_t size) {
+#endif
+
+    return calloc (nmemb, size);
+}
+
+#ifdef PROBABLE_FAULT_ALLOCATORS
+void* ba_reallocarray (void* ptr, size_t nmemb, size_t size) {
+    if (size == baBits2Bytes (KILL_ALLOCATOR))
+        return NULL;
+    else
+    
+#else
+void* ba_reallocarray (void* ptr, size_t nmemb, size_t size) {
+#endif
+
+    return reallocarray (ptr, nmemb, size);
+}
+
 size_t baBits2Bytes (size_t num_bits) {
     return num_bits / 8 + (num_bits % 8 != 0);
 }
@@ -56,8 +82,6 @@ void bprint (uint8_t* bytes, size_t num_bytes) {
 // ===============\\
 // Check functions ------------------------------------------------------------
 // ===============//
-
-// Может быть уже нет смысла в baCheckArr?
 
 inline bool baCheckArr (BinArray arr) {
     return (arr.buf_ != NULL) && (arr.buf_ != 0);
@@ -132,13 +156,13 @@ BinArray* baCreate (size_t num_bits) {
         return NULL;
     }
 
-    int num_bytes = baBits2Bytes (num_bits);
+    size_t num_bytes = baBits2Bytes (num_bits);
 
-    BinArray* arr = (BinArray*) calloc (1, sizeof (BinArray));
+    BinArray* arr = (BinArray*) ba_calloc (1, sizeof (BinArray));
     if (arr == NULL)
         return NULL;
 
-    if ((arr->buf_ = (uint8_t *) calloc (sizeof (uint8_t), num_bytes)) == NULL) {
+    if ((arr->buf_ = (uint8_t *) ba_calloc (sizeof (uint8_t), num_bytes)) == NULL) {
         free (arr);
         return NULL;
     }
@@ -154,7 +178,7 @@ int baResize (BinArray* arr, size_t new_num_bits) {
     if (new_num_bits == 0)
         return -1;
     
-    uint8_t *new_buf = (uint8_t *) reallocarray (arr->buf_, 
+    uint8_t *new_buf = (uint8_t *) ba_reallocarray (arr->buf_, 
                                                  baBits2Bytes (new_num_bits),
                                                  sizeof (uint8_t));
     if (new_buf == NULL)

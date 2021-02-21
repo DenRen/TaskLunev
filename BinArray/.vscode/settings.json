@@ -63,6 +63,7 @@
         "binlib.h": "c",
         "tutorials.h": "c",
         "stdio.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "string.h": "c"
     }
 }
