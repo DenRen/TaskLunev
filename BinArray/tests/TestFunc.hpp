@@ -4,6 +4,10 @@
 #include <cstddef>
 #include "../BinArray.h"
 
+bool Check_print_byte (uint8_t byte, const char* str);
+bool Check_print_byte_nl (uint8_t byte, const char* str);
+bool Check_bprint (uint8_t* byte, size_t num_bytes, const char* str);
+
 void ReadFromStdoutToBuf (char* buf, uint8_t size);
 
 BinArray** GetArrayBA (size_t num);

@@ -4,6 +4,150 @@
 #include <random>
 #include <cassert>
 
+bool Check_print_byte (uint8_t byte, const char* str) {
+    const char nameTempFile[] = "test_Secondary_Functions.tmp"; 
+
+    pid_t pid_child = fork ();
+    if (pid_child == -1) {
+        perror ("fork");
+        return -1;
+    }
+
+    if (pid_child != 0) {
+        int wstatus = 0;
+        if (wait (&wstatus) == -1) {
+            perror ("wait");
+            return -1;
+        }
+
+        return WEXITSTATUS (wstatus) == 0;
+
+    } else {
+
+        stdout = (FILE*) freopen (nameTempFile, "w+", stdout);
+        if (stdout == nullptr) {
+            perror ("fopen");
+            return -1;
+        }
+
+        char buf[128] = "";
+
+        print_byte (byte);
+        fflush (stdout);
+        sync ();
+
+        fseek (stdout, 0, SEEK_SET);
+
+        size_t len = strlen (str);
+        int ret = fread (buf, sizeof (char), len, stdout);
+        if (ret == 0) {
+            perror ("fread");
+            exit (-1);
+        }
+
+        fclose (stdout);
+        remove (nameTempFile);
+
+        exit (strncmp (buf, str, len));
+    }
+}
+
+bool Check_print_byte_nl (uint8_t byte, const char* str) {
+    const char nameTempFile[] = "test_Secondary_Functions.tmp"; 
+
+    pid_t pid_child = fork ();
+    if (pid_child == -1) {
+        perror ("fork");
+        return -1;
+    }
+
+    if (pid_child != 0) {
+        int wstatus = 0;
+        if (wait (&wstatus) == -1) {
+            perror ("wait");
+            return -1;
+        }
+
+        return WEXITSTATUS (wstatus) == 0;
+
+    } else {
+
+        stdout = (FILE*) freopen (nameTempFile, "w+", stdout);
+        if (stdout == nullptr) {
+            perror ("fopen");
+            return -1;
+        }
+
+        char buf[128] = "";
+
+        print_byte_nl (byte);
+        fflush (stdout);
+        sync ();
+
+        fseek (stdout, 0, SEEK_SET);
+        
+        size_t len = strlen (str);
+        int ret = fread (buf, sizeof (char), len, stdout);
+        if (ret == 0) {
+            perror ("fread");
+            exit (-1);
+        }
+
+        fclose (stdout);
+        remove (nameTempFile);
+
+        exit (strncmp (buf, str, len));
+    }
+}
+
+bool Check_bprint (uint8_t* byte, size_t num_bytes, const char* str) {
+    const char nameTempFile[] = "test_Secondary_Functions.tmp"; 
+
+    pid_t pid_child = fork ();
+    if (pid_child == -1) {
+        perror ("fork");
+        return -1;
+    }
+
+    if (pid_child != 0) {
+        int wstatus = 0;
+        if (wait (&wstatus) == -1) {
+            perror ("wait");
+            return -1;
+        }
+
+        return WEXITSTATUS (wstatus) == 0;
+
+    } else {
+
+        stdout = (FILE*) freopen (nameTempFile, "w+", stdout);
+        if (stdout == nullptr) {
+            perror ("fopen");
+            return -1;
+        }
+
+        char buf[128] = "";
+
+        bprint (byte, num_bytes);
+        fflush (stdout);
+        sync ();
+
+        fseek (stdout, 0, SEEK_SET);
+        
+        size_t len = strlen (str);
+        int ret = fread (buf, sizeof (char), len, stdout);
+        if (ret == 0) {
+            perror ("fread");
+            exit (-1);
+        }
+
+        fclose (stdout);
+        remove (nameTempFile);
+
+        exit (strncmp (buf, str, len));
+    }
+}
+
 void ReadFromStdoutToBuf (char* buf, uint8_t size) {
     fflush (stdout);
     fseek (stdout, 0, SEEK_SET);
@@ -89,6 +233,22 @@ void CheckFillOneBA (size_t num_bits, size_t begin, ssize_t len) {
     ASSERT_TRUE (result != NULL);
 
     CheckOneFullBA (result);
+
+    baDestroy (&result);
+    baDestroy (&arr);
+}
+
+void CheckFillZeroBA (size_t num_bits, size_t begin, ssize_t len) {
+    BinArray* arr = baCreate (num_bits);
+    ASSERT_TRUE (arr != NULL);
+
+    ASSERT_EQ (baFillOneFull (arr), 0);
+    ASSERT_EQ (baFillZero (arr, begin, len), 0);
+
+    BinArray* result = baGetSubArray (arr, begin, len);
+    ASSERT_TRUE (result != NULL);
+
+    CheckZeroFullBA (result);
 
     baDestroy (&result);
     baDestroy (&arr);
@@ -218,16 +378,20 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
 }
 
 void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check) {
-    FillOneFullArrayBA (arrs, num);
 
     std::random_device rd;
     std::mt19937_64 gen (rd ());
 
     using uni_dest = std::uniform_int_distribution <>;
+
+    // Find 0 -----------------------------------------------------
+
+    FillOneFullArrayBA (arrs, num);
+
     for (int iarr = 0; iarr < num; ++iarr) {
 
         BinArray* arr = arrs[iarr];
-        uni_dest rand_num_bit (0, baGetNumBits (arr) -1);
+        uni_dest rand_num_bit (0, baGetNumBits (arr) - 1);
         size_t num_attempts = koef_num_check * baGetNumBits (arr);
 
         for (int i = 0; i < num_attempts; ++i) {
@@ -239,6 +403,28 @@ void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check) {
             << baGetNumBits (arr) << " " << num_bit << " " << num_from_find;
 
             baSetOne (arr, num_bit);
+        }
+    }
+
+    // Find 1 -----------------------------------------------------
+
+    FillZeroFullArrayBA (arrs, num);
+
+    for (int iarr = 0; iarr < num; ++iarr) {
+
+        BinArray* arr = arrs[iarr];
+        uni_dest rand_num_bit (0, baGetNumBits (arr) - 1);
+        size_t num_attempts = koef_num_check * baGetNumBits (arr);
+
+        for (int i = 0; i < num_attempts; ++i) {
+            size_t num_bit = rand_num_bit (gen);
+            ASSERT_TRUE (baSetOne (arr, num_bit) != -1);
+
+            int64_t num_from_find = baFind (arr, 0, -1, 1);
+            ASSERT_EQ (num_bit, num_from_find)  
+            << baGetNumBits (arr) << " " << num_bit << " " << num_from_find;
+
+            baSetZero (arr, num_bit);
         }
     }
 }

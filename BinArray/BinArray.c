@@ -721,7 +721,7 @@ int baInvert (BinArray* arr) {
 }
 
 BinArray* baGetInvert (BinArray* arr) {
-    if (arr == NULL || baCheckArr (*arr) == false) {
+    if (baCheckPtr (arr) == false) {
         errno = EINVAL;
         return NULL;
     }

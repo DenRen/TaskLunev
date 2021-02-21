@@ -3,11 +3,15 @@
 CC  = g++
 CXX = g++
 LD  = g++
+RM = rm -rf
 
 OPTIM_FLAGS = -O3
 GTEST_FLAGS = -lgtest -pthread -g
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 LD_GCOV_FLAGS = -lgcov
+
+BROWSER = yandex-browser
+LCOV_OUT_FOLDER = out
 
 FLAGS  = OPTIM_FLAGS=$(OPTIM_FLAGS)
 #FLAGS += GTEST_FLAGS=$(GTEST_FLAGS)
@@ -47,10 +51,18 @@ valgrind:
 test_valgrind: clean test_build
 	valgrind ./$(TEST_DIR)/tests.out
 
+# Coverage ----------------------
+
+view_coverage:
+	lcov --capture --directory . --output-file coverage.info
+	genhtml coverage.info -o $(LCOV_OUT_FOLDER)
+	$(BROWSER)
+	$(BROWSER) $(LCOV_OUT_FOLDER)/index.html
+
 # Clean -------------------------
 
 clean:
-	$(RM) main.out $(OBJS) *.gcno *.gcda *.info
+	$(RM) main.out $(OBJS) *.gcno *.gcda *.info $(LCOV_OUT_FOLDER)
 	$(MAKE) -C $(TEST_DIR) clean
 	$(MAKE) -C $(SANDBOX_DIR) clean
 

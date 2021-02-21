@@ -4,7 +4,7 @@
 #include "../BinArray.h"
 #include "TestFunc.hpp"
 
-const size_t num_arr_g = 5000                / 1;
+const size_t num_arr_g = 1000                / 1;
 const size_t max_size_arr_g = UINT16_MAX * 4 / 1;
 
 // ===================\\
@@ -23,59 +23,82 @@ TEST (BIN_ARRAY, Secondary_Functions) {
 
     // Testing stdout through intercepting a stream
 
-    const char nameTempFile[] = "test_Secondary_Functions.txt"; 
-    
-    fflush (stdout);
-    FILE* save_stdout = stdout;
-    stdout = (FILE*) fopen (nameTempFile, "wb+");
-    ASSERT_TRUE (stdout != nullptr) << nameTempFile << " " << strerror (errno);
-    
-    char buf[32] = "";
+    #define TEST_PRINT_BYTE(byte)    ASSERT_EQ (Check_print_byte    (0b ## byte, #byte),     true);
+    #define TEST_PRINT_BYTE_NL(byte) ASSERT_EQ (Check_print_byte_nl (0b ## byte, #byte"\n"), true);
+    #define TEST_PRINTS(byte) TEST_PRINT_BYTE (byte); TEST_PRINT_BYTE_NL (byte);
+
+    TEST_PRINTS (00000000);
+    TEST_PRINTS (11111111);
+
+    TEST_PRINTS (10000000);
+    TEST_PRINTS (01000000);
+    TEST_PRINTS (00100000);
+    TEST_PRINTS (00010000);
+    TEST_PRINTS (00001000);
+    TEST_PRINTS (00000100);
+    TEST_PRINTS (00000010);
+    TEST_PRINTS (00000001);
+
+    TEST_PRINTS (00000001);
+    TEST_PRINTS (00110101);
+    TEST_PRINTS (00110001);
+    TEST_PRINTS (00000001);
+    TEST_PRINTS (00001101);
+    TEST_PRINTS (11100101);
+    TEST_PRINTS (01100101);
+
+    #undef TEST_PRINTS
+    #undef TEST_PRINT_BYTE
+    #undef TEST_PRINT_BYTE_NL
 
     uint8_t byte = 0;
+    uint8_t bytes[2];
 
-    #define TEST_PRINT_BYTE(byte)                       \
-    print_byte (0b##byte);                              \
-    ReadFromStdoutToBuf (buf, 8);                       \
-    ASSERT_TRUE (strncmp (buf, #byte, 8) == 0) << buf;
+    #define TEST_BPRINT8(val_byte)                              \
+        byte = 0b ## val_byte;                                  \
+        ASSERT_EQ (Check_bprint (&byte, 1, #val_byte" "), true);
 
-    TEST_PRINT_BYTE (00000000);
-    TEST_PRINT_BYTE (11111111);
-
-    TEST_PRINT_BYTE (10000000);
-    TEST_PRINT_BYTE (01000000);
-    TEST_PRINT_BYTE (00100000);
-    TEST_PRINT_BYTE (00010000);
-    TEST_PRINT_BYTE (00001000);
-    TEST_PRINT_BYTE (00000100);
-    TEST_PRINT_BYTE (00000010);
-    TEST_PRINT_BYTE (00000001);
-
-    TEST_PRINT_BYTE (00000001);
-    TEST_PRINT_BYTE (00110101);
-    TEST_PRINT_BYTE (00110001);
-    TEST_PRINT_BYTE (00000001);
-    TEST_PRINT_BYTE (00001101);
-    TEST_PRINT_BYTE (11100101);
-    TEST_PRINT_BYTE (01100101);
-
-    #undef TEST_PRINT_BYTE
-
-    /* I don't understand how test print_byte_nl and dump
-    #define TEST_PRINT_BYTE_NL(byte)                        \
-    print_byte_nl (0b##byte);                               \
-    ReadFromStdoutToBuf (buf, 10);                          \
-    ASSERT_TRUE (strncmp (buf, "01100101\n", 9) == 0);
-
-    TEST_PRINT_BYTE_NL (01100101);
+    #define TEST_BPRINT16(val_byte0, val_byte1)                                    \
+        bytes[0] = 0b ## val_byte0;                                                \
+        bytes[1] = 0b ## val_byte1;                                                \
+        ASSERT_EQ (Check_bprint (bytes, 2, #val_byte0" "#val_byte1" "), true);
     
-    #undef TEST_PRINT_BYTE_NL
-    */
+    TEST_BPRINT8 (00000000);
+    TEST_BPRINT8 (11111111);
+    TEST_BPRINT8 (00001111);
+    TEST_BPRINT8 (11110000);
+    
+    TEST_BPRINT8 (00001000);
+    TEST_BPRINT8 (00100010);
+    TEST_BPRINT8 (01001000);
+    TEST_BPRINT8 (01101011);
+    TEST_BPRINT8 (00001100);
+    TEST_BPRINT8 (10110011);
 
-    fclose (stdout);
-    remove (nameTempFile);
+    TEST_BPRINT16 (00000000, 00000000);
+    TEST_BPRINT16 (00000000, 11111111);
+    TEST_BPRINT16 (11111111, 00000000);
+    TEST_BPRINT16 (11111111, 11111111);
 
-    stdout = save_stdout;
+    TEST_BPRINT16 (00000000, 00000000);
+    TEST_BPRINT16 (00000000, 00001111);
+    TEST_BPRINT16 (00000000, 11110000);
+    TEST_BPRINT16 (00000000, 11111111);
+    
+    TEST_BPRINT16 (00000000, 00000000);
+    TEST_BPRINT16 (00001111, 00000000);
+    TEST_BPRINT16 (11110000, 00000000);
+    TEST_BPRINT16 (11111111, 00000000);
+
+    TEST_BPRINT16 (00001000, 00001001);
+    TEST_BPRINT16 (00100110, 01010011);
+    TEST_BPRINT16 (00001101, 00101001);
+    TEST_BPRINT16 (00100011, 01010011);
+    TEST_BPRINT16 (01001000, 11101001);
+    TEST_BPRINT16 (01100010, 01110011);
+
+    #undef TEST_BPRINT16
+    #undef TEST_BPRINT8
 }
 
 TEST (BIN_ARRAY, GetNumBits) {
@@ -242,10 +265,29 @@ TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
 
     // ---------------------------------------
 
-    CheckFillOneBA (  8, 3,  4);
-    CheckFillOneBA (  6, 0,  2);
-    CheckFillOneBA (800, 3, -1);
-    CheckFillOneBA (78,  3, -1);
+    BinArray* arr = baCreate (5);
+    ASSERT_TRUE (arr != NULL);
+
+    ASSERT_EQ (baSetValue (arr, 6, 1), -1);
+    ASSERT_EQ (baSetValue (arr, 6, 0), -1);
+    ASSERT_EQ (baSetOne   (arr, 6), -1);
+    ASSERT_EQ (baSetZero  (arr, 6), -1);
+
+    ASSERT_EQ (baGetValue (arr, 6), -1);
+
+    baDestroy (&arr);
+
+    // ---------------------------------------
+
+    CheckFillOneBA  (  8, 3,  4);
+    CheckFillOneBA  (  6, 0,  2);
+    CheckFillOneBA  (800, 3, -1);
+    CheckFillOneBA  (78,  3, -1);
+
+    CheckFillZeroBA (  8, 3,  4);
+    CheckFillZeroBA (  6, 0,  2);
+    CheckFillZeroBA (800, 3, -1);
+    CheckFillZeroBA (78,  3, -1);
 }
 
 TEST (BIN_ARRAY, Rand_Filling_And_Getting_One_And_Zero) {
@@ -317,30 +359,23 @@ TEST (BIN_ARRAY, Setting_And_GettingOne_OrZero) {
 // ==============//
 
 TEST (BIN_ARRAY, Find) {
-    const float koef_num_arr = 0.01;
-    const float koef_num_check = 0.03;
+    BinArray* arr = baCreate (10);
+    ASSERT_TRUE (arr != NULL);
 
-    const size_t num_arr = koef_num_arr * num_arr_g;
+    baFillZeroFull (arr);
 
-    BinArray** arrs = nullptr;
-
-    // --------------------------------------------------
+    baSetOne (arr, 4);
+    ASSERT_EQ (baFindOne (arr, 0, 5), 4);
+    ASSERT_EQ (baFindOne (arr, 3, 7), 4);
     
-    arrs = GetArrayBA (num_arr);
-    RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
+    baInvert (arr);
+    ASSERT_EQ (baFindZero (arr, 0, 5), 4);
+    ASSERT_EQ (baFindZero (arr, 3, 7), 4);
 
-    // --------------------------------------------------
-
-    CheckFindOne  (arrs, num_arr, koef_num_check);
-    CheckFindZero (arrs, num_arr, koef_num_check);
-    CheckFind     (arrs, num_arr, koef_num_check);
-    
-    // --------------------------------------------------
-
-    delete [] arrs;
+    baDestroy (&arr);
 }
 
-TEST (BIN_ARRAY, Tetsting_Find) {
+TEST (BIN_ARRAY, FindFull) {
     const float koef_num_arr = 0.01;
     const float koef_num_check = 0.01;
 
@@ -348,7 +383,21 @@ TEST (BIN_ARRAY, Tetsting_Find) {
     
     BinArray** arrs = nullptr;
 
+
+    // Little arrays ------------------------------------
+
+    arrs = GetArrayBA (num_arr);
+    RandCreateArrayBA (arrs, num_arr, 1, 8);
+
     // --------------------------------------------------
+
+    CheckFindOne  (arrs, num_arr, koef_num_check);
+    CheckFindZero (arrs, num_arr, koef_num_check);
+    CheckFind     (arrs, num_arr, koef_num_check);
+
+    DestroyArrayBA (arrs, num_arr);
+
+    // Normal arrays ------------------------------------
     
     arrs = GetArrayBA (num_arr);
     RandCreateArrayBA (arrs, num_arr, 1, max_size_arr_g);
@@ -359,6 +408,8 @@ TEST (BIN_ARRAY, Tetsting_Find) {
     CheckFindZero (arrs, num_arr, koef_num_check);
     CheckFind     (arrs, num_arr, koef_num_check);
     
+    DestroyArrayBA (arrs, num_arr);
+
     // --------------------------------------------------
 
     delete [] arrs;
@@ -384,7 +435,7 @@ static int find_min (BinArray* arr, bool el, void* data) {
     return 0;
 }
 
-TEST (BIN_ARRAY, baForeach) {
+TEST (BIN_ARRAY, Foreach_On_Max_Min_Functions) {
 
     const float koef_num_arr = 0.1;
 
@@ -434,8 +485,12 @@ TEST (BIN_ARRAY, baForeach) {
 // Invert functions -----------------------------------------------------------
 // ================//
 
-
 TEST (BIN_ARRAY, Invert_And_GetInvert) {
+    ASSERT_TRUE (baInvert    (NULL) == -1);
+    ASSERT_TRUE (baGetInvert (NULL) == NULL);    
+}
+
+TEST (BIN_ARRAY, Rand_Invert_And_GetInvert) {
     const float koef_num_arr = 0.01;
 
     const size_t num_arr = koef_num_arr * num_arr_g;
