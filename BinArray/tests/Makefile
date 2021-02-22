@@ -4,8 +4,8 @@ LD  = g++
 
 OPTIM_FLAGS = -O0
 GTEST_FLAGS = -lgtest -pthread -g
-GCOV_FLAGS = -fprofile-arcs -ftest-coverage
-LD_GCOV_FLAGS = -lgcov
+#GCOV_FLAGS = -fprofile-arcs -ftest-coverage
+#LD_GCOV_FLAGS = -lgcov
 
 CFLAGS   = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(GCOV_FLAGS)
 CXXFLAGS = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(GCOV_FLAGS)

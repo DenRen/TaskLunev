@@ -7,9 +7,9 @@ LD  = g++
 RM = rm -rf
 
 OPTIM_FLAGS = -O3
-GTEST_FLAGS = -lgtest -pthread -g
-GCOV_FLAGS = -fprofile-arcs -ftest-coverage
-LD_GCOV_FLAGS = -lgcov
+GTEST_FLAGS = -lgtest -pthread -g 
+#GCOV_FLAGS = -fprofile-arcs -ftest-coverage
+LD_GCOV_FLAGS = -flto # -lgcov
 
 BROWSER = yandex-browser
 LCOV_OUT_FOLDER = out
