@@ -13,8 +13,35 @@ int find_max (BinArray* c, bool el, void* data) {
 }
 
 // todo dump
-
+#include <strings.h>
 int main () {
+    printf ("%d\n", ffs (0b01000000));
+    
+    size_t num_bits = 5;
+    BinArray* arr = baCreate (num_bits);
+    if (arr == NULL) {
+        perror ("baCreate");
+        return -1;
+    }
+
+    baFillZeroFull (arr);
+
+    //baSetOne (arr, 4);
+    //baSetOne (arr, 3);
+    //baSetOne (arr, 7);
+    
+    //baSetOne (arr, 13);
+    baSetOne (arr, 2);
+    //baSetOne (arr, 15);
+    //baSetOne (arr, 11);
+    
+    baDumpBufFull (arr);
+    
+    printf ("Find 1: %zi\n", baFindOne (arr, 1, 3));
+
+    baDestroy (&arr);
+
+    /*
     size_t num_bits = 17;
     BinArray* arr = baCreate (num_bits), *index = baCreate (num_bits);
     if (arr == NULL || index == NULL) {
@@ -45,4 +72,5 @@ int main () {
 
     baDestroy (&arr);
     baDestroy (&index);
+    */
 }

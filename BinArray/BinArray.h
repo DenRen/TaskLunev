@@ -19,6 +19,8 @@ Tasks:
     Optimize ffs, baFindOne
 */
 
+//#define USE_FFS_OPTIMIZATION
+
 typedef struct bin_array BinArray;
 
 #ifdef __cplusplus

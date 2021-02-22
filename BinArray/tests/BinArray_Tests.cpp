@@ -377,7 +377,8 @@ TEST (BIN_ARRAY, Find) {
     baFillZeroFull (arr);
 
     baSetOne (arr, 4);
-    ASSERT_EQ (baFindOne (arr, 0, 5), 4);
+    baSetOne (arr, 5);
+    ASSERT_EQ (baFindOne (arr, 0, 6), 4);
     ASSERT_EQ (baFindOne (arr, 3, 7), 4);
     
     baInvert (arr);

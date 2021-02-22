@@ -6,6 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef USE_FFS_OPTIMIZATION
+    #include <strings.h>
+    #include <immintrin.h>
+#endif
+
 // ==========\\
 // Main types -----------------------------------------------------------------
 // ==========//
@@ -58,6 +63,9 @@ size_t baBits2Bytes (size_t num_bits) {
 }
 inline size_t _baGetNumBits (BinArray* arr) {
     return arr->num_bits_;
+}
+size_t baGetNumBits (BinArray* arr) {
+    return _baGetNumBits (arr);
 }
 
 void print_byte (uint8_t byte) {
@@ -243,6 +251,14 @@ BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len) {
         if (num_rest_bits <= 0)
             return clone;
 
+        /*
+        15 14 13 12 11 10  9  8 |  7  6  5  4  3  2  1  0
+         0  0  0 15 14 13 12 11 | 10  9  8  7  6  5  4  3
+
+        23 22 21 20 19 18 17 16 | 15 14 13 12 11 10  9  8
+         0  0  0 23 22 21 20 19 | 18 17 16 15 14 13 12 11 
+        */
+
         union reg_u16 reg;
         const size_t num_full_bytes = num_rest_bits / 8;
         for (size_t i = 1; i < num_full_bytes + 1; ++i) {
@@ -272,10 +288,6 @@ BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len) {
     return clone;
 }
 
-size_t baGetNumBits (BinArray* arr) {
-    return _baGetNumBits (arr);
-}
-
 // =============================\\
 // Getters and setters functions ----------------------------------------------
 // =============================//
@@ -284,7 +296,7 @@ size_t baGetNumBits (BinArray* arr) {
 static inline bool _baGetValue (buf_t buf, size_t num_bit) {
     uint8_t obj = *(buf + num_bit / 8);
 
-    return (obj & (1U << (7 - num_bit % 8)));
+    return obj & (1U << num_bit % 8);
 }
 
 int baGetValue (BinArray *arr, size_t num_bit) {
@@ -299,29 +311,26 @@ int baGetValue (BinArray *arr, size_t num_bit) {
     return _baGetValue (arr->buf_, num_bit);
 }
 
-// Without checking for correctness (for speed)
-static inline void _baSetValue (buf_t buf, size_t num_bit, bool val) {
-    uint8_t *obj = buf + num_bit / 8;
-    uint8_t mask = 1U << (7 - num_bit % 8);
-
-    if (val == 1)
-        *obj |= mask;
-    else
-        *obj &= ~mask;
-}
-
 static inline void _baSetOne (buf_t buf, size_t num_bit) {
     uint8_t *obj = buf + num_bit / 8;
-    uint8_t mask = 1U << (7 - num_bit % 8);
+    uint8_t mask = 1U << num_bit % 8;
 
     *obj |= mask;
 }
 
 static inline void _baSetZero (buf_t buf, size_t num_bit) {
-    uint8_t *obj = buf + num_bit / 8;
-    uint8_t mask = 1U << (7 - num_bit % 8);
+    uint8_t *obj = buf + (num_bit / 8);
+    uint8_t mask = 1U << (num_bit % 8);
 
     *obj &= ~mask;
+}
+
+// Without checking for correctness (for speed)
+static inline void _baSetValue (buf_t buf, size_t num_bit, bool val) {
+    if (val == 1)
+        _baSetOne (buf, num_bit);
+    else
+        _baSetZero (buf, num_bit);
 }
 
 int baSetValue (BinArray* arr, size_t num_bit, bool val) {
@@ -377,28 +386,14 @@ ssize_t baFind (BinArray* arr, size_t begin, ssize_t len, bool val) {
         return baFindZero (arr, 0, -1);
 }
 
-static inline int8_t _baFindBiteOneInByte (uint8_t byte) {
-    uint8_t mask = 1U << 7;
+// Find One -------------------------------------------------------------------
 
-    for (int i = 0; i < 8; ++i)
-        if (byte & (mask >> i))
-            return i;
-
-    return -1;
+static inline int8_t _baFindBitOneInByte (uint8_t byte) {
+    return ffs (byte) - 1;
 }
 
-static inline int8_t _baFindBiteOneInQWord (uint64_t qword) {
-    const uint8_t *buf_u8 = (uint8_t *) &qword;
-
-    int8_t path = 0;
-    for (uint8_t i = 0; i < 8; ++i)
-        if (buf_u8[i])
-        {
-            path += i * 8;
-
-            return path + _baFindBiteOneInByte (buf_u8[i]);
-        }
-    return -1;
+static inline int8_t _baFindBitOneInQWord (uint64_t qword) {
+    return ffsll (qword) - 1;
 }
 
 // arr - is correct array
@@ -406,8 +401,8 @@ static inline ssize_t _baFindOneInBytes  (proxyBinArray prx_arr) {
     const uint64_t *buf_u64 = (uint64_t*) prx_arr.arr.buf_;
     const size_t num_bits = prx_arr.arr.num_bits_; // For speed
 
-    size_t num_u64 = num_bits / (8 * 8);
-    size_t i = 0, path = 0;
+    const size_t num_u64 = num_bits / (8 * 8);
+    ssize_t i = 0, path = 0;
 
     for (; i < num_u64; ++i)
         if (buf_u64[i])
@@ -417,13 +412,13 @@ static inline ssize_t _baFindOneInBytes  (proxyBinArray prx_arr) {
 
     if (i == num_u64) {
         const int num_u8 = baBits2Bytes ((num_bits - 64 * num_u64));
-        const uint8_t* buf_u8 = (const uint8_t*) (buf_u64 + i);
+        const uint8_t* buf_u8 = (const uint8_t*) (buf_u64 + num_u64);
 
         for (i = 0; i < num_u8; ++i)
             if (buf_u8[i]) { // Equal  if (buf_u8[i])
                 path += i * 8;
 
-                uint8_t path_bit = _baFindBiteOneInByte(buf_u8[i]);
+                uint8_t path_bit = _baFindBitOneInByte(buf_u8[i]);
 
                 if (path + path_bit >= num_bits)
                     return -1;
@@ -435,7 +430,7 @@ static inline ssize_t _baFindOneInBytes  (proxyBinArray prx_arr) {
     }
     else
     {
-        return path + _baFindBiteOneInQWord (buf_u64[i]);
+        return path + _baFindBitOneInQWord (buf_u64[i]);
     }
 }
 
@@ -444,66 +439,44 @@ ssize_t baFindOne  (BinArray* arr, size_t begin, ssize_t len) {
         return -1;
 
     uint8_t* buf = arr->buf_ + begin / 8;
-    const uint8_t lshift = begin % 8;
-    
-    if (lshift + len < 8) {
-        const uint8_t mask = ((uint8_t) (0xFF << (8 - len)) >> lshift);
-        uint8_t first_u8 = buf[0] & mask;
+    const uint8_t rshift = begin % 8;
+     
+    if (rshift + len <= 8) {
+        const uint8_t mask = 0xFF >> (8 - len);
+        uint8_t first_u8 = (buf[0] >> rshift) & mask;   
 
-        if (first_u8)
-            return begin - lshift + _baFindBiteOneInByte (first_u8);
-        else
-            return -1;
+       return begin + _baFindBitOneInByte (first_u8);
     } else {
-        uint8_t first_u8 = buf[0] & ((uint8_t) 0xFF >> lshift);
+        const uint8_t mask = 0xFF << rshift;
+        uint8_t first_u8 = (uint8_t)(buf[0] & mask) >> rshift;   
 
-        if (first_u8)
-            return begin - lshift + _baFindBiteOneInByte (first_u8);
-        
-        ++buf;
-        len -= 8 - lshift;
+        ssize_t path = _baFindBitOneInByte (first_u8);
+        if (path != -1)
+            return begin + path;
 
-        /* g++ doesn't compile like that
-        proxyBinArray prx_arr = {
-            .arr.buf_ = buf,
-            .arr.num_bits_ = len
-        };
-        */
+        if ((len -= (8 - rshift)) == 0)
+            return -1;
 
         proxyBinArray prx_arr;
-        prx_arr.arr.buf_ = buf;
+        prx_arr.arr.buf_ = ++buf;
         prx_arr.arr.num_bits_ = len;
 
-        ssize_t path = _baFindOneInBytes (prx_arr);
+        path = _baFindOneInBytes (prx_arr);
         if (path != -1)
-            return begin - lshift + 8 + path;
+            return begin - rshift + 8 + path;
         else
             return -1;
     }
 }
 
-static inline int8_t _baFindBiteZeroInByte (uint8_t byte) {
-    uint8_t mask = 1U << 7;
+// Find Zero ------------------------------------------------------------------
 
-    for (int i = 0; i < 8; ++i)
-        if ((byte & (mask >> i)) == 0)
-            return i;
-    
-    return -1;
+static inline int8_t _baFindBitZeroInByte (uint8_t byte) {
+    return _baFindBitOneInByte ((uint8_t) ~byte);
 }
 
 static inline int8_t _baFindBiteZeroInQWord (uint64_t qword) {
-    const uint8_t *buf_u8 = (uint8_t *) &qword;
-
-    int8_t path = 0;
-    for (uint8_t i = 0; i < 8; ++i)
-        if (buf_u8[i] != 0xFF)
-        {
-            path += i * 8;
-
-            return path + _baFindBiteZeroInByte (buf_u8[i]);
-        }
-    return -1;
+   return _baFindBitOneInQWord ((uint64_t) ~qword);
 }
 
 // arr - is correct array
@@ -528,7 +501,7 @@ static inline ssize_t _baFindZeroInBytes  (proxyBinArray prx_arr) {
             if (buf_u8[i] != 0xFF) {
                 path += i * 8;
 
-                uint8_t path_bit = _baFindBiteZeroInByte(buf_u8[i]);
+                uint8_t path_bit = _baFindBitZeroInByte(buf_u8[i]);
 
                 if (path + path_bit >= num_bits)
                     return -1;
@@ -549,38 +522,31 @@ ssize_t baFindZero (BinArray* arr, size_t begin, ssize_t len) {
         return -1;
 
     uint8_t* buf = arr->buf_ + begin / 8;
-    const uint8_t lshift = begin % 8;
-    
-    if (lshift + len < 8) {
-        const uint8_t mask = ((uint8_t) (0xFF << (8 - len)) >> lshift);
-        uint8_t first_u8 = buf[0] & mask;
-        if (first_u8 != 0xFF)
-            return begin - lshift + _baFindBiteZeroInByte (first_u8);
-        else
-            return -1;
+    const uint8_t rshift = begin % 8;
+     
+    if (rshift + len <= 8) {
+        const uint8_t mask = 0xFF >> (8 - len);
+        uint8_t first_u8 = (buf[0] >> rshift) & mask;   
+
+       return begin + _baFindBitZeroInByte (first_u8);
     } else {
-        uint8_t first_u8 = buf[0] | ~((uint8_t) 0xFF >> lshift);
+        const uint8_t mask = 0xFF << rshift;
+        uint8_t first_u8 = (uint8_t)(buf[0] & mask) >> rshift;   
 
-        if (first_u8 != 0xFF) 
-            return begin - lshift + _baFindBiteZeroInByte (first_u8);
-        
-        ++buf;
-        len -= 8 - lshift;
+        ssize_t path = _baFindBitZeroInByte (first_u8);
+        if (path != -1)
+            return begin + path;
 
-        /* g++ doesn't compile like that
-        proxyBinArray prx_arr = {
-            .arr.buf_ = buf,
-            .arr.num_bits_ = len
-        };
-        */
+        if ((len -= (8 - rshift)) == 0)
+            return -1;
 
         proxyBinArray prx_arr;
-        prx_arr.arr.buf_ = buf;
+        prx_arr.arr.buf_ = ++buf;
         prx_arr.arr.num_bits_ = len;
-        
-        ssize_t path = _baFindZeroInBytes (prx_arr);
+
+        path = _baFindZeroInBytes (prx_arr);
         if (path != -1)
-            return begin - lshift + 8 + path;
+            return begin - rshift + 8 + path;
         else
             return -1;
     }

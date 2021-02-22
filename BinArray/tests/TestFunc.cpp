@@ -320,7 +320,7 @@ void CheckFindOne  (BinArray* arrs[], size_t num, const float koef_num_check) {
             baSetOne (arr, num_bit);
 
             int64_t num_from_find = baFindOne (arr, 0, -1);
-            ASSERT_EQ (num_bit, num_from_find);
+            EXPECT_EQ (num_bit, num_from_find);
 
             baSetZero (arr, num_bit);
         }
@@ -336,7 +336,7 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
 
     // ------------------------------------------------------------
 
-    FillZeroFullArrayBA (arrs, num);
+    FillOneFullArrayBA (arrs, num);
 
     for (int iarr = 0; iarr < num; ++iarr) {
 
@@ -346,12 +346,12 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
 
         for (int i = 0; i < num_attempts; ++i) {
             size_t num_bit = rand_num_bit (gen);
-            baSetOne (arr, num_bit);
+            baSetZero (arr, num_bit);
 
-            int64_t num_from_find = baFindOne (arr, 0, -1);
+            int64_t num_from_find = baFindZero (arr, 0, -1);
             ASSERT_EQ (num_bit, num_from_find);
 
-            baSetZero (arr, num_bit);
+            baSetOne (arr, num_bit);
         }
     }
 
