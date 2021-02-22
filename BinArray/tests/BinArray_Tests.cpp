@@ -4,7 +4,7 @@
 #include "../BinArray.h"
 #include "TestFunc.hpp"
 
-const size_t num_arr_g = 5000                / 1;
+const size_t num_arr_g = 10000                / 1;
 const size_t max_size_arr_g = UINT16_MAX * 4 / 1;
 
 // ===================\\
@@ -246,7 +246,8 @@ TEST (BIN_ARRAY, GetSubArray) {
 
     for (int i = 0; i < 80; ++i) {
         ASSERT_EQ (baGetValue (sub_arr, i), 1) << i
-                                               << " " << baDumpBufFull (sub_arr);
+                                               << "AAA\n" << baDumpBufFull (sub_arr)
+                                               << " " << baGetNumBits (sub_arr);
     }
     baDestroy (&sub_arr);
 
@@ -256,7 +257,7 @@ TEST (BIN_ARRAY, GetSubArray) {
 
     for (int i = 0; i < 80; ++i) {
         ASSERT_EQ (baGetValue (sub_arr, i), 0) << i 
-                                               << " " << baDumpBufFull (sub_arr);
+                                               << "\n" << baDumpBufFull (sub_arr);
     }
     baDestroy (&sub_arr);
 

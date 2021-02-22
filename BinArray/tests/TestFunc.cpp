@@ -257,7 +257,7 @@ void CheckFillZeroBA (size_t num_bits, size_t begin, ssize_t len) {
 void CheckOneFullBA (BinArray* arr) {
     size_t num_bits = baGetNumBits (arr);
     for (size_t j = 0; j < num_bits; ++j) {
-        ASSERT_EQ (baGetValue (arr, j), 1) << baDumpBufFull (arr);
+        ASSERT_EQ (baGetValue (arr, j), 1) << j << " " << num_bits << "A " << baDumpBufFull (arr) << "B\n";
     }
 }
 

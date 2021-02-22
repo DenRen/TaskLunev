@@ -235,54 +235,38 @@ BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len) {
         return NULL;
 
     uint8_t* clone_buf = clone->buf_;
+
     uint8_t* buf = arr->buf_ + begin / 8;
-    const uint8_t lshift = begin % 8;
-    if (lshift == 0) {
-        memcpy (clone->buf_, buf, baBits2Bytes (len));
-    } else {
-        union reg_u16 {
-            uint8_t  bytes[2];
-            uint16_t word;
-        };
-
-        clone_buf[0] = buf[0] << lshift;
+    const uint8_t rshift = begin % 8;
+    
+    if (rshift == 0)
+        memcpy (clone_buf, buf, baBits2Bytes (len));
+    else {
+        const size_t over_bytes = baBits2Bytes (len + rshift);
         
-        ssize_t num_rest_bits = len - (8 - lshift); // rest - остальные
-        if (num_rest_bits <= 0)
-            return clone;
-
-        /*
-        15 14 13 12 11 10  9  8 |  7  6  5  4  3  2  1  0
-         0  0  0 15 14 13 12 11 | 10  9  8  7  6  5  4  3
-
-        23 22 21 20 19 18 17 16 | 15 14 13 12 11 10  9  8
-         0  0  0 23 22 21 20 19 | 18 17 16 15 14 13 12 11 
-        */
-
-        union reg_u16 reg;
-        const size_t num_full_bytes = num_rest_bits / 8;
-        for (size_t i = 1; i < num_full_bytes + 1; ++i) {
-            reg.bytes[0] = buf[i];
-            reg.bytes[1] = 0;
-
-            reg.word <<= lshift;
-
-            clone_buf[i - 0]  = reg.bytes[0];
-            clone_buf[i - 1] |= reg.bytes[1];
+        const size_t num_u56 = (over_bytes - 1) / 7; // 7 * x + 1
+        for (size_t i = 0; i < num_u56; ++i) {
+            *((uint64_t*) clone_buf) = *((uint64_t*) buf) >> rshift;
+            clone_buf += 7;
+            buf += 7;
         }
 
-        num_rest_bits %= 8;
-        if (num_rest_bits) {
-            reg.bytes[0] = buf[num_full_bytes + 1];
-            reg.bytes[1] = 0;
+        bool state = over_bytes == baBits2Bytes (len); // Для несовпадения размеров
+        
+        int num_u8 = over_bytes - 7 * num_u56 - 1;
+        if (state)
+            --num_u8;
 
-            reg.word <<= lshift;
-
-            clone_buf[num_full_bytes] |= reg.bytes[1];
-
-            if (num_rest_bits > lshift)
-                clone_buf[num_full_bytes + 1]  = reg.bytes[0];
+        for (int i = 0; i < num_u8; ++i) {
+            *(uint16_t*) clone_buf = (*(uint16_t*) buf) >> rshift;
+            ++clone_buf;
+            ++buf;
         }
+
+        if (state)
+            *clone_buf = *buf >> rshift;
+        else
+            *clone_buf = (*(uint16_t*) buf) >> rshift;
     }
 
     return clone;
@@ -296,7 +280,7 @@ BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len) {
 static inline bool _baGetValue (buf_t buf, size_t num_bit) {
     uint8_t obj = *(buf + num_bit / 8);
 
-    return obj & (1U << num_bit % 8);
+    return obj & (1U << (num_bit % 8));
 }
 
 int baGetValue (BinArray *arr, size_t num_bit) {
@@ -561,22 +545,22 @@ int baFillOne  (BinArray* arr, size_t begin, ssize_t len) {
         return -1;
 
     uint8_t* buf = arr->buf_ + begin / 8;
-    const uint8_t lshift = begin % 8;
+    const uint8_t rshift = begin % 8;
     
-    if (lshift + len < 8) { // |---- -**-|---- --...
-        *buf |= ((uint8_t)(0xFF << (8 - len))) >> lshift;
+    if (rshift + len <= 8) { // |---- -**-|---- --...
+        *buf |= (uint8_t) (0xFF >> (8 - len)) << rshift;
     } else {
 
-        *buf++ |= (uint8_t) 0xFF >> lshift;
+        *buf++ |= (uint8_t) 0xFF << rshift;
 
-        len -= 8 - lshift;
-        size_t num_full_bytes = len / 8;
+        len -= 8 - rshift;
+        size_t  num_full_bytes = len / 8;
         uint8_t num_rest_bits  = len % 8;
 
         memset (buf, 0xFF, num_full_bytes);
 
         if (num_rest_bits)
-            *(buf + num_full_bytes) |= 0xFF << (8 - num_rest_bits);
+            *(buf + num_full_bytes) |= (uint8_t) (0xFF >> (8 - num_rest_bits));
     }
 
     return 0;
@@ -586,21 +570,22 @@ int baFillZero (BinArray* arr, size_t begin, ssize_t len) {
         return -1;
 
     uint8_t* buf = arr->buf_ + begin / 8;
-    const uint8_t lshift = begin % 8;
+    const uint8_t rshift = begin % 8;
     
-    if (lshift + len < 8) { // |---- -**-|---- --...
-        *buf &= ~(((uint8_t)(0xFF << (8 - len))) >> lshift);
+    if (rshift + len <= 8) { // |---- -**-|---- --...
+        *buf &= ~(uint8_t) ((0xFF >> (8 - len)) << rshift);
     } else {
 
-        *buf++ &= ~((uint8_t) 0xFF >> lshift);
+        *buf++ &= ~(uint8_t) (0xFF << rshift);
 
-        len -= 8 - lshift;
-        size_t num_full_bytes = len / 8;
+        len -= 8 - rshift;
+        size_t  num_full_bytes = len / 8;
         uint8_t num_rest_bits  = len % 8;
 
         memset (buf, 0x00, num_full_bytes);
+
         if (num_rest_bits)
-            *(buf + num_full_bytes) &= ~(0xFF << (8 - num_rest_bits));
+            *(buf + num_full_bytes) &= ~(uint8_t) (0xFF >> (8 - num_rest_bits));
     }
 
     return 0;
@@ -641,6 +626,34 @@ int baDumpBuf (BinArray* arr, size_t begin, ssize_t len) {
 }
 
 int baDumpBufFull (BinArray* arr) {
+
+    CHECK_PBA (arr);
+
+    const size_t num_bits = _baGetNumBits (arr);
+    const size_t size_str = num_bits + baBits2Bytes (num_bits) / 8 + 1;
+
+    for (size_t i = 0; i < num_bits; ++i)
+        printf ("%d", _baGetValue (arr->buf_, i));
+    printf ("\n");
+    /*
+    char str[size_str];
+    
+    size_t num_space = 0;
+    for (size_t i = 0; i < size_str; ++i) {
+        if ((i + 1) % 9 == 0) {
+            str[i++] = ' ';
+            ++num_space;
+        }
+
+        str[i] = '0' + _baGetValue (arr->buf_, i - num_space);
+
+    }
+
+    str[num_bits] = '\0';
+    printf ("%s\n", str);
+        */
+
+    /*
     CHECK_PBA (arr);
 
     const size_t num_full_bytes = _baGetNumBits (arr) / 8;
@@ -651,12 +664,13 @@ int baDumpBufFull (BinArray* arr) {
     if (num_rest_bits) {
         uint8_t rest_byte = arr->buf_[num_full_bytes]; 
         for (int i = 0; i < num_rest_bits; ++i)
-            printf ("%d", (rest_byte & ((uint8_t) (1U << 7) >> i)) != 0);
+            printf ("%d", _baGetValue (arr->buf_, num_full_bytes + i));
     }
 
     printf ("\n");
 
     return 0;
+    */
 }
 
 // ================\\
