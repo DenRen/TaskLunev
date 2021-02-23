@@ -6,10 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef USE_FFS_OPTIMIZATION
-    #include <strings.h>
-    #include <immintrin.h>
-#endif
+/*
+TODO
+1) До конца не оптимизированы baGetSubArray, baGetInvert
+    Им нужно добавить оптимизацию 64 битной кратности размера массива
+*/
+
 
 // ==========\\
 // Main types -----------------------------------------------------------------
@@ -90,7 +92,7 @@ void bprint (uint8_t* bytes, size_t num_bytes) {
 // Check functions ------------------------------------------------------------
 // ===============//
 
-/* inline*/ bool baCheckArr (BinArray arr) {
+bool baCheckArr (BinArray arr) {
     return (arr.buf_ != NULL) && (arr.buf_ != 0);
 }
 
@@ -98,22 +100,8 @@ bool baCheckPtr (BinArray* arr) {
     return arr != NULL && baCheckArr (*arr);
 }
 
-// arr - correct pointer to an existing array
-/* inline*/ bool baCheckSubVector (BinArray* arr, size_t begin, ssize_t len) {
-    if (len == -1)
-        return begin < _baGetNumBits (arr);
-    else if (len > 0)
-        return begin + len < _baGetNumBits (arr);
-    else 
-        return false;
-}
-
-/* inline*/ bool baCheckPtr_SV (BinArray* arr, size_t begin, ssize_t len) {
-    return baCheckPtr (arr) && baCheckSubVector (arr, begin, len);
-}
-
 // Effctive check and calculate input args
-/* inline*/ bool baCheckCalcArg (BinArray* arr, size_t begin, ssize_t* len) {
+bool baCheckCalcArg (BinArray* arr, size_t begin, ssize_t* len) {
     
     if (baCheckPtr (arr)) {
 
@@ -177,7 +165,6 @@ BinArray* baCreate (size_t num_bits) {
 
     return arr;
 }
-
 int baResize (BinArray* arr, size_t new_num_bits) {
 
     CHECK_PBA (arr);
@@ -195,7 +182,6 @@ int baResize (BinArray* arr, size_t new_num_bits) {
 
     return 0;
 }
-
 int baDestroy (BinArray** arr) {
 
     if (arr == NULL) {
@@ -210,7 +196,6 @@ int baDestroy (BinArray** arr) {
 
     return 0;
 }
-
 BinArray* baGetClone (BinArray* arr) {
     if (baCheckPtr (arr) == false)
         return NULL;
@@ -223,7 +208,6 @@ BinArray* baGetClone (BinArray* arr) {
 
     return clone;
 }
-
 BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len) {
     if (baCheckCalcArg (arr, begin, &len) == false) 
         return NULL;
@@ -232,23 +216,23 @@ BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len) {
     if (clone == NULL)
         return NULL;
 
-    uint8_t* clone_buf = clone->buf_;
+    uint8_t* sub_buf = clone->buf_;
 
     uint8_t* buf = arr->buf_ + begin / 8;
     const uint8_t rshift = begin % 8;
     
     if (rshift == 0)
-        memcpy (clone_buf, buf, baBits2Bytes (len));
+        memcpy (sub_buf, buf, baBits2Bytes (len));
     else {
         const ssize_t over_bytes = baBits2Bytes (len + rshift);
         
         ssize_t num_u56 = (over_bytes - 1) / 7; // 7 * x + 1
         if (baBits2Bytes (len) < 8)
             num_u56 = 0;
-        //printf ("begin: %zi, len: %zi, num_u56: %zi\n", begin, len, num_u56);
+        
         for (size_t i = 0; i < num_u56; ++i) {
-            *((uint64_t*) clone_buf) = *((uint64_t*) buf) >> rshift;
-            clone_buf += 7;
+            *((uint64_t*) sub_buf) = *((uint64_t*) buf) >> rshift;
+            sub_buf += 7;
             buf += 7;
         }
 
@@ -259,15 +243,15 @@ BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len) {
             --num_u8;
         
         for (int i = 0; i < num_u8; ++i) {
-            *(uint16_t*) clone_buf = (*(uint16_t*) buf) >> rshift;
-            ++clone_buf;
+            *(uint16_t*) sub_buf = (*(uint16_t*) buf) >> rshift;
+            ++sub_buf;
             ++buf;
         }
 
         if (state)
-            *clone_buf = (*(uint16_t*) buf) >> rshift;
+            *sub_buf = (*(uint16_t*) buf) >> rshift;
         else
-            *clone_buf = *buf >> rshift;
+            *sub_buf = *buf >> rshift;
     }
 
     return clone;
@@ -380,10 +364,6 @@ ssize_t baFind (BinArray* arr, size_t begin, ssize_t len, bool val) {
 
 // Find One -------------------------------------------------------------------
 
-static /* inline*/ int8_t _baFindBitOneInByte (uint8_t byte) {
-    return ffs (byte) - 1;
-}
-
 static /* inline*/ int8_t _baFindBitOneInQWord (uint64_t qword) {
     return ffsll (qword) - 1;
 }
@@ -437,10 +417,6 @@ ssize_t baFindOne  (BinArray* arr, size_t begin, ssize_t len) {
 
 // Find Zero ------------------------------------------------------------------
 
-static /* inline*/ int8_t _baFindBitZeroInByte (uint8_t byte) {
-    return _baFindBitOneInByte ((uint8_t) ~byte);
-}
-
 static /* inline*/ int8_t _baFindBitZeroInQWord (uint64_t qword) {
    return _baFindBitOneInQWord ((uint64_t) ~qword);
 }
@@ -451,10 +427,10 @@ ssize_t baFindZero (BinArray* arr, size_t begin, ssize_t len) {
 
     ssize_t pos = 0;
     uint64_t* buf = ((uint64_t*) arr->buf_) + begin / 64;
-    const int8_t rshift = begin % 64;
+    const uint8_t rshift = begin % 64;
 
     if (rshift != 0) {
-        uint64_t first_qword = (*buf) >> rshift;
+        uint64_t first_qword = ((int64_t) *buf) >> rshift;
 
         pos = _baFindBitZeroInQWord (first_qword);
 
@@ -485,6 +461,7 @@ ssize_t baFindZero (BinArray* arr, size_t begin, ssize_t len) {
             add_pos = _baFindBitZeroInQWord (buf[i]);
             break;
         }
+
     if (add_pos != -1 && add_pos < len)
         return 64 * i + pos + add_pos;
     
@@ -499,7 +476,6 @@ ssize_t baFindZero (BinArray* arr, size_t begin, ssize_t len) {
 static uint64_t _baGetMaskFirtsQWord (uint8_t rshift, uint8_t len) {
     return (uint64_t) (0xFFFFFFFFFFFFFFFFULL >> (64 - len)) << rshift;
 }
-
 static uint64_t _baGetMaskLastQWord (uint8_t len) {
     return (uint64_t) (0xFFFFFFFFFFFFFFFFULL >> (64 - len));
 }
@@ -513,7 +489,7 @@ int baFillOne  (BinArray* arr, size_t begin, ssize_t len) {
     const uint8_t rshift = begin % 64;
 
     if (rshift + len <= 64) {
-        *buf++ |= _baGetMaskFirtsQWord (rshift, len);
+        *buf |= _baGetMaskFirtsQWord (rshift, len);
         return 0;
     }
 
@@ -545,7 +521,7 @@ int baFillZero (BinArray* arr, size_t begin, ssize_t len) {
     const uint8_t rshift = begin % 64;
 
     if (rshift + len <= 64) {
-        *buf++ &= ~_baGetMaskFirtsQWord (rshift, len);
+        *buf &= ~_baGetMaskFirtsQWord (rshift, len);
         return 0;
     }
 
@@ -604,56 +580,20 @@ int baDumpBuf (BinArray* arr, size_t begin, ssize_t len) {
 
     return 0;
 }
-
 int baDumpBufFull (BinArray* arr) {
 
     CHECK_PBA (arr);
 
     const size_t num_bits = _baGetNumBits (arr);
-    const size_t size_str = num_bits + baBits2Bytes (num_bits) / 8 + 1;
+    size_t i = 0;
 
-    for (size_t i = 0; i < num_bits; ++i) {
+    for (i = 0; i < num_bits; ++i) {
         if (i % 8 == 0 && i != 0)
             printf (" ");
+
         printf ("%d", _baGetValue (arr->buf_, i));
     }
     printf ("\n");
-    /*
-    char str[size_str];
-    
-    size_t num_space = 0;
-    for (size_t i = 0; i < size_str; ++i) {
-        if ((i + 1) % 9 == 0) {
-            str[i++] = ' ';
-            ++num_space;
-        }
-
-        str[i] = '0' + _baGetValue (arr->buf_, i - num_space);
-
-    }
-
-    str[num_bits] = '\0';
-    printf ("%s\n", str);
-        */
-
-    /*
-    CHECK_PBA (arr);
-
-    const size_t num_full_bytes = _baGetNumBits (arr) / 8;
-    const size_t num_rest_bits  = _baGetNumBits (arr) % 8;
-
-    bprint (arr->buf_, num_full_bytes);
-    
-    if (num_rest_bits) {
-        uint8_t rest_byte = arr->buf_[num_full_bytes]; 
-        for (int i = 0; i < num_rest_bits; ++i)
-            printf ("%d", _baGetValue (arr->buf_, num_full_bytes + i));
-    }
-
-    printf ("\n");
-
-    return 0;
-    */
 }
 
 // ================\\
@@ -675,35 +615,43 @@ int baForeach (BinArray* arr,
 // Invert functions -----------------------------------------------------------
 // ================//
 
-int baInvert (BinArray* arr) {
-    CHECK_PBA (arr);
+int baInvert (BinArray* arr, size_t begin, ssize_t len) {
+    if (baCheckCalcArg (arr, begin, &len) == false)
+        return -1;
 
-    const unsigned bits_in_8bytes = 8 * 8;  // So that the compiler can see that we are 
-                                            // dividing and taking the remainder of the
-                                            // division of one number.
-    
-    size_t  num_u64 = arr->num_bits_ / bits_in_8bytes;
-    uint8_t num_u1  = arr->num_bits_ % bits_in_8bytes;
-    uint8_t num_u8  = baBits2Bytes (num_u1);
+    ssize_t pos = 0;
+    uint64_t* buf = ((uint64_t*) arr->buf_) + begin / 64;
+    const uint8_t rshift = begin % 64;
 
-    // Invert bloks of 8 bytes -----------------------
-    uint64_t* buf_u64 = (uint64_t*) arr->buf_;
+    if (rshift + len <= 64) {
+        const uint64_t mask = _baGetMaskFirtsQWord (rshift, len);
+        *buf = ((uint64_t) ~(*buf & mask)) & mask;
+        return 0;
+    }
     
-    if (num_u64 != 0)
-        while (num_u64--)
-            *buf_u64++ = ~*buf_u64;
+    const size_t rlen = 64 - rshift;
 
-    // Invert bloks of 1 bytes -----------------------
-    uint8_t* buf_u8 = (uint8_t*) buf_u64;
-    if (num_u8 != 0) 
-        while (num_u8--)
-            *buf_u8++ = ~*buf_u8;
+    uint64_t mask = _baGetMaskFirtsQWord (rshift, rlen);
+    *buf++ = (~(uint64_t)(*buf & mask)) & mask;
     
-    // -----------------------------------------------
+    pos += begin + rlen;
+    len -= rlen;
+    
+    // Here we know that the buf starts from the beginning
+
+    ssize_t num_u64 = baGetSizeArrayIn8Byte (len) - 1, i = 0;
+    if (num_u64 > 0) {
+        for (ssize_t i = 0; i < num_u64; ++i) {
+            *buf++ = ~((uint64_t) *buf);
+            len -= 64 * num_u64;
+        }
+    }
+
+    mask = _baGetMaskLastQWord (len);
+    *buf = ((uint64_t) ~(*buf & mask)) & mask;
 
     return 0;
 }
-
 BinArray* baGetInvert (BinArray* arr) {
     if (baCheckPtr (arr) == false) {
         errno = EINVAL;

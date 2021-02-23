@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "BinArray.h"
-//#include <random>
 
 typedef int el_t;
 
@@ -12,8 +11,6 @@ int find_max (BinArray* c, bool el, void* data) {
     return 0;
 }
 
-// todo dump
-#include <strings.h>
 int main () {
     printf ("\n");
 
@@ -22,13 +19,23 @@ int main () {
     if (arr == NULL) {
         perror ("baCreate");
         return -1;
-    } 
+    }
+      
+    baFillOneFull (arr);
+
+    baSetZero (arr, 70);
 
     baDumpBufFull (arr);
-
-    baFillOne (arr, 4, 93);
-
-    baDumpBufFull (arr);
+    printf ("Find 0: %zi\n", baFindZero (arr, 3, -1));
     
+    //
+
+    baFillZeroFull (arr);
+
+    baSetOne (arr, 70);
+
+    baDumpBufFull (arr);
+    printf ("Find 1: %zi\n", baFindOne (arr, 3, -1));
+
     baDestroy (&arr);
 }

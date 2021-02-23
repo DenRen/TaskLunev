@@ -432,7 +432,7 @@ void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check) {
     }
 }
 
-bool Check_Dump (BinArray* arr, size_t begin, ssize_t len, const char* str) {
+int Check_Dump (BinArray* arr, size_t begin, ssize_t len, const char* str) {
     const char nameTempFile[] = "test_Secondary_Functions.tmp"; 
 
     pid_t pid_child = fork ();
@@ -468,6 +468,7 @@ bool Check_Dump (BinArray* arr, size_t begin, ssize_t len, const char* str) {
         
         size_t len = strlen (str);
         int ret = fread (buf, sizeof (char), len, stdout);
+        
         if (ret == 0) {
             perror ("fread");
             exit (-1);

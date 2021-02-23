@@ -386,9 +386,26 @@ TEST (BIN_ARRAY, Find) {
     ASSERT_EQ (baFindOne (arr, 0, 6), 4);
     ASSERT_EQ (baFindOne (arr, 3, 7), 4);
     
-    baInvert (arr);
+    baInvert (arr, 0, -1);
     ASSERT_EQ (baFindZero (arr, 0, 5), 4);
     ASSERT_EQ (baFindZero (arr, 3, 7), 4);
+
+    baDestroy (&arr);
+
+    // ----------------------------------------
+
+    arr = baCreate (100);
+    ASSERT_TRUE (arr != NULL);
+
+    baFillZeroFull (arr);
+
+    baSetOne (arr, 70);
+    ASSERT_EQ (baFindOne (arr, 3, -1), 70);
+      
+    baFillOneFull (arr);
+
+    baSetZero (arr, 70);
+    ASSERT_EQ (baFindZero (arr, 3, -1), 70);
 
     baDestroy (&arr);
 }
@@ -504,7 +521,7 @@ TEST (BIN_ARRAY, Foreach_On_Max_Min_Functions) {
 // ================//
 
 TEST (BIN_ARRAY, Invert_And_GetInvert) {
-    ASSERT_TRUE (baInvert    (NULL) == -1);
+    ASSERT_TRUE (baInvert    (NULL, 0, -1) == -1);
     ASSERT_TRUE (baGetInvert (NULL) == NULL);    
 }
 
@@ -527,14 +544,15 @@ TEST (BIN_ARRAY, Rand_Invert_And_GetInvert) {
         BinArray* arr = arrs[iarr];
         
         BinArray* inv_arr = baGetClone (arr);
-        baInvert (inv_arr);
+        baInvert (inv_arr, 0, -1);
 
         size_t num_bits = baGetNumBits (arr);
         for (int i = 0; i < num_bits; i++) {
             bool elem = baGetValue (arr, i);
             bool inv_elem = baGetValue (inv_arr, i);
 
-            ASSERT_TRUE (elem != inv_elem);
+            ASSERT_TRUE (elem != inv_elem) << baDumpBufFull (arr) << "\n\n" 
+                                           << baDumpBufFull (inv_arr);
         }
     }
 
@@ -575,7 +593,7 @@ TEST (BIN_ARRAY, Dump) {
     ASSERT_EQ (Check_Dump (arr, 1,  2, "00"   ), 1);
     ASSERT_EQ (Check_Dump (arr, 3, -1, "00"   ), 1);
     ASSERT_EQ (Check_Dump (arr, 0,  1, "0"    ), 1);
-    ASSERT_EQ (Check_Dump (arr, 3, 2,  "00"   ), 1);
+    ASSERT_EQ (Check_Dump (arr, 3,  2, "00"   ), 1);
 
     baFillOneFull (arr);
     ASSERT_EQ (Check_Dump (arr, 6, -1, "11111"), 0);

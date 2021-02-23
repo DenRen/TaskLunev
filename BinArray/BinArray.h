@@ -100,7 +100,7 @@ int baForeach (BinArray* arr,
 // Invert functions -----------------------------------------------------------
 // ================//
 
-int baInvert (BinArray* arr);
+int       baInvert    (BinArray* arr, size_t begin, ssize_t len);
 BinArray* baGetInvert (BinArray* arr);
 
 #ifdef __cplusplus
