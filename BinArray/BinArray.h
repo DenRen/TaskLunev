@@ -14,8 +14,8 @@
 
 /*
 Tasks:
-
-    test calloc
+    Поставить проверку на 64 битную архитектуру
+    
     Optimize ffs, baFindOne
 */
 

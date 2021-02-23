@@ -6,7 +6,7 @@ LD  = g++
 
 RM = rm -rf
 
-OPTIM_FLAGS = -O3
+OPTIM_FLAGS = -O3 -flto
 GTEST_FLAGS = -lgtest -pthread -g
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 LD_GCOV_FLAGS = -lgcov
@@ -30,10 +30,10 @@ SANDBOX_DIR = sandbox
 # Main -------------------------
 
 all: main.out
-	echo $(FLAGS)
 
 main.out: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
+	strip $@
 
 # Test -------------------------
 
@@ -44,7 +44,7 @@ test: test_build
 	./$(TEST_DIR)/tests.out
 
 $(TEST_DIR)/test.out:
-	$(MAKE) -C $(TEST_DIR) $(FLAGS)
+	$(MAKE) -C $(TEST_DIR)
 
 valgrind:
 	valgrind ./main.out

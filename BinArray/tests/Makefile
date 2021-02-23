@@ -2,7 +2,7 @@ CXX = g++
 CC  = g++
 LD  = g++
 
-OPTIM_FLAGS = -O0
+OPTIM_FLAGS = -O3 -flto
 GTEST_FLAGS = -lgtest -pthread -g
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 LD_GCOV_FLAGS = -lgcov
@@ -17,6 +17,7 @@ all: tests.out
 
 tests.out: $(OBJS)
 	$(LD) -o $@ $^ $(LDFLAGS)
+	strip $@
 
 ../BinArray.o:
 	$(MAKE) -C ../ BinArray.o
