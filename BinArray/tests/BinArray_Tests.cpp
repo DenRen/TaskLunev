@@ -376,6 +376,12 @@ TEST (BIN_ARRAY, Setting_And_GettingOne_OrZero) {
 // ==============//
 
 TEST (BIN_ARRAY, Find) {
+
+    ASSERT_EQ (baFindOne  (NULL, 0, 3), -1);
+    ASSERT_EQ (baFindZero (NULL, 0, 3), -1);
+
+    // ----------------------------------------
+
     BinArray* arr = baCreate (10);
     ASSERT_TRUE (arr != NULL);
 
@@ -401,11 +407,15 @@ TEST (BIN_ARRAY, Find) {
 
     baSetOne (arr, 70);
     ASSERT_EQ (baFindOne (arr, 3, -1), 70);
+    baSetOne (arr, 53);
+    ASSERT_EQ (baFindOne (arr, 3, -1), 53);
       
     baFillOneFull (arr);
 
     baSetZero (arr, 70);
     ASSERT_EQ (baFindZero (arr, 3, -1), 70);
+    baSetZero (arr, 53);
+    ASSERT_EQ (baFindZero (arr, 3, -1), 53);
 
     baDestroy (&arr);
 }
@@ -603,6 +613,14 @@ TEST (BIN_ARRAY, Dump) {
     ASSERT_EQ (Check_Dump (arr, 3, -1, "11"   ), 1);
     ASSERT_EQ (Check_Dump (arr, 0,  1, "1"    ), 1);
     ASSERT_EQ (Check_Dump (arr, 3, 2,  "11"   ), 1);
+
+    baResize (arr, 16);
+    ASSERT_TRUE (arr != NULL);
+
+    baFillZeroFull (arr);
+    ASSERT_EQ (Check_Dump (arr, 6, -1, "00000000 00000000"), 0);
+    ASSERT_EQ (Check_Dump (arr, 6, -1, "00000000 00011100"), 0);
+    ASSERT_EQ (Check_Dump (arr, 6, -1, "11111111 11111111"), 0);
 
     baDestroy (&arr);
 }

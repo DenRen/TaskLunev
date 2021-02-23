@@ -162,7 +162,7 @@ BinArray* baCreate (size_t num_bits) {
     }
 
     arr->num_bits_ = num_bits;
-
+    
     return arr;
 }
 int baResize (BinArray* arr, size_t new_num_bits) {

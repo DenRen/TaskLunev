@@ -2,7 +2,7 @@ CXX = g++
 CC  = g++
 LD  = g++
 
-OPTIM_FLAGS = -O0 -flto
+OPTIM_FLAGS = -Os -flto
 GTEST_FLAGS = -lgtest -pthread -g
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 LD_GCOV_FLAGS = -lgcov

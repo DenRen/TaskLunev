@@ -6,7 +6,7 @@ LD  = g++
 
 RM = rm -rf
 
-OPTIM_FLAGS = -O0 -flto
+OPTIM_FLAGS = -Os -flto
 GTEST_FLAGS = -lgtest -pthread -g
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 LD_GCOV_FLAGS = -lgcov
@@ -63,8 +63,8 @@ view_coverage:
 # Clean -------------------------
 
 clean:
-	$(RM) main.out $(OBJS) *.gcno *.gcda *.info $(LCOV_OUT_FOLDER)
+	$(RM) main main.out $(OBJS) *.gcno *.gcda *.info $(LCOV_OUT_FOLDER)
 	$(MAKE) -C $(TEST_DIR) clean
 	$(MAKE) -C $(SANDBOX_DIR) clean
 
-.PHONY: clean all tests valgrind
+.PHONY: clean all test valgrind test_valgrind test_build

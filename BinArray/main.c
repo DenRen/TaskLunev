@@ -27,8 +27,6 @@ int main () {
 
     baDumpBufFull (arr);
     printf ("Find 0: %zi\n", baFindZero (arr, 3, -1));
-    
-    //
 
     baFillZeroFull (arr);
 
