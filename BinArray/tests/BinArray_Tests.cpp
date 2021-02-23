@@ -291,16 +291,17 @@ TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
 
     // ---------------------------------------
 
-    CheckFillOneBA  (  8, 3,  4);
-    CheckFillOneBA  (  6, 0,  2);
-    CheckFillOneBA  (800, 3, -1);
-    CheckFillOneBA  (78,  3, -1);
+    CheckFillOneBA  (  8, 3,   4);
+    CheckFillOneBA  (  6, 0,   2);
+    CheckFillOneBA  (800, 3,  -1);
+    CheckFillOneBA  (800, 3, 145);
+    CheckFillOneBA  (78,  3,  -1);
 
-    CheckFillZeroBA (  8, 3,  4);
-    CheckFillZeroBA (  6, 0,  2);
-    CheckFillZeroBA (800, 3, -1);
-    CheckFillZeroBA (800, 3, -1);
-    CheckFillZeroBA (78,  3, -1);
+    CheckFillZeroBA (  8, 3,   4);
+    CheckFillZeroBA (  6, 0,   2);
+    CheckFillZeroBA (800, 3,  -1);
+    CheckFillZeroBA (800, 3, 145);
+    CheckFillZeroBA (78,  3,  -1);
 
     for (int i = 4; i < 200; ++i)
         CheckFillZeroBA (i, 3, -1);

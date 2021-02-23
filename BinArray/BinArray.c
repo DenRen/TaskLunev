@@ -394,7 +394,7 @@ ssize_t baFindOne  (BinArray* arr, size_t begin, ssize_t len) {
 
     ssize_t pos = 0;
     uint64_t* buf = ((uint64_t*) arr->buf_) + begin / 64;
-    const int8_t rshift = begin % 64;
+    const uint8_t rshift = begin % 64;
 
     if (rshift != 0) {
         uint64_t first_qword = (*buf) >> rshift;
@@ -495,28 +495,44 @@ ssize_t baFindZero (BinArray* arr, size_t begin, ssize_t len) {
 // Fill functions -------------------------------------------------------------
 // ==============//
 
+// len + rshift <= 64
+static uint64_t _baGetMaskFirtsQWord (uint8_t rshift, uint8_t len) {
+    return (uint64_t) (0xFFFFFFFFFFFFFFFFULL >> (64 - len)) << rshift;
+}
+
+static uint64_t _baGetMaskLastQWord (uint8_t len) {
+    return (uint64_t) (0xFFFFFFFFFFFFFFFFULL >> (64 - len));
+}
+
 int baFillOne  (BinArray* arr, size_t begin, ssize_t len) {
     if (baCheckCalcArg (arr, begin, &len) == false)
         return -1;
 
-    uint8_t* buf = arr->buf_ + begin / 8;
-    const uint8_t rshift = begin % 8;
-    
-    if (rshift + len <= 8) { // |---- -**-|---- --...
-        *buf |= (uint8_t) (0xFF >> (8 - len)) << rshift;
-    } else {
+    ssize_t pos = 0;
+    uint64_t* buf = ((uint64_t*) arr->buf_) + begin / 64;
+    const uint8_t rshift = begin % 64;
 
-        *buf++ |= (uint8_t) 0xFF << rshift;
-
-        len -= 8 - rshift;
-        size_t  num_full_bytes = len / 8;
-        uint8_t num_rest_bits  = len % 8;
-
-        memset (buf, 0xFF, num_full_bytes);
-
-        if (num_rest_bits)
-            *(buf + num_full_bytes) |= (uint8_t) (0xFF >> (8 - num_rest_bits));
+    if (rshift + len <= 64) {
+        *buf++ |= _baGetMaskFirtsQWord (rshift, len);
+        return 0;
     }
+
+    const size_t rlen = 64 - rshift;
+
+    *buf++ |= _baGetMaskFirtsQWord (rshift, rlen);
+    pos += begin + rlen;
+    len -= rlen;
+    
+    // Here we know that the buf starts from the beginning
+
+    ssize_t num_u64 = baGetSizeArrayIn8Byte (len) - 1, i = 0;
+    if (num_u64 > 0) {
+        memset (buf, 0xFF, 8 * num_u64);
+        buf += num_u64;
+        len -= 64 * num_u64;
+    }
+
+    *buf |= _baGetMaskLastQWord (len);
 
     return 0;
 }
@@ -524,39 +540,48 @@ int baFillZero (BinArray* arr, size_t begin, ssize_t len) {
     if (baCheckCalcArg (arr, begin, &len) == false)
         return -1;
 
-    uint8_t* buf = arr->buf_ + begin / 8;
-    const uint8_t rshift = begin % 8;
-    
-    if (rshift + len <= 8) { // |---- -**-|---- --...
-        *buf &= ~(uint8_t) ((0xFF >> (8 - len)) << rshift);
-    } else {
+    ssize_t pos = 0;
+    uint64_t* buf = ((uint64_t*) arr->buf_) + begin / 64;
+    const uint8_t rshift = begin % 64;
 
-        *buf++ &= ~(uint8_t) (0xFF << rshift);
-
-        len -= 8 - rshift;
-        size_t  num_full_bytes = len / 8;
-        uint8_t num_rest_bits  = len % 8;
-
-        memset (buf, 0x00, num_full_bytes);
-
-        if (num_rest_bits)
-            *(buf + num_full_bytes) &= ~(uint8_t) (0xFF >> (8 - num_rest_bits));
+    if (rshift + len <= 64) {
+        *buf++ &= ~_baGetMaskFirtsQWord (rshift, len);
+        return 0;
     }
+
+    const size_t rlen = 64 - rshift;
+
+    *buf++ &= ~_baGetMaskFirtsQWord (rshift, rlen);
+    pos += begin + rlen;
+    len -= rlen;
+    
+    // Here we know that the buf starts from the beginning
+
+    ssize_t num_u64 = baGetSizeArrayIn8Byte (len) - 1, i = 0;
+    if (num_u64 > 0) {
+        memset (buf, 0x00, 8 * num_u64);
+        buf += num_u64;
+        len -= 64 * num_u64;
+    }
+
+    *buf &= ~_baGetMaskLastQWord (len);
 
     return 0;
 }
 
 int baFillZeroFull (BinArray* arr) {
     CHECK_PBA (arr);
-
-    memset (arr->buf_, 0x00, baBits2Bytes (arr->num_bits_));
-
+    
+    // NEED TO OPTIMIZE SPEED!
+    memset (arr->buf_, 0x00, 8 * baGetSizeArrayIn8Byte (arr->num_bits_));
+    
     return 0;
 }
 int baFillOneFull (BinArray* arr) {
     CHECK_PBA (arr);
 
-    memset (arr->buf_, 0xFF, baBits2Bytes (arr->num_bits_));
+    // NEED TO OPTIMIZE SPEED!
+    memset (arr->buf_, 0xFF, 8 * baGetSizeArrayIn8Byte (arr->num_bits_));
 
     return 0;
 }
@@ -587,8 +612,11 @@ int baDumpBufFull (BinArray* arr) {
     const size_t num_bits = _baGetNumBits (arr);
     const size_t size_str = num_bits + baBits2Bytes (num_bits) / 8 + 1;
 
-    for (size_t i = 0; i < num_bits; ++i)
+    for (size_t i = 0; i < num_bits; ++i) {
+        if (i % 8 == 0 && i != 0)
+            printf (" ");
         printf ("%d", _baGetValue (arr->buf_, i));
+    }
     printf ("\n");
     /*
     char str[size_str];

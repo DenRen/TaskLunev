@@ -17,27 +17,18 @@ int find_max (BinArray* c, bool el, void* data) {
 int main () {
     printf ("\n");
 
-    ssize_t num_bits = 700 * 100;
+    ssize_t num_bits = 100;
     BinArray* arr = baCreate (num_bits);
     if (arr == NULL) {
         perror ("baCreate");
         return -1;
-    }
+    } 
 
-    for (ssize_t pos = 789; pos < num_bits; ++pos) {
-        baSetOne (arr, pos);
+    baDumpBufFull (arr);
 
-        ssize_t pos_find = baFindOne (arr, 265, -1);
-        if (pos != pos_find) {
-            printf ("pos: %zi, find: %zi\n", pos, pos_find);
+    baFillOne (arr, 4, 93);
 
-            //baDestroy (&arr);
-            //return 0;
-        }
-
-        baSetZero (arr, pos);
-    }
-
-    printf ("Good!\n");
+    baDumpBufFull (arr);
+    
     baDestroy (&arr);
 }

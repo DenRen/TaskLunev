@@ -229,7 +229,7 @@ void CheckFillOneBA (size_t num_bits, size_t begin, ssize_t len) {
     ASSERT_EQ (baFillZeroFull (arr), 0);
     ASSERT_EQ (baFillOne (arr, begin, len), 0);
 
-    baDumpBufFull (arr);
+    //baDumpBufFull (arr);
     BinArray* result = baGetSubArray (arr, begin, len);
     ASSERT_TRUE (result != NULL);
 
@@ -246,6 +246,7 @@ void CheckFillZeroBA (size_t num_bits, size_t begin, ssize_t len) {
     ASSERT_EQ (baFillOneFull (arr), 0);
     ASSERT_EQ (baFillZero (arr, begin, len), 0);
 
+    //baDumpBufFull (arr);
     BinArray* result = baGetSubArray (arr, begin, len);
     ASSERT_TRUE (result != NULL);
 
