@@ -4,7 +4,7 @@
 #include "../BinArray.h"
 #include "TestFunc.hpp"
 
-const size_t num_arr_g = 10000                / 1;
+const size_t num_arr_g = 5000                / 1;
 const size_t max_size_arr_g = UINT16_MAX * 4 / 1;
 
 // ===================\\
@@ -22,7 +22,6 @@ TEST (BIN_ARRAY, Fault_Allocate) {
     baDestroy (&arr);
 }
 #endif
-
 TEST (BIN_ARRAY, Secondary_Functions) {
     ASSERT_EQ (baBits2Bytes (0),  0);
     ASSERT_EQ (baBits2Bytes (2),  1);
@@ -300,7 +299,11 @@ TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
     CheckFillZeroBA (  8, 3,  4);
     CheckFillZeroBA (  6, 0,  2);
     CheckFillZeroBA (800, 3, -1);
+    CheckFillZeroBA (800, 3, -1);
     CheckFillZeroBA (78,  3, -1);
+
+    for (int i = 4; i < 200; ++i)
+        CheckFillZeroBA (i, 3, -1);
 }
 
 TEST (BIN_ARRAY, Rand_Filling_And_Getting_One_And_Zero) {
