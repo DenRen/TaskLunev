@@ -10,6 +10,7 @@ OPTIM_FLAGS = -Os -flto
 GTEST_FLAGS = -lgtest -pthread -g
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 LD_GCOV_FLAGS = -lgcov
+OTHER_FLAGS = -MD
 
 BROWSER = yandex-browser
 LCOV_OUT_FOLDER = out
@@ -19,9 +20,9 @@ FLAGS  = OPTIM_FLAGS=$(OPTIM_FLAGS)
 #FLAGS += GCOV_FLAGS=$(GCOV_FLAGS)
 #FLAGS += LD_GCOV_FLAGS=$(LD_GCOV_FLAGS)
 
-CFLAGS 	 = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS)
-CXXFLAGS = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS)
-LDFLAGS  = $(LD_GCOV_FLAGS)
+CFLAGS 	 = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS) $(OTHER_FLAGS)
+CXXFLAGS = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS) $(OTHER_FLAGS)
+LDFLAGS  = $(LD_GCOV_FLAGS) $(OTHER_FLAGS)
 
 OBJS = main.o BinArray.o
 TEST_DIR = tests
@@ -37,14 +38,12 @@ main.out: $(OBJS)
 
 # Test -------------------------
 
-test_build: all $(TEST_DIR)/test.out 
+test_build:
+	$(MAKE) -C $(TEST_DIR)
 	echo "Test created. Run: ./$(TEST_DIR)/tests.out"
 
 test: test_build
 	./$(TEST_DIR)/tests.out
-
-$(TEST_DIR)/test.out:
-	$(MAKE) -C $(TEST_DIR)
 
 valgrind:
 	valgrind ./main.out
@@ -57,14 +56,16 @@ test_valgrind: clean test_build
 view_coverage:
 	lcov --capture --directory . --output-file coverage.info
 	genhtml coverage.info -o $(LCOV_OUT_FOLDER)
-	$(BROWSER)
+	#$(BROWSER)
 	$(BROWSER) $(LCOV_OUT_FOLDER)/index.html
 
 # Clean -------------------------
 
 clean:
-	$(RM) main main.out $(OBJS) *.gcno *.gcda *.info $(LCOV_OUT_FOLDER)
+	$(RM) main main.out $(OBJS) *.gcno *.gcda *.info *.d $(LCOV_OUT_FOLDER)
 	$(MAKE) -C $(TEST_DIR) clean
 	$(MAKE) -C $(SANDBOX_DIR) clean
+
+-include $(OBJS:.o=.d)
 
 .PHONY: clean all test valgrind test_valgrind test_build

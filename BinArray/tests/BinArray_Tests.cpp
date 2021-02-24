@@ -275,6 +275,11 @@ TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
     ASSERT_EQ (baFillOne  (NULL, 1, 1), -1);
     ASSERT_EQ (baFillZero (NULL, 1, 1), -1);
 
+    ASSERT_EQ (baSetOne   (NULL, 1), -1);
+    ASSERT_EQ (baSetZero  (NULL, 1), -1);
+    ASSERT_EQ (baGetValue (NULL, 1), -1);
+    ASSERT_EQ (baSetValue (NULL, 1, 0), -1);
+
     // ---------------------------------------
 
     BinArray* arr = baCreate (5);
@@ -592,6 +597,8 @@ TEST (BIN_ARRAY, Rand_Invert_And_GetInvert) {
 // ==============//
 
 TEST (BIN_ARRAY, Dump) {
+
+    ASSERT_EQ (baDumpBufFull (NULL), -1);
 
     BinArray* arr = baCreate (5);
     ASSERT_TRUE (arr != NULL);

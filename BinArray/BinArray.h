@@ -11,15 +11,12 @@
     1) Нужно ли в функциях, которые не меняют объект либо указатель на него
     писать f (const BinArray *arr) или f (BinArray * const arr)?
 */
-
 /*
 Tasks:
     Поставить проверку на 64 битную архитектуру
-    
+    Кинуть временные файлы в tmp
     Optimize ffs, baFindOne
 */
-
-//#define USE_FFS_OPTIMIZATION
 
 typedef struct bin_array BinArray;
 

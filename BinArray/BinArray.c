@@ -62,7 +62,7 @@ size_t baBits2Bytes (size_t num_bits) {
     return num_bits / 8 + (num_bits % 8 != 0);
 }
 
-size_t _baGetNumBits (BinArray* arr) {
+static size_t _baGetNumBits (BinArray* arr) {
     return arr->num_bits_;
 }
 size_t baGetNumBits (BinArray* arr) {
@@ -92,16 +92,16 @@ void bprint (uint8_t* bytes, size_t num_bytes) {
 // Check functions ------------------------------------------------------------
 // ===============//
 
-bool baCheckArr (BinArray arr) {
+static bool baCheckArr (BinArray arr) {
     return (arr.buf_ != NULL) && (arr.buf_ != 0);
 }
 
-bool baCheckPtr (BinArray* arr) {
+static bool baCheckPtr (BinArray* arr) {
     return arr != NULL && baCheckArr (*arr);
 }
 
 // Effctive check and calculate input args
-bool baCheckCalcArg (BinArray* arr, size_t begin, ssize_t* len) {
+static bool baCheckCalcArg (BinArray* arr, size_t begin, ssize_t* len) {
     
     if (baCheckPtr (arr)) {
 
@@ -167,7 +167,11 @@ BinArray* baCreate (size_t num_bits) {
 }
 int baResize (BinArray* arr, size_t new_num_bits) {
 
-    CHECK_PBA (arr);
+    if (baCheckPtr (arr) == false) {                                  
+       errno = EINVAL;                 
+       return -1;
+    }
+
     if (new_num_bits == 0)
         return -1;
     
@@ -281,7 +285,10 @@ static /* inline*/ bool _baGetValue (buf_t buf, size_t num_bit) {
 
 int baGetValue (BinArray *arr, size_t num_bit) {
 
-    CHECK_PBA (arr);
+    if (baCheckPtr (arr) == false) {                                  
+       errno = EINVAL;                 
+       return -1;
+}
 
     if (num_bit > arr->num_bits_) {
         errno = E2BIG;
@@ -312,7 +319,10 @@ static /* inline*/ void _baSetValue (buf_t buf, size_t num_bit, bool val) {
 
 int baSetOne   (BinArray* arr, size_t num_bit) {
 
-    CHECK_PBA (arr);
+    if (baCheckPtr (arr) == false) {                                  
+       errno = EINVAL;                 
+       return -1;
+    }
 
     if (num_bit > arr->num_bits_) {
         errno = E2BIG;
@@ -325,7 +335,10 @@ int baSetOne   (BinArray* arr, size_t num_bit) {
 }
 int baSetZero  (BinArray* arr, size_t num_bit) {
 
-    CHECK_PBA (arr);
+    if (baCheckPtr (arr) == false) {                                  
+       errno = EINVAL;                 
+       return -1;
+}
 
     if (num_bit > arr->num_bits_) {
         errno = E2BIG;
@@ -337,7 +350,10 @@ int baSetZero  (BinArray* arr, size_t num_bit) {
     return 0;
 }
 int baSetValue (BinArray* arr, size_t num_bit, bool val) {
-    CHECK_PBA (arr);
+    if (baCheckPtr (arr) == false) {                                  
+       errno = EINVAL;                 
+       return -1;
+}
 
     if (num_bit > arr->num_bits_) {
         errno = E2BIG;
@@ -546,7 +562,10 @@ int baFillZero (BinArray* arr, size_t begin, ssize_t len) {
 }
 
 int baFillZeroFull (BinArray* arr) {
-    CHECK_PBA (arr);
+    if (baCheckPtr (arr) == false) {                                  
+       errno = EINVAL;                 
+       return -1;
+    }
     
     // NEED TO OPTIMIZE SPEED!
     memset (arr->buf_, 0x00, 8 * baGetSizeArrayIn8Byte (arr->num_bits_));
@@ -554,7 +573,10 @@ int baFillZeroFull (BinArray* arr) {
     return 0;
 }
 int baFillOneFull (BinArray* arr) {
-    CHECK_PBA (arr);
+    if (baCheckPtr (arr) == false) {                                  
+       errno = EINVAL;                 
+       return -1;
+}
 
     // NEED TO OPTIMIZE SPEED!
     memset (arr->buf_, 0xFF, 8 * baGetSizeArrayIn8Byte (arr->num_bits_));
@@ -582,7 +604,10 @@ int baDumpBuf (BinArray* arr, size_t begin, ssize_t len) {
 }
 int baDumpBufFull (BinArray* arr) {
 
-    CHECK_PBA (arr);
+    if (baCheckPtr (arr) == false) {                                  
+       errno = EINVAL;                 
+       return -1;
+    }
 
     const size_t num_bits = _baGetNumBits (arr);
     size_t i = 0;
