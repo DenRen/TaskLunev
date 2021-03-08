@@ -53,7 +53,7 @@ test_valgrind: clean test_build
 
 # Coverage ----------------------
 
-view_coverage:
+view_coverage: test
 	lcov --capture --directory . --output-file coverage.info
 	genhtml coverage.info -o $(LCOV_OUT_FOLDER)
 	#$(BROWSER)
