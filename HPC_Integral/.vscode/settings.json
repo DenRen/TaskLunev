@@ -9,6 +9,8 @@
         "unistd.h": "c",
         "functional": "c",
         "cerrno": "c",
-        "cstdio": "c"
+        "cstdio": "c",
+        "ratio": "cpp",
+        "sched.h": "c"
     }
 }

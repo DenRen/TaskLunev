@@ -30,30 +30,9 @@ void* thread_print (void* num) {
         return -1;              \
     } while (0);
 
+#define _GNU_SOURCE
+#include <sched.h>
+
 int main () {
     printf ("%g\n", Integral (0, 3.141592, sin, 8));
-
-    return 0;
-
-    int state = 0;
-    pthread_t tid = 0;
-
-    pthread_attr_t tattr = {};
-    pthread_attr_init (&tattr);
-
-    int num = 4;
-    if ((state = pthread_create (&tid, NULL, thread_print, &num)))
-        handle_error_en (state, "pthread_create");
-
-    if ((state = pthread_cancel (tid)))
-        handle_error_en (state, "pthread_cancel")
-
-    double *result = NULL;
-    if ((state = pthread_join (tid, (void**) &result)))
-        handle_error_en (state, "pthread_join");
-
-    if (result != PTHREAD_CANCELED)
-        printf ("%g\n", *result);
-    else
-        printf ("The thread %ld will be canceled\n", tid);
 }

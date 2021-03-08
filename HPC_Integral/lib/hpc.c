@@ -7,7 +7,10 @@
 #include <math.h>
 #include <stdio.h>
 
-const double eps = 1e-6;
+#define _GNU_SOURCE
+#include <sched.h>
+
+const double eps = 1e-9 / 3;
 
 static void swap_double (double* first, double* second) {
     double temp = *first;
@@ -20,13 +23,14 @@ typedef struct {
     double (* func) (double x);
 } integral_arg_t;
 
-bool _verifier_int_arg (const integral_arg_t int_arg) {
-    return (int_arg.a < int_arg.b) &&
-           (int_arg.dx > 0) && (int_arg.func != NULL);
+static bool _verifier_int_arg (const integral_arg_t int_arg) {
+    return (int_arg.a    <= int_arg.b) &&
+           (int_arg.dx   >= 0)         &&
+           (int_arg.func != NULL);
 }
 
 // a <= b
-void* _calc_integral (void* pointer_int_arg) {
+static void* _calc_integral (void* pointer_int_arg) {
     integral_arg_t int_arg = * (integral_arg_t*) pointer_int_arg;
 
     if (_verifier_int_arg (int_arg) == false) {
@@ -43,7 +47,7 @@ void* _calc_integral (void* pointer_int_arg) {
     pthread_exit (res);
 }
 
-void _detach_threads (pthread_t arr_tid[], size_t num_arr) {
+static void _detach_threads (pthread_t arr_tid[], size_t num_arr) {
     for (int i = 0; i < num_arr; ++i)
         pthread_detach (arr_tid[i]);
 }
@@ -56,8 +60,8 @@ double Integral (double a, double b, double (* func) (double), int num_threads) 
     if (!sign_int)
         swap_double (&a, &b);
 
-    const double dx = (b - a) * eps;
-    double len = (b - a) / num_threads;
+    const double dx  = (b - a) * eps;
+    const double len = (b - a) / num_threads;
     
     double         res_arr [num_threads];
     pthread_t      tid_arr [num_threads];
@@ -84,6 +88,26 @@ double Integral (double a, double b, double (* func) (double), int num_threads) 
             return NAN;
         }
     }
+    
+    /*
+    cpu_set_t cpu_set = {};
+
+    CPU_ZERO (&cpu_set);
+    for (int i = 0; i < 8; ++i)
+        CPU_CLR (i, &cpu_set);
+
+    for (int i = 0; i < num_threads; ++i) {
+        CPU_SET (i % 10, &cpu_set);
+
+        state = pthread_setaffinity_np (tid_arr[i], sizeof (cpu_set), &cpu_set);
+        if (state) {
+            perror ("pthread_setaffinity_np");
+            _detach_threads (tid_arr, num_threads);
+            return NAN;
+        }
+
+        CPU_CLR (i % 10, &cpu_set);
+    }*/
 
     double res = 0;
     for (int i = 0; i < num_threads; ++i) {
@@ -109,7 +133,7 @@ double SimpleIntegral (double a, double b, double (* func) (double)) {
         swap_double (&a, &b);
 
     const double dx = (b - a) * eps;
-    double res = 0, len = (b - a);
+    double res = 0;
 
     while (a < b) {
         res += func (a);

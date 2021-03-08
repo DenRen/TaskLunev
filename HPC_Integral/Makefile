@@ -5,10 +5,10 @@ LD = g++
 
 RM = rm -rf
 
-OPTIM_FLAGS = -Og
+OPTIM_FLAGS = -Ofast
 
 CFLAGS = $(OPTIM_FLAGS) -MD -pthread
-LDFLAGS = $(CFLAGS) -lm
+LDFLAGS = $(CFLAGS) -lm -flto
 
 LIB_HPC_DIR = lib
 LIB_HPC_OBJS = hpc.o cpu_topology.o
@@ -41,10 +41,13 @@ test:
 
 # Clean ----------------------------------------------------
 
-clean:
-	$(RM) $(EXEC_FILE) *.o *.d
+clean_temp:
+	$(RM) *.o *.d
 	$(MAKE) -C $(LIB_HPC_DIR) 	   clean
 	$(MAKE) -C $(LIB_HPC_TEST_DIR) clean
+
+clean: clean_temp
+	$(RM) $(EXEC_FILE)
 
 -include $(ALL_EXEC_OBJS:.o=.d)
 

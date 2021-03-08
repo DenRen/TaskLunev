@@ -3,10 +3,10 @@
 CC = g++
 LD = g++
 
-OPTIM_FLAGS = -Og
+OPTIM_FLAGS = -Ofast
 
 CFLAGS = $(OPTIM_FLAGS) -MD -pthread
-LDFLAGS = $(CFLAGS) -lm
+LDFLAGS = $(CFLAGS) -lm -flto
 
 RM = rm -rf
 
@@ -16,11 +16,8 @@ OBJS = cpu_topology.o hpc.o
 
 all: $(OBJS)
 
-$(EXEC_FILE): $(OBJS)
-	$(LD) -o $@ $^ $(LDFLAGS)
-
 clean:
-	$(RM) $(EXEC_FILE) *.o *.d
+	$(RM) *.o *.d
 
 -include $(OBJS:.o=.d)
 
