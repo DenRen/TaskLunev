@@ -28,4 +28,6 @@ clean:
 
 -include $(OBJS:.o=.d)
 
-.PHONY: clean all ../BinArray.o	# ../BinArray.o because other make
+.PHONY: clean all ../BinArray.o	# ../BinArray.o because other makecore_id: the CPU core ID of cpu#. Typically it is the
+		hardware platform's identifier (rather than the kernel's).
+		The actual value is architecture and platform dependent.

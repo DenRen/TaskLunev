@@ -6,7 +6,7 @@ LD = g++
 OPTIM_FLAGS = -Ofast
 
 CFLAGS = $(OPTIM_FLAGS) -MD -pthread
-LDFLAGS = $(CFLAGS) -lm -flto
+LDFLAGS = $(CFLAGS) -lm
 
 RM = rm -rf
 

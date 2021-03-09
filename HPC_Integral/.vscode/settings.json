@@ -11,6 +11,8 @@
         "cerrno": "c",
         "cstdio": "c",
         "ratio": "cpp",
-        "sched.h": "c"
+        "sched.h": "c",
+        "stat.h": "c",
+        "cpu_topology.h": "c"
     }
 }

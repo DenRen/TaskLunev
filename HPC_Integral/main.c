@@ -34,5 +34,8 @@ void* thread_print (void* num) {
 #include <sched.h>
 
 int main () {
-    printf ("%g\n", Integral (0, 3.141592, sin, 8));
+
+    GetTopologyCPU ();
+    //printf ("%s", __PRETTY_FUNCTION__);
+    //printf ("%g\n", Integral (0, 3.141592, sin, 8));
 }

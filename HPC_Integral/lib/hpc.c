@@ -10,7 +10,7 @@
 #define _GNU_SOURCE
 #include <sched.h>
 
-const double eps = 1e-9 / 3;
+const double eps = 1e-7;
 
 static void swap_double (double* first, double* second) {
     double temp = *first;
@@ -89,6 +89,7 @@ double Integral (double a, double b, double (* func) (double), int num_threads) 
         }
     }
     
+
     /*
     cpu_set_t cpu_set = {};
 
