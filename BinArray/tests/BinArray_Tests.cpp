@@ -22,7 +22,6 @@ TEST (BIN_ARRAY, Fault_Allocate) {
     baDestroy (&arr);
 }
 #endif
-
 TEST (BIN_ARRAY, Secondary_Functions) {
     ASSERT_EQ (baBits2Bytes (0),  0);
     ASSERT_EQ (baBits2Bytes (2),  1);
@@ -246,7 +245,8 @@ TEST (BIN_ARRAY, GetSubArray) {
 
     for (int i = 0; i < 80; ++i) {
         ASSERT_EQ (baGetValue (sub_arr, i), 1) << i
-                                               << " " << baDumpBufFull (sub_arr);
+                                               << "AAA\n" << baDumpBufFull (sub_arr)
+                                               << " " << baGetNumBits (sub_arr);
     }
     baDestroy (&sub_arr);
 
@@ -256,7 +256,7 @@ TEST (BIN_ARRAY, GetSubArray) {
 
     for (int i = 0; i < 80; ++i) {
         ASSERT_EQ (baGetValue (sub_arr, i), 0) << i 
-                                               << " " << baDumpBufFull (sub_arr);
+                                               << "\n" << baDumpBufFull (sub_arr);
     }
     baDestroy (&sub_arr);
 
@@ -275,6 +275,11 @@ TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
     ASSERT_EQ (baFillOne  (NULL, 1, 1), -1);
     ASSERT_EQ (baFillZero (NULL, 1, 1), -1);
 
+    ASSERT_EQ (baSetOne   (NULL, 1), -1);
+    ASSERT_EQ (baSetZero  (NULL, 1), -1);
+    ASSERT_EQ (baGetValue (NULL, 1), -1);
+    ASSERT_EQ (baSetValue (NULL, 1, 0), -1);
+
     // ---------------------------------------
 
     BinArray* arr = baCreate (5);
@@ -291,15 +296,20 @@ TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {
 
     // ---------------------------------------
 
-    CheckFillOneBA  (  8, 3,  4);
-    CheckFillOneBA  (  6, 0,  2);
-    CheckFillOneBA  (800, 3, -1);
-    CheckFillOneBA  (78,  3, -1);
+    CheckFillOneBA  (  8, 3,   4);
+    CheckFillOneBA  (  6, 0,   2);
+    CheckFillOneBA  (800, 3,  -1);
+    CheckFillOneBA  (800, 3, 145);
+    CheckFillOneBA  (78,  3,  -1);
 
-    CheckFillZeroBA (  8, 3,  4);
-    CheckFillZeroBA (  6, 0,  2);
-    CheckFillZeroBA (800, 3, -1);
-    CheckFillZeroBA (78,  3, -1);
+    CheckFillZeroBA (  8, 3,   4);
+    CheckFillZeroBA (  6, 0,   2);
+    CheckFillZeroBA (800, 3,  -1);
+    CheckFillZeroBA (800, 3, 145);
+    CheckFillZeroBA (78,  3,  -1);
+
+    for (int i = 4; i < 200; ++i)
+        CheckFillZeroBA (i, 3, -1);
 }
 
 TEST (BIN_ARRAY, Rand_Filling_And_Getting_One_And_Zero) {
@@ -371,18 +381,46 @@ TEST (BIN_ARRAY, Setting_And_GettingOne_OrZero) {
 // ==============//
 
 TEST (BIN_ARRAY, Find) {
+
+    ASSERT_EQ (baFindOne  (NULL, 0, 3), -1);
+    ASSERT_EQ (baFindZero (NULL, 0, 3), -1);
+
+    // ----------------------------------------
+
     BinArray* arr = baCreate (10);
     ASSERT_TRUE (arr != NULL);
 
     baFillZeroFull (arr);
 
     baSetOne (arr, 4);
-    ASSERT_EQ (baFindOne (arr, 0, 5), 4);
+    baSetOne (arr, 5);
+    ASSERT_EQ (baFindOne (arr, 0, 6), 4);
     ASSERT_EQ (baFindOne (arr, 3, 7), 4);
     
-    baInvert (arr);
+    baInvert (arr, 0, -1);
     ASSERT_EQ (baFindZero (arr, 0, 5), 4);
     ASSERT_EQ (baFindZero (arr, 3, 7), 4);
+
+    baDestroy (&arr);
+
+    // ----------------------------------------
+
+    arr = baCreate (100);
+    ASSERT_TRUE (arr != NULL);
+
+    baFillZeroFull (arr);
+
+    baSetOne (arr, 70);
+    ASSERT_EQ (baFindOne (arr, 3, -1), 70);
+    baSetOne (arr, 53);
+    ASSERT_EQ (baFindOne (arr, 3, -1), 53);
+      
+    baFillOneFull (arr);
+
+    baSetZero (arr, 70);
+    ASSERT_EQ (baFindZero (arr, 3, -1), 70);
+    baSetZero (arr, 53);
+    ASSERT_EQ (baFindZero (arr, 3, -1), 53);
 
     baDestroy (&arr);
 }
@@ -498,7 +536,7 @@ TEST (BIN_ARRAY, Foreach_On_Max_Min_Functions) {
 // ================//
 
 TEST (BIN_ARRAY, Invert_And_GetInvert) {
-    ASSERT_TRUE (baInvert    (NULL) == -1);
+    ASSERT_TRUE (baInvert    (NULL, 0, -1) == -1);
     ASSERT_TRUE (baGetInvert (NULL) == NULL);    
 }
 
@@ -521,14 +559,15 @@ TEST (BIN_ARRAY, Rand_Invert_And_GetInvert) {
         BinArray* arr = arrs[iarr];
         
         BinArray* inv_arr = baGetClone (arr);
-        baInvert (inv_arr);
+        baInvert (inv_arr, 0, -1);
 
         size_t num_bits = baGetNumBits (arr);
         for (int i = 0; i < num_bits; i++) {
             bool elem = baGetValue (arr, i);
             bool inv_elem = baGetValue (inv_arr, i);
 
-            ASSERT_TRUE (elem != inv_elem);
+            ASSERT_TRUE (elem != inv_elem) << baDumpBufFull (arr) << "\n\n" 
+                                           << baDumpBufFull (inv_arr);
         }
     }
 
@@ -559,6 +598,8 @@ TEST (BIN_ARRAY, Rand_Invert_And_GetInvert) {
 
 TEST (BIN_ARRAY, Dump) {
 
+    ASSERT_EQ (baDumpBufFull (NULL), -1);
+
     BinArray* arr = baCreate (5);
     ASSERT_TRUE (arr != NULL);
 
@@ -569,7 +610,7 @@ TEST (BIN_ARRAY, Dump) {
     ASSERT_EQ (Check_Dump (arr, 1,  2, "00"   ), 1);
     ASSERT_EQ (Check_Dump (arr, 3, -1, "00"   ), 1);
     ASSERT_EQ (Check_Dump (arr, 0,  1, "0"    ), 1);
-    ASSERT_EQ (Check_Dump (arr, 3, 2,  "00"   ), 1);
+    ASSERT_EQ (Check_Dump (arr, 3,  2, "00"   ), 1);
 
     baFillOneFull (arr);
     ASSERT_EQ (Check_Dump (arr, 6, -1, "11111"), 0);
@@ -579,6 +620,14 @@ TEST (BIN_ARRAY, Dump) {
     ASSERT_EQ (Check_Dump (arr, 3, -1, "11"   ), 1);
     ASSERT_EQ (Check_Dump (arr, 0,  1, "1"    ), 1);
     ASSERT_EQ (Check_Dump (arr, 3, 2,  "11"   ), 1);
+
+    baResize (arr, 16);
+    ASSERT_TRUE (arr != NULL);
+
+    baFillZeroFull (arr);
+    ASSERT_EQ (Check_Dump (arr, 6, -1, "00000000 00000000"), 0);
+    ASSERT_EQ (Check_Dump (arr, 6, -1, "00000000 00011100"), 0);
+    ASSERT_EQ (Check_Dump (arr, 6, -1, "11111111 11111111"), 0);
 
     baDestroy (&arr);
 }

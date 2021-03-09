@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "BinArray.h"
-//#include <random>
 
 typedef int el_t;
 
@@ -12,37 +11,29 @@ int find_max (BinArray* c, bool el, void* data) {
     return 0;
 }
 
-// todo dump
-
 int main () {
-    size_t num_bits = 17;
-    BinArray* arr = baCreate (num_bits), *index = baCreate (num_bits);
-    if (arr == NULL || index == NULL) {
+    printf ("\n");
+
+    ssize_t num_bits = 100;
+    BinArray* arr = baCreate (num_bits);
+    if (arr == NULL) {
         perror ("baCreate");
         return -1;
     }
-
+      
     baFillOneFull (arr);
-    //baFillZeroFull (arr);
-    baFillZeroFull (index);
 
-    ssize_t size_dump = -1;
-    size_t begin = 16;
-    ssize_t len = -1;
-    
-    baSetOne (index, begin);
-    baSetOne (index, begin + len - 1);
-    baDumpBuf (index, 0, size_dump);
+    baSetZero (arr, 70);
 
-    baFillZero (arr, begin, len);
-    //baFillOne (arr, begin, len);
-    baDumpBuf (arr, 0, size_dump);
+    baDumpBufFull (arr);
+    printf ("Find 0: %zi\n", baFindZero (arr, 3, -1));
 
-    for (int i = 0; i < 23; ++i) {
-        //printf ("Find 1 (%2d): %2zi\n", i, baFindOne (arr, i, -1));
-        printf ("Find 0 (%2d): %2zi\n", i, baFindZero (arr, i, -1));
-    }
+    baFillZeroFull (arr);
+
+    baSetOne (arr, 70);
+
+    baDumpBufFull (arr);
+    printf ("Find 1: %zi\n", baFindOne (arr, 3, -1));
 
     baDestroy (&arr);
-    baDestroy (&index);
 }

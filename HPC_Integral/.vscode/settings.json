@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "cryptouser.h": "c",
+        "module.h": "c",
+        "atomic": "cpp",
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "sstream": "cpp",
+        "unistd.h": "c",
+        "functional": "c",
+        "cerrno": "c",
+        "cstdio": "c",
+        "ratio": "cpp",
+        "sched.h": "c",
+        "stat.h": "c",
+        "cpu_topology.h": "c"
+    }
+}

@@ -2,14 +2,15 @@ CXX = g++
 CC  = g++
 LD  = g++
 
-OPTIM_FLAGS = -O0
+OPTIM_FLAGS = -Os -flto
 GTEST_FLAGS = -lgtest -pthread -g
-#GCOV_FLAGS = -fprofile-arcs -ftest-coverage
-#LD_GCOV_FLAGS = -lgcov
+GCOV_FLAGS = -fprofile-arcs -ftest-coverage
+LD_GCOV_FLAGS = -lgcov
+OTHER_FLAGS = -MD
 
-CFLAGS   = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(GCOV_FLAGS)
-CXXFLAGS = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(GCOV_FLAGS)
-LDFLAGS  = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(LD_GCOV_FLAGS)
+CFLAGS   = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(GCOV_FLAGS) $(OTHER_FLAGS)
+CXXFLAGS = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(GCOV_FLAGS) $(OTHER_FLAGS)
+LDFLAGS  = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(LD_GCOV_FLAGS) $(OTHER_FLAGS)
 
 OBJS = main.o ../BinArray.o TestFunc.o
 
@@ -17,11 +18,16 @@ all: tests.out
 
 tests.out: $(OBJS)
 	$(LD) -o $@ $^ $(LDFLAGS)
+	strip $@
 
 ../BinArray.o:
 	$(MAKE) -C ../ BinArray.o
 
 clean:
-	$(RM) tests.out *.o *.gcno *.gcda *.info
+	$(RM) tests.out *.o *.gcno *.gcda *.info *.d
 
-.PHONY: clean all ../BinArray.o	# ../BinArray.o because other make
+-include $(OBJS:.o=.d)
+
+.PHONY: clean all ../BinArray.o	# ../BinArray.o because other makecore_id: the CPU core ID of cpu#. Typically it is the
+		hardware platform's identifier (rather than the kernel's).
+		The actual value is architecture and platform dependent.

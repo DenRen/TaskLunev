@@ -11,11 +11,10 @@
     1) Нужно ли в функциях, которые не меняют объект либо указатель на него
     писать f (const BinArray *arr) или f (BinArray * const arr)?
 */
-
 /*
 Tasks:
-
-    test calloc
+    Поставить проверку на 64 битную архитектуру
+    Кинуть временные файлы в tmp
     Optimize ffs, baFindOne
 */
 
@@ -98,7 +97,7 @@ int baForeach (BinArray* arr,
 // Invert functions -----------------------------------------------------------
 // ================//
 
-int baInvert (BinArray* arr);
+int       baInvert    (BinArray* arr, size_t begin, ssize_t len);
 BinArray* baGetInvert (BinArray* arr);
 
 #ifdef __cplusplus

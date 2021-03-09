@@ -229,6 +229,7 @@ void CheckFillOneBA (size_t num_bits, size_t begin, ssize_t len) {
     ASSERT_EQ (baFillZeroFull (arr), 0);
     ASSERT_EQ (baFillOne (arr, begin, len), 0);
 
+    //baDumpBufFull (arr);
     BinArray* result = baGetSubArray (arr, begin, len);
     ASSERT_TRUE (result != NULL);
 
@@ -245,6 +246,7 @@ void CheckFillZeroBA (size_t num_bits, size_t begin, ssize_t len) {
     ASSERT_EQ (baFillOneFull (arr), 0);
     ASSERT_EQ (baFillZero (arr, begin, len), 0);
 
+    //baDumpBufFull (arr);
     BinArray* result = baGetSubArray (arr, begin, len);
     ASSERT_TRUE (result != NULL);
 
@@ -257,7 +259,8 @@ void CheckFillZeroBA (size_t num_bits, size_t begin, ssize_t len) {
 void CheckOneFullBA (BinArray* arr) {
     size_t num_bits = baGetNumBits (arr);
     for (size_t j = 0; j < num_bits; ++j) {
-        ASSERT_EQ (baGetValue (arr, j), 1) << baDumpBufFull (arr);
+        ASSERT_EQ (baGetValue (arr, j), 1) 
+        << j << " " << num_bits << "A " << baDumpBufFull (arr) << "B\n";
     }
 }
 
@@ -320,7 +323,7 @@ void CheckFindOne  (BinArray* arrs[], size_t num, const float koef_num_check) {
             baSetOne (arr, num_bit);
 
             int64_t num_from_find = baFindOne (arr, 0, -1);
-            ASSERT_EQ (num_bit, num_from_find);
+            EXPECT_EQ (num_bit, num_from_find);
 
             baSetZero (arr, num_bit);
         }
@@ -336,7 +339,7 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
 
     // ------------------------------------------------------------
 
-    FillZeroFullArrayBA (arrs, num);
+    FillOneFullArrayBA (arrs, num);
 
     for (int iarr = 0; iarr < num; ++iarr) {
 
@@ -346,12 +349,12 @@ void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {
 
         for (int i = 0; i < num_attempts; ++i) {
             size_t num_bit = rand_num_bit (gen);
-            baSetOne (arr, num_bit);
+            baSetZero (arr, num_bit);
 
-            int64_t num_from_find = baFindOne (arr, 0, -1);
+            int64_t num_from_find = baFindZero (arr, 0, -1);
             ASSERT_EQ (num_bit, num_from_find);
 
-            baSetZero (arr, num_bit);
+            baSetOne (arr, num_bit);
         }
     }
 
@@ -429,7 +432,7 @@ void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check) {
     }
 }
 
-bool Check_Dump (BinArray* arr, size_t begin, ssize_t len, const char* str) {
+int Check_Dump (BinArray* arr, size_t begin, ssize_t len, const char* str) {
     const char nameTempFile[] = "test_Secondary_Functions.tmp"; 
 
     pid_t pid_child = fork ();
@@ -465,6 +468,7 @@ bool Check_Dump (BinArray* arr, size_t begin, ssize_t len, const char* str) {
         
         size_t len = strlen (str);
         int ret = fread (buf, sizeof (char), len, stdout);
+        
         if (ret == 0) {
             perror ("fread");
             exit (-1);
