@@ -1,9 +1,6 @@
 #include "cpu_topology.h"
 #include "cpu_topology_dev.h"
 
-#define PATH_CPU     "/sys/devices/system/cpu/"
-#define FILE_ONLINE  "online"
-#define DIR_TOPOLOGY "cpu%d/topology"
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -13,7 +10,13 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "../../BinArray/BinArray.h"
+#define PATH_CPU     "/sys/devices/system/cpu/"
+#define FILE_ONLINE  "online"
+#define DIR_TOPOLOGY "cpu%d/topology"
+#define FILE_COREID  "core_id"
+
+const int MAX_LEN_PATH = 128;
+const int MAX_SIZE_TOPOLGY_FILE = 128;  // F.e cpu/online, cpu#/topology/core_id
 
 /*
 for ((count = 0; count < 8; count++))
@@ -36,36 +39,36 @@ thread_siblings: internel kernel map of cpu#'s hardware
 // Error function -------------------------------------------------------------
 // ==============//
 
-void print_error_line (const char name_file[], int line) {
+void print_error_line (const char strerr[], const char name_file[], int line) {
     char str_error[256];
-    sprintf (str_error, "Pointer is NULL\n"
-                        "LINE: " __FILE__ ": %d\n", __LINE__);
+    sprintf (str_error, "%s\n"
+                        "LINE: %s: %d\n", strerr, name_file, line);
     perror (str_error);
 }
 
-#define CHECK_PTR(ptr)                          \
-    if (ptr == NULL) {                          \
-        print_error_line (__FILE__, __LINE__);  \
-        return -1;                              \
+#define CHECK_PTR(ptr)                                              \
+    if (ptr == NULL) {                                              \
+        print_error_line ("Pointer is NULL", __FILE__, __LINE__);   \
+        return -1;                                                  \
     }
 
-// ==================\\
-// CPU topology struct -------------------------------------------------------------
-// ==================//
+// ===========\\
+// Main struct -------------------------------------------------------------
+// ===========//
 
 typedef struct {
     int id;
     int core_id;
 } logic_cpu_t;
 
-typedef struct {
+typedef struct _cpu_topology_t {
     int num_logic_cpu;
     logic_cpu_t* logic_cpus;
 } cpu_topology_t;
 
-// ======================\\
-// CPU topology functions -------------------------------------------------------------
-// ======================//
+// ==============\\
+// Init functions -------------------------------------------------------------
+// ==============//
 
 cpu_topology_t* cputopCreate () {
     return (cpu_topology_t*) calloc (1, sizeof (cpu_topology_t));
@@ -75,32 +78,23 @@ int cputopDestroy (cpu_topology_t* cputop) {
     CHECK_PTR (cputop);
 
     free (cputop->logic_cpus);
-    cputop->logic_cpus = -1;
+    cputop-> num_logic_cpu = -1;
 }
 
 int cputopInit (cpu_topology_t* cputop) {
     CHECK_PTR (cputop);
 
-    // todo: fill main 
+    cputopInitLogicCPU (cputop);    // Read cpu/online
+    cputopInitCPU (cputop);         // Read cpu#/topology/core_id
 }
 
-void GetTopologyCPU () {
-    const int num_cpus = GetNumLogicCPU ();
-    printf ("num_cpus: %d\n", num_cpus);
+// ====================\\
+// Init functions [DEV] -------------------------------------------------------
+// ====================//
 
-    char dir_topology[sizeof (PATH_CPU) + sizeof (DIR_TOPOLOGY) + 16];
+const int LOGIC_CPU_MAX = 256;
 
-    unsigned thread_cpu[num_cpus];
-
-    for (int num_cpu = 0; num_cpu < num_cpus; ++num_cpu) {
-        
-        sprintf (dir_topology, PATH_CPU DIR_TOPOLOGY "/core", num_cpu);
-
-        //int fd = open ();
-    }
-}
-
-char* _readFile (const char name_file[]) {
+char* _readCpuTopologyFile (const char name_file[]) {
     int fd = open (name_file, O_RDONLY);
     if (fd == -1) {
         perror ("open");
@@ -118,7 +112,6 @@ char* _readFile (const char name_file[]) {
     char* buf = (char*) calloc (str_len + 1, 1);
 
     const int len = read (fd, buf, str_len);
-    
     if (len == -1 || len == 0) {
         perror ("read");
         close (fd);
@@ -132,37 +125,88 @@ char* _readFile (const char name_file[]) {
     return buf;
 }
 
-// str != NULL
-int _parseString2SumNumber (char* str) {
+int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str) {
+    CHECK_PTR (cputop);
+    CHECK_PTR (str);
+
     char* str2 = NULL, *token = NULL;
 
-    int num = 0;
+    cputop->logic_cpus = (logic_cpu_t*) calloc (LOGIC_CPU_MAX, sizeof (logic_cpu_t));
+    
+    int num_cpus = 0;
 
     for (char* str1 = str; ; str1 = NULL) {
         if ((token = strtok (str1, ",")) == NULL)
             break;
         
         char* pos_delim = strchr (token, '-');
-        if (pos_delim == NULL)
-            ++num;
-        else
-            num += atoi (pos_delim + 1) - atoi (token) + 1;
+        if (pos_delim == NULL) {    // 1
+            cputop->logic_cpus[num_cpus++].id = atoi (token);
+        }
+        else {                      // 1-3
+            int cur_log_cpu = atoi (token) + 1, max_log_cpu = atoi (pos_delim + 1);
+            do {
+                cputop->logic_cpus[num_cpus++].id = cur_log_cpu++;
+            } while (cur_log_cpu <= max_log_cpu);
+        }
     }
 
-    return num;
+    cputop->num_logic_cpu = num_cpus;
+    cputop->logic_cpus = (logic_cpu_t*) realloc (cputop->logic_cpus, num_cpus * sizeof (logic_cpu_t));
+    
+    return 0;
+}
+int _cputopFillCoreCPU (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+    CHECK_PTR (cputop->logic_cpus);
+    
+    if (cputop->num_logic_cpu <= 0) {
+        errno = EINVAL;
+        print_error_line ("(cputop->num_logic_cpu <= 0) is false", __FILE__, __LINE__);
+        return -1;
+    }
+
+    const int num_logic_cpus = cputop->num_logic_cpu;
+    for (int i = 0; i < num_logic_cpus; ++i) {
+        const int num_logic_cpu = cputop->logic_cpus[i].id;
+        
+        char path_file[MAX_LEN_PATH] = {0};
+        sprintf (path_file, PATH_CPU DIR_TOPOLOGY "/" FILE_COREID, num_logic_cpu);
+
+        char* str_core_id = _readCpuTopologyFile (path_file);
+        CHECK_PTR (str_core_id);
+
+        cputop->logic_cpus[i].core_id = atoi (str_core_id);
+
+        free (str_core_id);
+    }
+
+    return 0;
 }
 
-int GetNumLogicCPU () {
-    
-    char* str = _readFile (PATH_CPU FILE_ONLINE);
+int cputopInitLogicCPU (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+
+    char* str = _readCpuTopologyFile (PATH_CPU FILE_ONLINE);
     if (str == NULL) {
         perror ("_readFile");
         return -1;
     }
 
-    int numLogicCPU = _parseString2SumNumber (str);
+    if (_cputopFillLogicCPU (cputop, str) == -1) {
+        perror ("_cputopFillLogicCPU");
+        free (str);
+        return -1;
+    }
 
     free (str);
 
-    return numLogicCPU;
+}
+int cputopInitCPU (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+
+    if (_cputopFillCoreCPU (cputop) == -1) {
+        print_error_line ("_cputopFillCoreCPU", __FILE__, __LINE__);
+        return -1;
+    }
 }
