@@ -1,4 +1,5 @@
 #include "hpc.h"
+#include "cpu_topology.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -52,8 +53,35 @@ static void _detach_threads (pthread_t arr_tid[], size_t num_arr) {
         pthread_detach (arr_tid[i]);
 }
 
+// tid_arr != NULL && cputop != NULL
+int _distributeThread (pthread_t tid_arr[], int num_threads, cpu_topology_t* cputop) {
+    cpu_set_t cpu_set = {0};
+
+    const int num_logic_cpu = cputopGetNumLogicCPU (cputop);
+
+    CPU_ZERO (&cpu_set);
+    for (int i = 0; i < num_logic_cpu; ++i)
+        CPU_CLR (i, &cpu_set);
+
+    for (int num_thread = 0; num_thread < num_threads; ++num_thread) {
+
+        const int logic_cpu_id = cputopGetLogicCpuId (cputop, num_thread % num_logic_cpu);
+
+        CPU_SET (logic_cpu_id, &cpu_set);
+
+        if (pthread_setaffinity_np (tid_arr[num_thread], sizeof (cpu_set), &cpu_set)) {
+            perror ("pthread_setaffinity_np");
+            _detach_threads (tid_arr, num_threads);
+            return NAN;
+        }
+
+        CPU_CLR (logic_cpu_id, &cpu_set);
+    }
+}
+
 // If error, that return NAN and errno != 0
-double Integral (double a, double b, double (* func) (double), int num_threads) {
+double _integral (double a, double b, double (* func) (double),
+                  int num_threads, cpu_topology_t* cputop) {
     errno = 0;
     bool sign_int = a <= b;
 
@@ -89,26 +117,7 @@ double Integral (double a, double b, double (* func) (double), int num_threads) 
         }
     }
     
-
-    /*
-    cpu_set_t cpu_set = {};
-
-    CPU_ZERO (&cpu_set);
-    for (int i = 0; i < 8; ++i)
-        CPU_CLR (i, &cpu_set);
-
-    for (int i = 0; i < num_threads; ++i) {
-        CPU_SET (i % 10, &cpu_set);
-
-        state = pthread_setaffinity_np (tid_arr[i], sizeof (cpu_set), &cpu_set);
-        if (state) {
-            perror ("pthread_setaffinity_np");
-            _detach_threads (tid_arr, num_threads);
-            return NAN;
-        }
-
-        CPU_CLR (i % 10, &cpu_set);
-    }*/
+    _distributeThread (tid_arr, num_threads, cputop);
 
     double res = 0;
     for (int i = 0; i < num_threads; ++i) {
@@ -125,6 +134,23 @@ double Integral (double a, double b, double (* func) (double), int num_threads) 
     }
 
     return res * (2 * sign_int - 1) * dx;
+}
+
+double Integral (double a, double b, double (* func) (double), int num_threads) {
+    cpu_topology_t* cputop = cputopCreate ();
+    if (cputop == NULL) {
+        perror ("cputopCreate");
+        return NAN;
+    }
+
+    cputopInit (cputop);
+    cputopSortUniqSetsCoreId (cputop);
+    
+    double result = _integral (a, b, func, num_threads, cputop);
+
+    cputopDestroy (cputop);
+
+    return result;
 }
 
 double SimpleIntegral (double a, double b, double (* func) (double)) {

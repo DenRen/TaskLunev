@@ -14,14 +14,5 @@ double func (double x) {
 }
 
 int main () {
-
-    cpu_topology_t* cputop = cputopCreate ();
-
-    cputopInit(cputop);
-    
-    cputopDestroy (cputop);
-
-    //GetTopologyCPU ();
-    //printf ("%s", __PRETTY_FUNCTION__);
-    //printf ("%g\n", Integral (0, 3.141592, sin, 8));
+    printf ("%g\n", Integral (0, 3.141592, sin, 8));
 }

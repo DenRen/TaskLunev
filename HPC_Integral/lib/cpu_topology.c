@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <stdint.h>
 
 #define PATH_CPU     "/sys/devices/system/cpu/"
 #define FILE_ONLINE  "online"
@@ -56,7 +57,7 @@ void print_error_line (const char strerr[], const char name_file[], int line) {
 // Main struct -------------------------------------------------------------
 // ===========//
 
-typedef struct {
+typedef struct _logic_cpu_t {
     int id;
     int core_id;
 } logic_cpu_t;
@@ -86,6 +87,11 @@ int cputopInit (cpu_topology_t* cputop) {
 
     cputopInitLogicCPU (cputop);    // Read cpu/online
     cputopInitCPU (cputop);         // Read cpu#/topology/core_id
+}
+
+static inline bool _cputopIsInit (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+    return (cputop->num_logic_cpu > 0) && (cputop->logic_cpus != NULL);
 }
 
 // ====================\\
@@ -128,13 +134,13 @@ char* _readCpuTopologyFile (const char name_file[]) {
 int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str) {
     CHECK_PTR (cputop);
     CHECK_PTR (str);
-
+    
     char* str2 = NULL, *token = NULL;
 
     cputop->logic_cpus = (logic_cpu_t*) calloc (LOGIC_CPU_MAX, sizeof (logic_cpu_t));
     
     int num_cpus = 0;
-
+    // TODO показывает 7, а не 8
     for (char* str1 = str; ; str1 = NULL) {
         if ((token = strtok (str1, ",")) == NULL)
             break;
@@ -144,7 +150,7 @@ int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str) {
             cputop->logic_cpus[num_cpus++].id = atoi (token);
         }
         else {                      // 1-3
-            int cur_log_cpu = atoi (token) + 1, max_log_cpu = atoi (pos_delim + 1);
+            int cur_log_cpu = atoi (token), max_log_cpu = atoi (pos_delim + 1);
             do {
                 cputop->logic_cpus[num_cpus++].id = cur_log_cpu++;
             } while (cur_log_cpu <= max_log_cpu);
@@ -153,7 +159,7 @@ int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str) {
 
     cputop->num_logic_cpu = num_cpus;
     cputop->logic_cpus = (logic_cpu_t*) realloc (cputop->logic_cpus, num_cpus * sizeof (logic_cpu_t));
-    
+
     return 0;
 }
 int _cputopFillCoreCPU (cpu_topology_t* cputop) {
@@ -208,5 +214,118 @@ int cputopInitCPU (cpu_topology_t* cputop) {
     if (_cputopFillCoreCPU (cputop) == -1) {
         print_error_line ("_cputopFillCoreCPU", __FILE__, __LINE__);
         return -1;
+    }
+}
+
+// ===============================\\
+// Sort uniq sets core id function -------------------------------------------------------------
+// ===============================//
+
+int cputopSortUniqSetsCoreId (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+    if (_cputopIsInit (cputop) == false) {
+        perror ("_cputopIsInit");
+        return -1;
+    }
+
+    _cputopSortCoreId (cputop);
+
+    const int num_logic_cpu = cputop->num_logic_cpu; 
+
+    logic_cpu_t *logic_cpus = cputop->logic_cpus;
+
+    logic_cpu_t logic_cpus_copy[num_logic_cpu];
+    memcpy (logic_cpus_copy, logic_cpus, num_logic_cpu * sizeof (logic_cpu_t));
+
+    for (int i = 0; i < num_logic_cpu;) {
+        int min = -1;
+        for (int j = 0; j < num_logic_cpu; ++j)
+            if (logic_cpus_copy[j].core_id > min)
+            {
+                logic_cpus[i++] = logic_cpus_copy[j];
+                min = logic_cpus_copy[j].core_id;
+                logic_cpus_copy[j].core_id = -2;
+            }
+    }
+
+    return 0;
+}
+
+static int _cmpCoreId (const void *first, const void *second) {
+    return ((logic_cpu_t*) first)->core_id > ((logic_cpu_t*) second)->core_id;
+}
+
+void _cputopSortCoreId (cpu_topology_t* cputop) {
+    qsort (cputop->logic_cpus, cputop->num_logic_cpu, sizeof (logic_cpu_t), _cmpCoreId);
+}
+
+// first != NULL && second != NULL
+void _cputopSwapLogicCpu (logic_cpu_t* first, logic_cpu_t* second) {
+    logic_cpu_t temp = *first;
+    *first = *second;
+    *second = temp;
+}
+
+// ================\\
+// Getter functions -------------------------------------------------------------
+// ================//
+
+int cputopGetNumLogicCPU (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+
+    return cputop->num_logic_cpu;
+}
+
+int cputopGetNumCoreCPU (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+    if (_cputopIsInit (cputop) == false) {
+        errno = EINVAL;
+        print_error_line ("_cputopIsInit", __FILE__, __LINE__);
+        return -1;
+    }
+    
+    // Лучше реализовать через BinArray
+    const unsigned num_logic_cpu = cputop->num_logic_cpu;
+    
+    uint8_t mask_core_id[num_logic_cpu];
+    memset (mask_core_id, 0, num_logic_cpu);
+
+    for (int i = 0; i < num_logic_cpu; ++i)
+        mask_core_id[cputop->logic_cpus[i].core_id] = 1;
+
+    int sum = 0;
+    for (int i = 0; i < num_logic_cpu; ++i)
+        sum += mask_core_id[i];
+
+    return sum;
+}
+
+int cputopGetLogicCpuId (cpu_topology_t* cputop, int num_logic_cpu) {
+    if (cputop == NULL || num_logic_cpu >= cputop->num_logic_cpu) {
+        print_error_line ("(cputop == NULL || num_logic_cpu >= cputop->num_logic_cpu) is false",
+                          __FILE__, __LINE__);
+        errno = EINVAL;
+        return -1;
+    }
+
+    return cputop->logic_cpus[num_logic_cpu].id;
+}
+
+// =============\\
+// Dump function --------------------------------------------------------------
+// =============//
+
+int cputopDump (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+    
+    const int num_logic_cpu = cputopGetNumLogicCPU (cputop);
+    printf ("Number logic CPU: %d\n", num_logic_cpu);
+    printf ("Number core CPU:  %d\n", cputopGetNumCoreCPU (cputop));
+
+    printf ("\n");
+        printf ("Logic id -> Core id\n");
+    for (int i = 0; i < num_logic_cpu; ++i) {
+        logic_cpu_t logic_cpu = cputop->logic_cpus[i];
+        printf ("%2d -> %-2d\n", logic_cpu.id, logic_cpu.core_id);
     }
 }

@@ -15,23 +15,6 @@ bool IsEqual (double first, double second, double eps = 1e-3) {
     return fabs (first - second) < eps;
 }
 
-TEST (CPU_TOPOLOGY, _parseString2SumNumber) {
-
-    #define TEST_PARSER_STR_2_SUM_NUM(str, answer)       \
-    do {                                                 \
-        char buf[128] = str;                             \
-        ASSERT_EQ (_parseString2SumNumber (buf), answer);\
-    } while (0)
-
-    TEST_PARSER_STR_2_SUM_NUM ("0", 1);
-    TEST_PARSER_STR_2_SUM_NUM ("1", 1);
-    TEST_PARSER_STR_2_SUM_NUM ("2", 1);
-    TEST_PARSER_STR_2_SUM_NUM ("0-1", 2);
-    TEST_PARSER_STR_2_SUM_NUM ("3-15", 13);
-    TEST_PARSER_STR_2_SUM_NUM ("3,4-5", 3);
-    TEST_PARSER_STR_2_SUM_NUM ("1,2,3,5-9,13,14-19", 15);
-}
-
 TEST (HPC_Integral, SimpleIntegral) {
     #define TEST_SIMPLE_INTEGRAL(a, b, func, answer)                            \
     do {                                                                        \
