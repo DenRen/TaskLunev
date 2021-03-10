@@ -7,10 +7,6 @@
 #include "../lib/cpu_topology.h"
 #include "../lib/cpu_topology_dev.h"
 
-/*
-TODO: тесты GETNumebrCPU
-*/
-
 bool IsEqual (double first, double second, double eps = 1e-3) {
     return fabs (first - second) < eps;
 }

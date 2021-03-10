@@ -13,6 +13,7 @@
         "ratio": "cpp",
         "sched.h": "c",
         "stat.h": "c",
-        "cpu_topology.h": "c"
+        "cpu_topology.h": "c",
+        "cpu_topology_dev.h": "c"
     }
 }

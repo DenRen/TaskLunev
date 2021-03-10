@@ -5,13 +5,13 @@ LD = g++
 
 RM = rm -rf
 
-OPTIM_FLAGS = -Ofast
+OPTIM_FLAGS = -Og
 
 CFLAGS = $(OPTIM_FLAGS) -MD -pthread
 LDFLAGS = $(CFLAGS) -lm -flto
 
 LIB_HPC_DIR = lib
-LIB_HPC_OBJS = hpc.o cpu_topology.o
+LIB_HPC_OBJS = hpc.o cpu_topology.o debug_func.o
 LIB_HPC_OBJS_PATH = $(LIB_HPC_OBJS:%.o=$(LIB_HPC_DIR)/%.o)
 
 LIB_HPC_TEST_DIR = test

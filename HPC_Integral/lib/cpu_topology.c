@@ -1,5 +1,6 @@
 #include "cpu_topology.h"
 #include "cpu_topology_dev.h"
+#include "debug_func.h"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -35,37 +36,6 @@ core_id: the CPU core ID of cpu#. Typically it is the
 thread_siblings: internel kernel map of cpu#'s hardware
 		threads within the same core as cpu#
 */
-
-// ==============\\
-// Error function -------------------------------------------------------------
-// ==============//
-
-void print_error_line (const char strerr[], const char name_file[], int line) {
-    char str_error[256];
-    sprintf (str_error, "%s\n"
-                        "LINE: %s: %d\n", strerr, name_file, line);
-    perror (str_error);
-}
-
-#define CHECK_PTR(ptr)                                              \
-    if (ptr == NULL) {                                              \
-        print_error_line ("Pointer is NULL", __FILE__, __LINE__);   \
-        return -1;                                                  \
-    }
-
-// ===========\\
-// Main struct -------------------------------------------------------------
-// ===========//
-
-typedef struct _logic_cpu_t {
-    int id;
-    int core_id;
-} logic_cpu_t;
-
-typedef struct _cpu_topology_t {
-    int num_logic_cpu;
-    logic_cpu_t* logic_cpus;
-} cpu_topology_t;
 
 // ==============\\
 // Init functions -------------------------------------------------------------
@@ -151,15 +121,21 @@ int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str) {
         }
         else {                      // 1-3
             int cur_log_cpu = atoi (token), max_log_cpu = atoi (pos_delim + 1);
-            do {
+            do
                 cputop->logic_cpus[num_cpus++].id = cur_log_cpu++;
-            } while (cur_log_cpu <= max_log_cpu);
+            while (cur_log_cpu <= max_log_cpu);
         }
     }
 
     cputop->num_logic_cpu = num_cpus;
-    cputop->logic_cpus = (logic_cpu_t*) realloc (cputop->logic_cpus, num_cpus * sizeof (logic_cpu_t));
-
+    /*logic_cpu_t* new_logic_cpus = (logic_cpu_t*) realloc (cputop->logic_cpus,
+                                                          num_cpus * sizeof (logic_cpu_t));
+    
+    if (new_logic_cpus == NULL) {
+        PRINT_ERROR ("realloc (cputop->logic_cpus, num_cpus * sizeof (logic_cpu_t))");
+        free (cputop->logic_cpus);
+        return -1;
+    }*/
     return 0;
 }
 int _cputopFillCoreCPU (cpu_topology_t* cputop) {

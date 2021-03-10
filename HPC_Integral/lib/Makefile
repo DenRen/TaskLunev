@@ -3,14 +3,14 @@
 CC = g++
 LD = g++
 
-OPTIM_FLAGS = -Ofast
+OPTIM_FLAGS = -Og
 
 CFLAGS = $(OPTIM_FLAGS) -MD -pthread
 LDFLAGS = $(CFLAGS) -lm
 
 RM = rm -rf
 
-OBJS = cpu_topology.o hpc.o
+OBJS = cpu_topology.o hpc.o debug_func.o
 
 # Main --------------------------
 

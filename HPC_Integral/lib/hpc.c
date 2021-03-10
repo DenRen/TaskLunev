@@ -1,5 +1,6 @@
 #include "hpc.h"
 #include "cpu_topology.h"
+#include "debug_func.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -11,7 +12,7 @@
 #define _GNU_SOURCE
 #include <sched.h>
 
-const double eps = 1e-7;
+const double eps = 1e-9 / 3;
 
 static void swap_double (double* first, double* second) {
     double temp = *first;
@@ -31,7 +32,7 @@ static bool _verifier_int_arg (const integral_arg_t int_arg) {
 }
 
 // a <= b
-static void* _calc_integral (void* pointer_int_arg) {
+static void* _pthread_calc_integral (void* pointer_int_arg) {
     integral_arg_t int_arg = * (integral_arg_t*) pointer_int_arg;
 
     if (_verifier_int_arg (int_arg) == false) {
@@ -48,13 +49,16 @@ static void* _calc_integral (void* pointer_int_arg) {
     pthread_exit (res);
 }
 
-static void _detach_threads (pthread_t arr_tid[], size_t num_arr) {
+static void _detachThreads (pthread_t arr_tid[], size_t num_arr) {
     for (int i = 0; i < num_arr; ++i)
         pthread_detach (arr_tid[i]);
 }
 
 // tid_arr != NULL && cputop != NULL
-int _distributeThread (pthread_t tid_arr[], int num_threads, cpu_topology_t* cputop) {
+int _distributeAttrThreads (pthread_attr_t tid_attr_arr[], int num_threads, cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+    CHECK_PTR (tid_attr_arr);
+    
     cpu_set_t cpu_set = {0};
 
     const int num_logic_cpu = cputopGetNumLogicCPU (cputop);
@@ -69,14 +73,28 @@ int _distributeThread (pthread_t tid_arr[], int num_threads, cpu_topology_t* cpu
 
         CPU_SET (logic_cpu_id, &cpu_set);
 
-        if (pthread_setaffinity_np (tid_arr[num_thread], sizeof (cpu_set), &cpu_set)) {
-            perror ("pthread_setaffinity_np");
-            _detach_threads (tid_arr, num_threads);
-            return NAN;
+        if (pthread_attr_init (&tid_attr_arr[num_thread])) {
+            PRINT_ERROR ("pthread_attr_init");
+            return -1;
+        }
+
+        if (pthread_attr_setaffinity_np (&tid_attr_arr[num_thread], sizeof (cpu_set), &cpu_set)) {
+            PRINT_ERROR ("pthread_setaffinity_np");
+            return -1;
         }
 
         CPU_CLR (logic_cpu_id, &cpu_set);
     }
+
+    return 0;
+}
+
+int _destroyAttrThread (pthread_attr_t pid_attr_arr[], unsigned num_arr) {
+    CHECK_PTR (pid_attr_arr);
+    for (int i = 0; i < num_arr; ++i)
+        pthread_attr_destroy (&pid_attr_arr[i]);
+
+    return 0;
 }
 
 // If error, that return NAN and errno != 0
@@ -91,14 +109,17 @@ double _integral (double a, double b, double (* func) (double),
     const double dx  = (b - a) * eps;
     const double len = (b - a) / num_threads;
     
-    double         res_arr [num_threads];
-    pthread_t      tid_arr [num_threads];
+    double         res_arr[num_threads];
+    pthread_t      tid_arr[num_threads];
+    pthread_attr_t tid_attr_arr[num_threads];
     integral_arg_t int_args[num_threads];
 
     int state = 0;
-    pthread_attr_t attr = {};
-    if ((state = pthread_attr_init (&attr))) {
-        perror ("pthread_attr_init");
+
+    // Distribute threads
+    state = _distributeAttrThreads (tid_attr_arr, num_threads, cputop);
+    if (state) {
+        PRINT_ERROR ("_distributeAttrThreads");
         return NAN;
     }
     
@@ -109,28 +130,32 @@ double _integral (double a, double b, double (* func) (double),
         int_arg->a    = a;
         int_arg->b    = a += len;
 
-        state = pthread_create (&tid_arr[i], &attr, _calc_integral, (void*) int_arg);
+        state = pthread_create (&tid_arr[i], &tid_attr_arr[i], _pthread_calc_integral, (void*) int_arg);
         if (state) {
-            perror ("pthread_create");
-            _detach_threads (tid_arr, i);
+            PRINT_ERROR ("pthread_create");
+            _detachThreads (tid_arr, i);
             return NAN;
         }
     }
     
-    _distributeThread (tid_arr, num_threads, cputop);
-
     double res = 0;
     for (int i = 0; i < num_threads; ++i) {
         double* piece_sum = NULL;
         
         state = pthread_join (tid_arr[i], (void**) &piece_sum);
         if (state || (void*) piece_sum == NULL) {
-            perror ("pthread_join");
-            _detach_threads (tid_arr + i + 1, num_threads - i - 1);
+            PRINT_ERROR ("pthread_join");
+            _detachThreads (tid_arr + i + 1, num_threads - i - 1);
+            _destroyAttrThread (tid_attr_arr, num_threads);
             return NAN;
         }
 
         res += *piece_sum;
+    }
+
+    if (_destroyAttrThread (tid_attr_arr, num_threads) == -1) {
+        PRINT_ERROR ("_destroyAttrThread");
+        return -1;
     }
 
     return res * (2 * sign_int - 1) * dx;
@@ -139,7 +164,7 @@ double _integral (double a, double b, double (* func) (double),
 double Integral (double a, double b, double (* func) (double), int num_threads) {
     cpu_topology_t* cputop = cputopCreate ();
     if (cputop == NULL) {
-        perror ("cputopCreate");
+        PRINT_ERROR ("cputopCreate");
         return NAN;
     }
 

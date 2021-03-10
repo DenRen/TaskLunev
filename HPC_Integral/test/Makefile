@@ -4,7 +4,7 @@ LD  = g++
 
 RM = rm -rf
 
-OPTIM_FLAGS = -Os #-flto
+OPTIM_FLAGS = -Og #-flto
 GTEST_FLAGS = -lgtest -pthread -g
 #GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 #LD_GCOV_FLAGS = -lgcov
