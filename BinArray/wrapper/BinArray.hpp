@@ -3,8 +3,6 @@
 namespace ba {
 /*
     Сделать счётчик тяжёлых операций. 
-
-
 */
 class binarray {
     BinArray* arr_;

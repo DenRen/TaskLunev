@@ -24,10 +24,12 @@ char* _readCpuTopologyFile (const char name_file[]);
 int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str);
 int _cputopFillCoreCPU (cpu_topology_t* cputop);
 
-int cputopInitLogicCPU (cpu_topology_t* cputop);
-int cputopInitCPU (cpu_topology_t* cputop);
+int _cputopInitLogicCPU (cpu_topology_t* cputop);
+int _cputopInitCoreCPU (cpu_topology_t* cputop);
 
 void _cputopSortCoreId (cpu_topology_t* cputop);
 void _cputopSwapLogicCpu (logic_cpu_t* first, logic_cpu_t* second);
+
+void _cputopDestroy (cpu_topology_t* cputop);
 
 #endif // CPU_TOPOLOGY_DEV_H
