@@ -147,6 +147,8 @@ int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str_online) {
 
     cputop->logic_cpus = (logic_cpu_t*) calloc (LOGIC_CPU_MAX, sizeof (logic_cpu_t));
     CHECK_PTR (cputop->logic_cpus);
+    
+    logic_cpu_t* const logic_cpus = cputop->logic_cpus;
 
     char* token = NULL;
     int num_cpus = 0;
@@ -159,7 +161,7 @@ int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str_online) {
         char* pos_delim = strchr (token, '-');
         if (pos_delim == NULL) {    // 1
             const int num_logic_cpu = atoi (token);
-            cputop->logic_cpus[num_cpus++].id = num_logic_cpu;
+            logic_cpus[num_cpus++].id = num_logic_cpu;
 
             IF_DEBUG (printf ("num_logic_cpu: %d\n", num_logic_cpu));
         }
@@ -172,7 +174,7 @@ int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str_online) {
             do {
                 IF_DEBUG (printf ("\t\t\t%d\n", cur_logic_cpu));
 
-                cputop->logic_cpus[num_cpus++].id = cur_logic_cpu++;
+                logic_cpus[num_cpus++].id = cur_logic_cpu++;
             } while (cur_logic_cpu <= max_logic_cpu);
         }
     }
@@ -180,13 +182,13 @@ int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str_online) {
     cputop->num_logic_cpu = num_cpus;
 
     IF_DEBUG (printf ("Set cputop->num_logic_cpu = %d\n", cputop->num_logic_cpu));
-
+    
     logic_cpu_t* temp_logic_cpus = (logic_cpu_t*) realloc (cputop->logic_cpus, 
                                                            num_cpus * sizeof (logic_cpu_t));
 
-    printf ("\n%d vs %d\n", LOGIC_CPU_MAX * sizeof (logic_cpu_t), num_cpus * sizeof (logic_cpu_t));
+    printf ("\n%ld vs %ld\n", LOGIC_CPU_MAX * sizeof (logic_cpu_t), num_cpus * sizeof (logic_cpu_t));
 
-    if (temp_logic_cpus != NULL) {
+    if (temp_logic_cpus == NULL) {
         IF_DEBUG (printf ("Realloc (cputop->logic_cpus) didn't work: realloc (...) = NULL\n"));
     } else {
         IF_DEBUG (printf ("Realloc did work: logic_cpus = %p\n", temp_logic_cpus));

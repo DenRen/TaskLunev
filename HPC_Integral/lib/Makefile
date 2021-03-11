@@ -3,9 +3,10 @@
 CC = g++
 LD = g++
 
-OPTIM_FLAGS = -Og
+OPTIM_FLAGS = -O0
 
-CFLAGS = $(OPTIM_FLAGS) -MD -pthread
+DEBUG_FLAGS = -g
+CFLAGS = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS)
 LDFLAGS = $(CFLAGS) -lm
 
 RM = rm -rf

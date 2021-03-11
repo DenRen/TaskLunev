@@ -5,9 +5,9 @@ LD = g++
 
 RM = rm -rf
 
-OPTIM_FLAGS = -Og
-
-CFLAGS = $(OPTIM_FLAGS) -MD -pthread
+OPTIM_FLAGS = -O0
+DEBUG_FLAGS = -g
+CFLAGS = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS)
 LDFLAGS = $(CFLAGS) -lm -flto
 
 LIB_HPC_DIR = lib
