@@ -46,7 +46,7 @@ cpu_topology_t* cputopCreate () {
     return (cpu_topology_t*) calloc (1, sizeof (cpu_topology_t));
 }
 
-int cputopDestroy (cpu_topology_t* cputop) {
+int cputopDestroy (cpu_topology_t** cputop) {
     CHECK_PTR (cputop);
 
     _cputopDestroy (cputop);
@@ -56,7 +56,7 @@ int cputopInit (cpu_topology_t* cputop) {
     CHECK_PTR (cputop);
     
     if (cputop->logic_cpus != NULL)
-        cputopDestroy (cputop);
+        free (cputop->logic_cpus);
 
     if (_cputopInitLogicCPU (cputop) == -1) {    // Read cpu/online
         PRINT_ERROR ("_cputopInitLogicCPU");
@@ -81,9 +81,10 @@ static inline bool _cputopVerifier (cpu_topology_t* cputop) {
 // ====================//
 
 // cputop != NULL
-void _cputopDestroy (cpu_topology_t* cputop) {
-    free (cputop->logic_cpus);
-    cputop->num_logic_cpu = -1;
+void _cputopDestroy (cpu_topology_t** cputop) {
+    free ((*cputop)->logic_cpus);
+    free (*cputop);
+    *cputop = NULL;
 }
 
 // cputop != NULL

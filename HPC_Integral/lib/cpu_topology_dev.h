@@ -30,6 +30,6 @@ int _cputopInitCoreCPU (cpu_topology_t* cputop);
 void _cputopSortCoreId (cpu_topology_t* cputop);
 void _cputopSwapLogicCpu (logic_cpu_t* first, logic_cpu_t* second);
 
-void _cputopDestroy (cpu_topology_t* cputop);
+void _cputopDestroy (cpu_topology_t** cputop);
 
 #endif // CPU_TOPOLOGY_DEV_H

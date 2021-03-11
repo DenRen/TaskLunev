@@ -6,7 +6,7 @@ typedef struct _cpu_topology_t cpu_topology_t;
 #include <stdbool.h>
 
 cpu_topology_t* cputopCreate ();
-int cputopDestroy (cpu_topology_t* cputop);
+int cputopDestroy (cpu_topology_t** cputop);
 int cputopInit    (cpu_topology_t* cputop);
 
 int cputopGetNumLogicCPU  (cpu_topology_t* cputop);

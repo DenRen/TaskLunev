@@ -22,8 +22,8 @@ int main (int argc, char* argv[]) {
     }
     
     const int num_threads = atoi (argv[1]);
-    if (num_threads <= 0) {
-        printf ("Please, enter the positive number thread\n");
+    if (num_threads <= 0 || num_threads > 256) {
+        printf ("Please, enter the positive number thread (< 256)\n");
         return -1;
     }
 
