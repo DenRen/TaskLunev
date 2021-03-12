@@ -3,7 +3,7 @@
 
 void print_error_line (const char strerr[], const char name_file[], int line);
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
     #define IF_DEBUG_NON_PRINT(act) \
@@ -28,6 +28,7 @@ void print_error_line (const char strerr[], const char name_file[], int line);
 
 #define CHECK_PTR(ptr)                      \
     if (ptr == NULL) {                      \
+        errno = EINVAL;                     \
         PRINT_ERROR ("Pointer is NULL");    \
         return -1;                          \
     }

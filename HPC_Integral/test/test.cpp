@@ -11,10 +11,10 @@ bool IsEqual (double first, double second, double eps = 1e-3) {
     return fabs (first - second) < eps;
 }
 
-TEST (HPC_Integral, SimpleIntegral) {
+TEST (HPC_Integral, hpcSimpleIntegral) {
     #define TEST_SIMPLE_INTEGRAL(a, b, func, answer)                            \
     do {                                                                        \
-        double res = SimpleIntegral (a, b, func);                               \
+        double res = hpcSimpleIntegral (a, b, func);                               \
         ASSERT_TRUE (IsEqual (res, answer)) << "result: " << res << std::endl;  \
     } while (0)
 
@@ -41,10 +41,10 @@ TEST (HPC_Integral, SimpleIntegral) {
     #undef TEST_SIMPLE_INTEGRAL
 }
 
-TEST (HPC_Integral, Integral) {
+TEST (HPC_Integral, hpcIntegral) {
     #define TEST_INTEGRAL(num_threads, a, b, func, answer)                          \
     do {                                                                            \
-        double res = Integral (a, b, func, num_threads);                            \
+        double res = hpcIntegral (a, b, func, num_threads);                            \
         ASSERT_TRUE (IsEqual (res, answer))                                         \
             << "result: " << res << "\nnum_threads: " << num_threads << std::endl; \
     } while (0)

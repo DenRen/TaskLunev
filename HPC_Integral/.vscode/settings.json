@@ -16,6 +16,19 @@
         "cpu_topology.h": "c",
         "cpu_topology_dev.h": "c",
         "fcntl.h": "c",
-        "debug_func.h": "c"
+        "debug_func.h": "c",
+        "hpc_new.h": "c",
+        "hpc.h": "c",
+        "bit": "c",
+        "bitset": "c",
+        "concepts": "c",
+        "random": "c",
+        "istream": "c",
+        "limits": "c",
+        "ostream": "c",
+        "ranges": "c",
+        "thread": "c",
+        "type_traits": "c",
+        "cpu-set.h": "c"
     }
 }

@@ -38,42 +38,17 @@ thread_siblings: internel kernel map of cpu#'s hardware
 		threads within the same core as cpu#
 */
 
-// ==============\\
-// Init functions -------------------------------------------------------------
-// ==============//
+// ==================\\
+// Verifier functions -------------------------------------------------------------
+// ==================//
 
-cpu_topology_t* cputopCreate () {
-    return (cpu_topology_t*) calloc (1, sizeof (cpu_topology_t));
-}
-
-int cputopDestroy (cpu_topology_t** cputop) {
-    CHECK_PTR (cputop);
-
-    _cputopDestroy (cputop);
-}
-
-int cputopInit (cpu_topology_t* cputop) {
-    CHECK_PTR (cputop);
-    
-    if (cputop->logic_cpus != NULL)
-        free (cputop->logic_cpus);
-
-    if (_cputopInitLogicCPU (cputop) == -1) {    // Read cpu/online
-        PRINT_ERROR ("_cputopInitLogicCPU");
-        return -1;
-    }
-    
-    if (_cputopInitCoreCPU (cputop) == -1) {         // Read cpu#/topology/core_id
-        PRINT_ERROR ("_cputopInitCoreCPU");
-        return -1;
-    }
-
-    return 0;
-}
-
-static inline bool _cputopVerifier (cpu_topology_t* cputop) {
-    CHECK_PTR (cputop);
+static bool _cputopVerifier (cpu_topology_t* cputop) {
     return (cputop->num_logic_cpu > 0) && (cputop->logic_cpus != NULL);
+}
+
+bool cputopVerifier (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+    return _cputopVerifier (cputop);
 }
 
 // ====================\\
@@ -81,34 +56,13 @@ static inline bool _cputopVerifier (cpu_topology_t* cputop) {
 // ====================//
 
 // cputop != NULL
-void _cputopDestroy (cpu_topology_t** cputop) {
+static void _cputopDestroy (cpu_topology_t** cputop) {
     free ((*cputop)->logic_cpus);
     free (*cputop);
     *cputop = NULL;
 }
 
-// cputop != NULL
-int _cputopInitLogicCPU (cpu_topology_t* cputop) {
-    char* str_online = _readCpuTopologyFile (PATH_CPU FILE_ONLINE);
-    if (str_online == NULL) {
-        PRINT_ERROR ("_readCpuTopologyFile");
-        return -1;
-    }
-
-    IF_DEBUG (printf ("read %s: \"%s\"\n", PATH_CPU FILE_ONLINE, str_online));
-
-    if (_cputopFillLogicCPU (cputop, str_online) == -1) {
-        PRINT_ERROR ("_cputopFillLogicCPU");
-        free (str_online);
-        return -1;
-    }
-
-    free (str_online);
-
-    return 0;
-}
-
-char* _readCpuTopologyFile (const char name_file[]) {
+static char* _readCpuTopologyFile (const char name_file[]) {
     int fd = open (name_file, O_RDONLY);
     if (fd == -1) {
         PRINT_ERROR ("open");
@@ -140,7 +94,7 @@ char* _readCpuTopologyFile (const char name_file[]) {
 }
 
 // cputop != NULL && str_online != NULL
-int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str_online) {
+static int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str_online) {
     IF_DEBUG (CHECK_PTR (cputop); 
               if (cputop->logic_cpus != NULL) {
                   PRINT_ERROR ("cputop->logic_cpus != NULL");
@@ -187,7 +141,7 @@ int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str_online) {
     logic_cpu_t* temp_logic_cpus = (logic_cpu_t*) realloc (cputop->logic_cpus, 
                                                            num_cpus * sizeof (logic_cpu_t));
 
-    printf ("\n%ld vs %ld\n", LOGIC_CPU_MAX * sizeof (logic_cpu_t), num_cpus * sizeof (logic_cpu_t));
+    //printf ("\n%ld vs %ld\n", LOGIC_CPU_MAX * sizeof (logic_cpu_t), num_cpus * sizeof (logic_cpu_t));
 
     if (temp_logic_cpus == NULL) {
         IF_DEBUG (printf ("Realloc (cputop->logic_cpus) didn't work: realloc (...) = NULL\n"));
@@ -200,23 +154,34 @@ int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str_online) {
 }
 
 // cputop != NULL
-int _cputopInitCoreCPU (cpu_topology_t* cputop) {
-    if (_cputopFillCoreCPU (cputop) == -1) {
-        PRINT_ERROR ("_cputopFillCoreCPU");
+static int _cputopInitLogicCPU (cpu_topology_t* cputop) {
+    char* str_online = _readCpuTopologyFile (PATH_CPU FILE_ONLINE);
+    if (str_online == NULL) {
+        PRINT_ERROR ("_readCpuTopologyFile");
         return -1;
     }
+
+    IF_DEBUG (printf ("read %s: \"%s\"\n", PATH_CPU FILE_ONLINE, str_online));
+
+    if (_cputopFillLogicCPU (cputop, str_online) == -1) {
+        PRINT_ERROR ("_cputopFillLogicCPU");
+        free (str_online);
+        return -1;
+    }
+
+    free (str_online);
 
     return 0;
 }
 
 // cputop is correct
-int _cputopFillCoreCPU (cpu_topology_t* cputop) {
+static int _cputopFillCoreCPU (cpu_topology_t* cputop) {
     IF_DEBUG_NON_PRINT (
         CHECK_PTR (cputop);
 
-        if (_cputopVerifier (cputop) == false) {      
+        if (cputopVerifier (cputop) == false) {      
             errno = EINVAL;
-            PRINT_ERROR ("_cputopVerifier");
+            PRINT_ERROR ("cputopVerifier");
             return -1;
         }
     );
@@ -243,14 +208,65 @@ int _cputopFillCoreCPU (cpu_topology_t* cputop) {
     return 0;
 }
 
+// cputop != NULL
+static int _cputopInitCoreCPU (cpu_topology_t* cputop) {
+    if (_cputopFillCoreCPU (cputop) == -1) {
+        PRINT_ERROR ("_cputopFillCoreCPU");
+        return -1;
+    }
+
+    return 0;
+}
+
+// ==============\\
+// Init functions -------------------------------------------------------------
+// ==============//
+
+cpu_topology_t* cputopCreate () {
+    return (cpu_topology_t*) calloc (1, sizeof (cpu_topology_t));
+}
+
+int cputopDestroy (cpu_topology_t** cputop) {
+    CHECK_PTR (cputop);
+
+    _cputopDestroy (cputop);
+}
+
+int cputopInit (cpu_topology_t* cputop) {
+    CHECK_PTR (cputop);
+    
+    if (cputop->logic_cpus != NULL)
+        free (cputop->logic_cpus);
+
+    if (_cputopInitLogicCPU (cputop) == -1) {    // Read cpu/online
+        PRINT_ERROR ("_cputopInitLogicCPU");
+        return -1;
+    }
+    
+    if (_cputopInitCoreCPU (cputop) == -1) {         // Read cpu#/topology/core_id
+        PRINT_ERROR ("_cputopInitCoreCPU");
+        return -1;
+    }
+
+    return 0;
+}
+
 // ===============================\\
 // Sort uniq sets core id function -------------------------------------------------------------
 // ===============================//
 
+static int _cmpCoreId (const void *first, const void *second) {
+    return ((logic_cpu_t*) first)->core_id > ((logic_cpu_t*) second)->core_id;
+}
+
+static void _cputopSortCoreId (cpu_topology_t* cputop) {
+    qsort (cputop->logic_cpus, cputop->num_logic_cpu, sizeof (logic_cpu_t), _cmpCoreId);
+}
+
 int cputopSortUniqSetsCoreId (cpu_topology_t* cputop) {
     CHECK_PTR (cputop);
-    if (_cputopVerifier (cputop) == false) {
-        PRINT_ERROR ("_cputopVerifier");
+    if (cputopVerifier (cputop) == false) {
+        PRINT_ERROR ("cputopVerifier");
         return -1;
     }
 
@@ -277,21 +293,6 @@ int cputopSortUniqSetsCoreId (cpu_topology_t* cputop) {
     return 0;
 }
 
-static int _cmpCoreId (const void *first, const void *second) {
-    return ((logic_cpu_t*) first)->core_id > ((logic_cpu_t*) second)->core_id;
-}
-
-void _cputopSortCoreId (cpu_topology_t* cputop) {
-    qsort (cputop->logic_cpus, cputop->num_logic_cpu, sizeof (logic_cpu_t), _cmpCoreId);
-}
-
-// first != NULL && second != NULL
-void _cputopSwapLogicCpu (logic_cpu_t* first, logic_cpu_t* second) {
-    logic_cpu_t temp = *first;
-    *first = *second;
-    *second = temp;
-}
-
 // ================\\
 // Getter functions -------------------------------------------------------------
 // ================//
@@ -304,9 +305,9 @@ int cputopGetNumLogicCPU (cpu_topology_t* cputop) {
 
 int cputopGetNumCoreCPU (cpu_topology_t* cputop) {
     CHECK_PTR (cputop);
-    if (_cputopVerifier (cputop) == false) {
+    if (cputopVerifier (cputop) == false) {
         errno = EINVAL;
-        PRINT_ERROR ("_cputopVerifier");
+        PRINT_ERROR ("cputopVerifier");
         return -1;
     }
     
@@ -343,7 +344,7 @@ int cputopGetLogicCpuId (cpu_topology_t* cputop, int num_logic_cpu) {
 int cputopDump (cpu_topology_t* cputop) {
     CHECK_PTR (cputop);
     if (_cputopVerifier (cputop) == false) {
-        printf ("Not initialize\n");
+        PRINT_ERROR ("cputopDump: cputop is not init\n");
         return -1;
     }
 

@@ -3,15 +3,16 @@
 CC = g++
 LD = g++
 
-OPTIM_FLAGS = -O0
+OPTIM_FLAGS = -Os -flto
+DEBUG_FLAGS = #-g
 
-DEBUG_FLAGS = -g
-CFLAGS = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS)
+CFLAGS = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS) -D_GNU_SOURCE
+CXXFLAGS = $(CFLAGS)
 LDFLAGS = $(CFLAGS) -lm
 
 RM = rm -rf
 
-OBJS = cpu_topology.o hpc.o debug_func.o
+OBJS = cpu_topology.o debug_func.o hpc.o
 
 # Main --------------------------
 

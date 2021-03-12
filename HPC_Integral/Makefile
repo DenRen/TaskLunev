@@ -5,13 +5,14 @@ LD = g++
 
 RM = rm -rf
 
-OPTIM_FLAGS = -O0
-DEBUG_FLAGS = -g
-CFLAGS = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS)
-LDFLAGS = $(CFLAGS) -lm -flto
+OPTIM_FLAGS = -Os -flto
+DEBUG_FLAGS = #-g
+CFLAGS = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS) -D_GNU_SOURCE
+CXXFLAGS = $(CFLAGS)
+LDFLAGS = $(CFLAGS) -lm
 
 LIB_HPC_DIR = lib
-LIB_HPC_OBJS = hpc.o cpu_topology.o debug_func.o
+LIB_HPC_OBJS = cpu_topology.o debug_func.o hpc.o
 LIB_HPC_OBJS_PATH = $(LIB_HPC_OBJS:%.o=$(LIB_HPC_DIR)/%.o)
 
 LIB_HPC_TEST_DIR = test
@@ -28,6 +29,7 @@ all: $(EXEC_FILE)
 
 $(EXEC_FILE): hpc_lib $(OBJS)
 	$(LD) -o $@ $(ALL_EXEC_OBJS) $(LDFLAGS)
+	strip $@
 
 # HPC library ---------------------------------------------
 

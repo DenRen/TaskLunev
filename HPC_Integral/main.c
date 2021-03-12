@@ -1,20 +1,14 @@
 #include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <errno.h>
-
+#include <stdlib.h>
 #include "lib/hpc.h"
-#include "lib/cpu_topology.h"
 
 double func (double x) {
-    return sin (x);
+    return x * x;
 }
-/*
-todo: Ускоряет не линейно. С этим нужно будет разобраться
-*/
+
+#include <pthread.h>
+
 int main (int argc, char* argv[]) {
     if (argc != 2) {
         printf ("Please enter the number thread. F.e.: ./main.out 4\n");
@@ -27,5 +21,18 @@ int main (int argc, char* argv[]) {
         return -1;
     }
 
-    printf ("%g\n", Integral (0, 3.141592, sin, num_threads));
+    errno = 0;
+
+    if (pthread_setconcurrency (8) == -1) {
+        perror ("pthread_setconcurrency");
+        return -1;
+    }
+
+    double res = hpcIntegral (0, 90, func, num_threads);
+    if (errno != 0) {
+        perror ("hpcIntegral");
+        return -1;
+    }
+
+    printf ("%g\n", res);
 }
