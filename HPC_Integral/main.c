@@ -4,7 +4,7 @@
 #include "lib/hpc.h"
 
 double func (double x) {
-    return x * x;
+    return x;
 }
 
 #include <pthread.h>

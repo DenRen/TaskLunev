@@ -12,7 +12,7 @@
 #define _POSIX_PRIORITY_SCHEDULING
 #include <unistd.h>
 
-const double eps = 1e-11;
+const double eps = 1e-10 / 2;
 
 // ============\\
 // Main structs ---------------------------------------------------------------
@@ -47,7 +47,7 @@ static bool _verifier_int_arg (const integral_arg_t int_arg) {
 // a, b is number, func != NULL, num_threads > 0 and cputop != NULL
 // a <= b
 static void* _pthread_calc_integral (void* pointer_int_arg) {
-    integral_arg_t int_arg = * (integral_arg_t*) pointer_int_arg;
+    register integral_arg_t int_arg = *(integral_arg_t*) pointer_int_arg;
 
     IF_DEBUG_NON_PRINT (
         if (_verifier_int_arg (int_arg) == false) {
@@ -58,13 +58,53 @@ static void* _pthread_calc_integral (void* pointer_int_arg) {
         }
     );
 
-    double res = 0;
+    if (pthread_setconcurrency (99 + pthread_self () % 2)) {
+        PRINT_ERROR ("pthread_setconcurrency");
+        pthread_exit ((void*) 1);
+    }
+
+    //#define VECT_CALC
+
+#ifdef VECT_CALC
+    const int _num = 4;
+    register double x[_num];
+    x[0] = int_arg.a;
+    x[1] = int_arg.a + int_arg.dx;
+    x[2] = int_arg.a + 2 * int_arg.dx;
+    x[3] = int_arg.a + 3 * int_arg.dx;
+
+    register double dx = _num * int_arg.dx;
+
+    register double res[4];
+    res[0] = 0;
+    res[1] = 0;
+    res[2] = 0;
+    res[3] = 0;
+    while (x[3] < int_arg.b) {        
+        res[0] += int_arg.func (x[0]);
+        res[1] += int_arg.func (x[1]);
+        res[2] += int_arg.func (x[2]);
+        res[3] += int_arg.func (x[3]);
+
+        x[0] += dx;
+        x[1] += dx;
+        x[2] += dx;
+        x[3] += dx;
+    }
+
+    ((integral_arg_t*) pointer_int_arg)->result = res[0] + res[1] + res[2] + res[3];
+
+#else
+
+    int_arg.result = 0;
     while (int_arg.a < int_arg.b) {
-        res += int_arg.func (int_arg.a);
+        int_arg.result += int_arg.func (int_arg.a);
         int_arg.a += int_arg.dx;
     }
 
-    ((integral_arg_t*) pointer_int_arg)->result = res;
+    ((integral_arg_t*) pointer_int_arg)->result = int_arg.result;
+
+#endif
 
     return NULL;
 }
@@ -114,8 +154,14 @@ static int _distributeAttrThreads (pthread_attr_t tid_attr_arr[], unsigned num_t
 
     for (unsigned num_thread = 0; num_thread < num_threads; ++num_thread) {
 
+        pthread_attr_t* tid_attr = &tid_attr_arr[num_thread];
+
+        if (pthread_attr_init (tid_attr)) {
+            PRINT_ERROR ("pthread_attr_init");
+            return -1;
+        }
+
         const int logic_cpu_id = cputopGetLogicCpuId (cputop, num_thread % num_logic_cpu);
-        
         if (logic_cpu_id == -1) {
             PRINT_ERROR ("cputopGetLogicCpuId");
             return -1;
@@ -124,18 +170,38 @@ static int _distributeAttrThreads (pthread_attr_t tid_attr_arr[], unsigned num_t
         IF_DEBUG (printf ("Set logic cpu id: %d\n", logic_cpu_id));
 
         CPU_SET (logic_cpu_id, &cpuset);
-
-        if (pthread_attr_init (&tid_attr_arr[num_thread])) {
-            PRINT_ERROR ("pthread_attr_init");
-            return -1;
-        }
-
-        if (pthread_attr_setaffinity_np (&tid_attr_arr[num_thread], sizeof (cpuset), &cpuset)) {
+        if (pthread_attr_setaffinity_np (tid_attr, sizeof (cpuset), &cpuset)) {
             PRINT_ERROR ("pthread_setaffinity_np");
             return -1;
         }
-
         CPU_CLR (logic_cpu_id, &cpuset);
+    /*
+        if (pthread_attr_setdetachstate (tid_attr, PTHREAD_CREATE_JOINABLE)) {
+            PRINT_ERROR ("pthread_attr_setdetachstate");
+            return -1;
+        }
+        
+        if (pthread_attr_setschedpolicy (tid_attr, SCHED_RR)) {
+            PRINT_ERROR ("pthread_attr_setschedpolicy (tid_attr, SCHED_RR)");
+            return -1;
+        }
+
+        struct sched_param param = { .sched_priority = 50 };
+        if (pthread_attr_setschedparam (tid_attr, &param)) {
+            PRINT_ERROR ("pthread_attr_setschedparam");
+            return -1;
+        }
+        
+        if (pthread_attr_setstacksize (tid_attr, 200000)) {
+            PRINT_ERROR ("pthread_attr_setstacksize");
+            return -1;
+        }
+
+        if (pthread_attr_setscope (tid_attr, PTHREAD_SCOPE_SYSTEM)) {
+            PRINT_ERROR ("pthread_attr_setscope (tid_attr, PTHREAD_SCOPE_SYSTEM)");
+            return -1;
+        }
+    */
     }
 
     return 0;
@@ -196,6 +262,12 @@ static double _integral (double a, double b, double (* func) (double),
         }
     }
     
+    if (_destroyAttrThread (tid_attr_arr, num_threads) == -1) {
+        PRINT_ERROR ("_destroyAttrThread");
+        _detachThreads (tid_arr, num_threads);
+        return -1;
+    }
+
     // Join all pthreads and check for error by ret_val
     double res = 0;
     for (int i = 0; i < num_threads; ++i) {
@@ -211,11 +283,6 @@ static double _integral (double a, double b, double (* func) (double),
         }
         
         res += int_args[i].result;
-    }
-
-    if (_destroyAttrThread (tid_attr_arr, num_threads) == -1) {
-        PRINT_ERROR ("_destroyAttrThread");
-        return -1;
     }
 
     return res * (2 * sign_int - 1) * dx;
@@ -258,6 +325,8 @@ double hpcIntegral (double a, double b, double (* func) (double), const unsigned
         return NAN;
     }
     
+    // Less than 0.01 seconds passed
+
     double result = _integral (a, b, func, num_threads, cputop);
 
     cputopDestroy (&cputop);

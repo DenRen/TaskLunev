@@ -5,7 +5,7 @@ LD = g++
 
 RM = rm -rf
 
-OPTIM_FLAGS = -Os -flto
+OPTIM_FLAGS = -Ofast -flto -ffast-math
 DEBUG_FLAGS = #-g
 CFLAGS = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS) -D_GNU_SOURCE
 CXXFLAGS = $(CFLAGS)

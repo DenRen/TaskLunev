@@ -21,6 +21,8 @@ const int MAX_LEN_PATH = 128;
 const int MAX_SIZE_TOPOLGY_FILE = 128;  // F.e cpu/online, cpu#/topology/core_id
 const int LOGIC_CPU_MAX = 256;
 
+// TODO: Реализовать через hwloc для кроссплатформенности
+
 /*
 for ((count = 0; count < 8; count++))
 do
