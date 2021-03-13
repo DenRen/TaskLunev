@@ -4,6 +4,9 @@
 #define _GNU_SOURCE
 #include <sched.h>
 
+#define LINEAR_TIME_CALC
+//#define VECT_CALC
+
 double hpcIntegral (double a, double b, double (* func) (double), const unsigned num_threads);
 double hpcSimpleIntegral (double a, double b, double (*func) (double));
 

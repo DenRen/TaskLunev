@@ -23,11 +23,6 @@ int main (int argc, char* argv[]) {
 
     errno = 0;
 
-    if (pthread_setconcurrency (8) == -1) {
-        perror ("pthread_setconcurrency");
-        return -1;
-    }
-
     double res = hpcIntegral (0, 90, func, num_threads);
     if (errno != 0) {
         perror ("hpcIntegral");

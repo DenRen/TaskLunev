@@ -1,7 +1,6 @@
 #include "hpc.h"
 #include "cpu_topology.h"
 #include "debug_func.h"
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -62,8 +61,6 @@ static void* _pthread_calc_integral (void* pointer_int_arg) {
         PRINT_ERROR ("pthread_setconcurrency");
         pthread_exit ((void*) 1);
     }
-
-    //#define VECT_CALC
 
 #ifdef VECT_CALC
     const int _num = 4;
@@ -210,7 +207,7 @@ static int _distributeAttrThreads (pthread_attr_t tid_attr_arr[], unsigned num_t
 // If error, that return NAN and errno != 0
 // a, b is number, func != NULL, num_threads > 0 and cputop != NULL
 static double _integral (double a, double b, double (* func) (double),
-                  const int num_threads, cpu_topology_t* cputop) {
+                         const int num_threads, cpu_topology_t* cputop) {
     
     IF_DEBUG_NON_PRINT (
         if ((isfinite (a) && isfinite (b) && func != NULL && num_threads > 0) == false) {
@@ -226,6 +223,14 @@ static double _integral (double a, double b, double (* func) (double),
         }
     );
     
+#ifdef LINEAR_TIME_CALC
+    int num_dummy = 0, num_logic_cpu = cputopGetNumLogicCPU (cputop);
+    if (num_threads < num_logic_cpu)
+        num_dummy = num_logic_cpu - num_threads;
+#endif
+
+#ifndef LINEAR_TIME_CALC
+
     // Distribute threads to core and hyperthreads
     pthread_attr_t tid_attr_arr[num_threads];
     int state = _distributeAttrThreads (tid_attr_arr, num_threads, cputop);
@@ -233,6 +238,17 @@ static double _integral (double a, double b, double (* func) (double),
         PRINT_ERROR ("_distributeAttrThreads");
         return NAN;
     }
+#else
+
+    // Distribute threads to core and hyperthreads
+    pthread_attr_t tid_attr_arr[num_threads + num_dummy];
+    int state = _distributeAttrThreads (tid_attr_arr, num_threads + num_dummy, cputop);
+    if (state) {
+        PRINT_ERROR ("_distributeAttrThreads");
+        return NAN;
+    }
+
+#endif
 
     // Set a < b
     bool sign_int = a <= b;
@@ -242,6 +258,7 @@ static double _integral (double a, double b, double (* func) (double),
     const double dx  = (b - a) * eps;
     const double len = (b - a) / num_threads;
 
+#ifndef LINEAR_TIME_CALC
     pthread_t      tid_arr [num_threads];
     integral_arg_t int_args[num_threads];
     
@@ -278,12 +295,81 @@ static double _integral (double a, double b, double (* func) (double),
             errno = EINVAL;
             PRINT_ERROR ("pthread_join");
             _detachThreads (tid_arr + i + 1, num_threads - i - 1);
-            _destroyAttrThread (tid_attr_arr, num_threads);
             return NAN;
         }
         
         res += int_args[i].result;
     }
+
+#else
+    pthread_t      tid_arr [num_threads + num_dummy];
+    integral_arg_t int_args[num_threads + num_dummy];
+    
+    // Create pthreads with special attributs
+    for (int i = 0; i < num_threads; ++i) {
+        integral_arg_t* int_arg = &int_args[i];
+        int_arg->dx   = dx;
+        int_arg->func = func;
+        int_arg->a    = a;
+        int_arg->b    = a += len;
+        
+        state = pthread_create (&tid_arr[i], &tid_attr_arr[i], _pthread_calc_integral, (void*) int_arg);
+        if (state) {
+            PRINT_ERROR ("pthread_create");
+            _detachThreads (tid_arr, i);
+            _destroyAttrThread (tid_attr_arr, num_threads);
+            return NAN;
+        }
+    }
+    
+    // n v t = s n
+    // m v t = s m
+
+    const double dx_dummy  = dx  / (num_dummy / num_threads);
+    const double len_dummy = len / (num_dummy / num_threads);
+
+    a -= len * num_threads;
+
+    // Create dummy pthreads with special attributs
+    for (int i = num_threads; i < num_threads + num_dummy; ++i) {
+        integral_arg_t* int_arg = &int_args[i];
+        int_arg->dx   = dx_dummy;
+        int_arg->func = func;
+        int_arg->a    = a;
+        int_arg->b    = a += len_dummy;
+        
+        state = pthread_create (&tid_arr[i], &tid_attr_arr[i], _pthread_calc_integral, (void*) int_arg);
+        if (state) {
+            PRINT_ERROR ("pthread_create");
+            _detachThreads (tid_arr, i);
+            _destroyAttrThread (tid_attr_arr, num_threads);
+            return NAN;
+        }
+    }
+
+    if (_destroyAttrThread (tid_attr_arr, num_threads) == -1) {
+        PRINT_ERROR ("_destroyAttrThread");
+        _detachThreads (tid_arr, num_threads);
+        return -1;
+    }
+
+    // Join all pthreads and check for error by ret_val
+    double res = 0;
+    for (int i = 0; i < num_threads + num_dummy; ++i) {
+        int* ret_val = NULL;
+        state = pthread_join (tid_arr[i], (void**) &ret_val);
+        
+        if (state || ret_val != NULL) {
+            errno = EINVAL;
+            PRINT_ERROR ("pthread_join");
+            _detachThreads (tid_arr + i + 1, num_threads + num_dummy - i - 1);
+            return NAN;
+        }
+        
+        if (i < num_dummy)
+            res += int_args[i].result;
+    }
+#endif
 
     return res * (2 * sign_int - 1) * dx;
 }
