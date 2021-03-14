@@ -39,3 +39,4 @@ BinArray/sandbox/vim
 BinArray/sandbox/vim
 BinArray/out
 BinArray/coverage.info
+*.swp

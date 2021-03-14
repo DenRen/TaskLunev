@@ -13,7 +13,7 @@
 #define _POSIX_PRIORITY_SCHEDULING
 #include <unistd.h>
 
-const double eps = 1e-10;
+const double eps = 1e-8;
 
 // ============\\
 // Main structs ---------------------------------------------------------------
@@ -314,7 +314,7 @@ static double _integral_linear (double a, double b, double (* func) (double),
         if (state) {
             PRINT_ERROR ("pthread_create");
             _detachThreads (tid_arr, i);
-            _destroyAttrThread (tid_attr_arr, num_threads);
+            _destroyAttrThread (tid_attr_arr, num_threads + num_dummy);
             return NAN;
         }
     }
@@ -340,13 +340,13 @@ static double _integral_linear (double a, double b, double (* func) (double),
             if (state) {
                 PRINT_ERROR ("pthread_create");
                 _detachThreads (tid_arr, i);
-                _destroyAttrThread (tid_attr_arr, num_threads);
+                _destroyAttrThread (tid_attr_arr, num_threads + num_dummy);
                 return NAN;
             }
         }
     }
 
-    if (_destroyAttrThread (tid_attr_arr, num_threads) == -1) {
+    if (_destroyAttrThread (tid_attr_arr, num_threads + num_dummy) == -1) {
         PRINT_ERROR ("_destroyAttrThread");
         _detachThreads (tid_arr, num_threads);
         return -1;
