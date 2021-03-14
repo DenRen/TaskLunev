@@ -7,9 +7,11 @@ RM = rm -rf
 
 OPTIM_FLAGS = -Ofast -flto -ffast-math
 DEBUG_FLAGS = #-g
-CFLAGS = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS) -D_GNU_SOURCE
+WARNING_FLAGS = -Wall
+
+CFLAGS   = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS) $(WARNING_FLAGS) -D_GNU_SOURCE
 CXXFLAGS = $(CFLAGS)
-LDFLAGS = $(CFLAGS) -lm
+LDFLAGS  = $(CFLAGS) -lm
 
 LIB_HPC_DIR = lib
 LIB_HPC_OBJS = cpu_topology.o debug_func.o hpc.o
@@ -44,7 +46,7 @@ test:
 # Clean ----------------------------------------------------
 
 clean_temp:
-	$(RM) *.o *.d
+	$(RM) *.o *.d *.gch
 	$(MAKE) -C $(LIB_HPC_DIR) 	   clean
 	$(MAKE) -C $(LIB_HPC_TEST_DIR) clean
 

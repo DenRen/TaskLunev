@@ -5,10 +5,11 @@ LD = g++
 
 OPTIM_FLAGS = -Ofast -flto -ffast-math
 DEBUG_FLAGS = #-g
+WARNING_FLAGS = -Wall -Wcomment
 
-CFLAGS = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS) -D_GNU_SOURCE
+CFLAGS   = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS) $(WARNING_FLAGS) -D_GNU_SOURCE
 CXXFLAGS = $(CFLAGS)
-LDFLAGS = $(CFLAGS) -lm
+LDFLAGS  = $(CFLAGS) -lm
 
 RM = rm -rf
 
@@ -19,7 +20,7 @@ OBJS = cpu_topology.o debug_func.o hpc.o
 all: $(OBJS)
 
 clean:
-	$(RM) *.o *.d
+	$(RM) *.o *.d *.gch
 
 -include $(OBJS:.o=.d)
 

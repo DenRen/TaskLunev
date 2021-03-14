@@ -59,7 +59,9 @@ bool cputopVerifier (cpu_topology_t* cputop) {
 
 // cputop != NULL
 static void _cputopDestroy (cpu_topology_t** cputop) {
-    free ((*cputop)->logic_cpus);
+    if ((*cputop)->logic_cpus != NULL)
+        free ((*cputop)->logic_cpus);
+    
     free (*cputop);
     *cputop = NULL;
 }
@@ -97,10 +99,13 @@ static char* _readCpuTopologyFile (const char name_file[]) {
 
 // cputop != NULL && str_online != NULL
 static int _cputopFillLogicCPU (cpu_topology_t* cputop, char* str_online) {
-    IF_DEBUG (CHECK_PTR (cputop); 
-              if (cputop->logic_cpus != NULL) {
-                  PRINT_ERROR ("cputop->logic_cpus != NULL");
-              });
+    IF_DEBUG (
+        CHECK_PTR (cputop); 
+        if (cputop->logic_cpus != NULL) {
+            PRINT_ERROR ("cputop->logic_cpus != NULL");
+            return -1;
+        }
+    );
 
     cputop->logic_cpus = (logic_cpu_t*) calloc (LOGIC_CPU_MAX, sizeof (logic_cpu_t));
     CHECK_PTR (cputop->logic_cpus);
@@ -232,6 +237,8 @@ int cputopDestroy (cpu_topology_t** cputop) {
     CHECK_PTR (cputop);
 
     _cputopDestroy (cputop);
+
+    return 0;
 }
 
 int cputopInit (cpu_topology_t* cputop) {

@@ -15,7 +15,7 @@
 
 const double eps = 1e-8;
 
-// ============\\
+// ============\\ 
 // Main structs ---------------------------------------------------------------
 // ============//
 
@@ -25,7 +25,7 @@ typedef struct {
     double result;
 } integral_arg_t;
 
-// ===================\\
+// ===================\\ 
 // Secondary functions ------------------------------------------------------------
 // ===================//
 
@@ -41,7 +41,7 @@ static bool _verifier_int_arg (const integral_arg_t int_arg) {
            (int_arg.func != NULL);
 }
 
-// =============================\\
+// =============================\\ 
 // Calc integral functions [DEV] -------------------------------------------------------------
 // =============================//
 
@@ -372,7 +372,7 @@ static double _integral_linear (double a, double b, double (* func) (double),
     return res * (2 * sign_int - 1) * dx;
 }
 
-// =======================\\
+// =======================\\ 
 // Calc integral functions -------------------------------------------------------------
 // =======================//
 
@@ -417,7 +417,10 @@ double hpcIntegral (double a, double b, double (* func) (double), const unsigned
     double result = _integral_linear (a, b, func, num_threads, cputop);
 #endif
 
-    cputopDestroy (&cputop);
+    if (cputopDestroy (&cputop) == -1) {
+        PRINT_ERROR ("cputopDestroy");
+        return -1;
+    }
 
     return result;
 }
@@ -439,7 +442,7 @@ double hpcSimpleIntegral (double a, double b, double (* func) (double)) {
     return res * (2 * sign_int - 1) * dx;
 }
 
-// ==================\\
+// ==================\\ 
 // Priority functions -------------------------------------------------------------
 // ==================//
 
