@@ -1,6 +1,8 @@
 #include "hpc.h"
 #include "cpu_topology.h"
+//#define DEBUG
 #include "debug_func.h"
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -11,7 +13,7 @@
 #define _POSIX_PRIORITY_SCHEDULING
 #include <unistd.h>
 
-const double eps = 1e-10 / 2;
+const double eps = 1e-10;
 
 // ============\\
 // Main structs ---------------------------------------------------------------
@@ -56,12 +58,12 @@ static void* _pthread_calc_integral (void* pointer_int_arg) {
             pthread_exit ((void*) 1);
         }
     );
-
+/*
     if (pthread_setconcurrency (99 + pthread_self () % 2)) {
         PRINT_ERROR ("pthread_setconcurrency");
         pthread_exit ((void*) 1);
     }
-
+*/
 #ifdef VECT_CALC
     const int _num = 4;
     register double x[_num];
@@ -139,7 +141,6 @@ static int _distributeAttrThreads (pthread_attr_t tid_attr_arr[], unsigned num_t
         }
     );
 
-
     const int num_logic_cpu = cputopGetNumLogicCPU (cputop);
     if (num_logic_cpu == -1) {
         PRINT_ERROR ("cputopGetNumLogicCPU");
@@ -147,7 +148,6 @@ static int _distributeAttrThreads (pthread_attr_t tid_attr_arr[], unsigned num_t
     }
 
     cpu_set_t cpuset = {0};
-    CPU_ZERO (&cpuset);
 
     for (unsigned num_thread = 0; num_thread < num_threads; ++num_thread) {
 
@@ -166,39 +166,13 @@ static int _distributeAttrThreads (pthread_attr_t tid_attr_arr[], unsigned num_t
 
         IF_DEBUG (printf ("Set logic cpu id: %d\n", logic_cpu_id));
 
+        CPU_ZERO (&cpuset);
         CPU_SET (logic_cpu_id, &cpuset);
+
         if (pthread_attr_setaffinity_np (tid_attr, sizeof (cpuset), &cpuset)) {
             PRINT_ERROR ("pthread_setaffinity_np");
             return -1;
         }
-        CPU_CLR (logic_cpu_id, &cpuset);
-    /*
-        if (pthread_attr_setdetachstate (tid_attr, PTHREAD_CREATE_JOINABLE)) {
-            PRINT_ERROR ("pthread_attr_setdetachstate");
-            return -1;
-        }
-        
-        if (pthread_attr_setschedpolicy (tid_attr, SCHED_RR)) {
-            PRINT_ERROR ("pthread_attr_setschedpolicy (tid_attr, SCHED_RR)");
-            return -1;
-        }
-
-        struct sched_param param = { .sched_priority = 50 };
-        if (pthread_attr_setschedparam (tid_attr, &param)) {
-            PRINT_ERROR ("pthread_attr_setschedparam");
-            return -1;
-        }
-        
-        if (pthread_attr_setstacksize (tid_attr, 200000)) {
-            PRINT_ERROR ("pthread_attr_setstacksize");
-            return -1;
-        }
-
-        if (pthread_attr_setscope (tid_attr, PTHREAD_SCOPE_SYSTEM)) {
-            PRINT_ERROR ("pthread_attr_setscope (tid_attr, PTHREAD_SCOPE_SYSTEM)");
-            return -1;
-        }
-    */
     }
 
     return 0;
@@ -222,14 +196,6 @@ static double _integral (double a, double b, double (* func) (double),
             return NAN;
         }
     );
-    
-#ifdef LINEAR_TIME_CALC
-    int num_dummy = 0, num_logic_cpu = cputopGetNumLogicCPU (cputop);
-    if (num_threads < num_logic_cpu)
-        num_dummy = num_logic_cpu - num_threads;
-#endif
-
-#ifndef LINEAR_TIME_CALC
 
     // Distribute threads to core and hyperthreads
     pthread_attr_t tid_attr_arr[num_threads];
@@ -238,17 +204,7 @@ static double _integral (double a, double b, double (* func) (double),
         PRINT_ERROR ("_distributeAttrThreads");
         return NAN;
     }
-#else
 
-    // Distribute threads to core and hyperthreads
-    pthread_attr_t tid_attr_arr[num_threads + num_dummy];
-    int state = _distributeAttrThreads (tid_attr_arr, num_threads + num_dummy, cputop);
-    if (state) {
-        PRINT_ERROR ("_distributeAttrThreads");
-        return NAN;
-    }
-
-#endif
 
     // Set a < b
     bool sign_int = a <= b;
@@ -258,7 +214,6 @@ static double _integral (double a, double b, double (* func) (double),
     const double dx  = (b - a) * eps;
     const double len = (b - a) / num_threads;
 
-#ifndef LINEAR_TIME_CALC
     pthread_t      tid_arr [num_threads];
     integral_arg_t int_args[num_threads];
     
@@ -301,7 +256,49 @@ static double _integral (double a, double b, double (* func) (double),
         res += int_args[i].result;
     }
 
-#else
+    return res * (2 * sign_int - 1) * dx;
+}
+
+// If error, that return NAN and errno != 0
+// a, b is number, func != NULL, num_threads > 0 and cputop != NULL
+static double _integral_linear (double a, double b, double (* func) (double),
+                                int num_threads, cpu_topology_t* cputop) {
+    IF_DEBUG_NON_PRINT (
+        if ((isfinite (a) && isfinite (b) && func != NULL && num_threads > 0) == false) {
+            errno = EINVAL;
+            PRINT_ERROR ("(isfinite (a) && isfinite (b) && func == NULL && num_threads > 0) is false");
+            return NAN;
+        }
+        CHECK_PTR (cputop);
+        if (cputopVerifier (cputop) == false) {
+            errno = EINVAL;
+            PRINT_ERROR ("cputop is not init: cputopVerifier (cputop) == false");
+            return NAN;
+        }
+    );
+    
+    int num_dummy = 0, num_logic_cpu = cputopGetNumLogicCPU (cputop);
+    if (num_threads < num_logic_cpu)
+        num_dummy = num_logic_cpu - num_threads;
+    else if (num_threads > num_logic_cpu)
+        num_threads = num_logic_cpu;
+
+    // Distribute threads to core and hyperthreads
+    pthread_attr_t tid_attr_arr[num_threads + num_dummy];
+    int state = _distributeAttrThreads (tid_attr_arr, num_threads + num_dummy, cputop);
+    if (state) {
+        PRINT_ERROR ("_distributeAttrThreads");
+        return NAN;
+    }
+
+    // Set a < b
+    bool sign_int = a <= b;
+    if (!sign_int)
+        swap_double (&a, &b);
+
+    const double dx  = (b - a) * eps;
+    const double len = (b - a) / num_threads;
+
     pthread_t      tid_arr [num_threads + num_dummy];
     integral_arg_t int_args[num_threads + num_dummy];
     
@@ -325,25 +322,27 @@ static double _integral (double a, double b, double (* func) (double),
     // n v t = s n
     // m v t = s m
 
-    const double dx_dummy  = dx  / (num_dummy / num_threads);
-    const double len_dummy = len / (num_dummy / num_threads);
+    if (num_dummy != 0) {
+        const double dx_dummy  = dx  * num_threads / num_dummy;
+        const double len_dummy = len * num_threads / num_dummy;
 
-    a -= len * num_threads;
+        a -= len * num_threads;
 
-    // Create dummy pthreads with special attributs
-    for (int i = num_threads; i < num_threads + num_dummy; ++i) {
-        integral_arg_t* int_arg = &int_args[i];
-        int_arg->dx   = dx_dummy;
-        int_arg->func = func;
-        int_arg->a    = a;
-        int_arg->b    = a += len_dummy;
-        
-        state = pthread_create (&tid_arr[i], &tid_attr_arr[i], _pthread_calc_integral, (void*) int_arg);
-        if (state) {
-            PRINT_ERROR ("pthread_create");
-            _detachThreads (tid_arr, i);
-            _destroyAttrThread (tid_attr_arr, num_threads);
-            return NAN;
+        // Create dummy pthreads with special attributs
+        for (int i = num_threads; i < num_threads + num_dummy; ++i) {
+            integral_arg_t* int_arg = &int_args[i];
+            int_arg->dx   = dx_dummy;
+            int_arg->func = func;
+            int_arg->a    = a;
+            int_arg->b    = a += len_dummy;
+            
+            state = pthread_create (&tid_arr[i], &tid_attr_arr[i], _pthread_calc_integral, (void*) int_arg);
+            if (state) {
+                PRINT_ERROR ("pthread_create");
+                _detachThreads (tid_arr, i);
+                _destroyAttrThread (tid_attr_arr, num_threads);
+                return NAN;
+            }
         }
     }
 
@@ -366,10 +365,9 @@ static double _integral (double a, double b, double (* func) (double),
             return NAN;
         }
         
-        if (i < num_dummy)
+        if (i < num_threads)
             res += int_args[i].result;
     }
-#endif
 
     return res * (2 * sign_int - 1) * dx;
 }
@@ -413,7 +411,11 @@ double hpcIntegral (double a, double b, double (* func) (double), const unsigned
     
     // Less than 0.01 seconds passed
 
+#ifndef LINEAR_TIME_CALC
     double result = _integral (a, b, func, num_threads, cputop);
+#else
+    double result = _integral_linear (a, b, func, num_threads, cputop);
+#endif
 
     cputopDestroy (&cputop);
 

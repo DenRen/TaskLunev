@@ -22,8 +22,9 @@ int main (int argc, char* argv[]) {
     }
 
     errno = 0;
-
-    double res = hpcIntegral (0, 90, func, num_threads);
+    
+    double res = 0;
+    res += hpcIntegral (0, 90, func, num_threads);
     if (errno != 0) {
         perror ("hpcIntegral");
         return -1;
