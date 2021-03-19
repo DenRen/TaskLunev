@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "debug_func.h": "c",
+        "unp.h": "c",
+        "stdio.h": "c",
+        "strings.h": "c",
+        "inet.h": "c",
+        "in.h": "c",
+        "time.h": "c"
+    },
+    "C_Cpp.intelliSenseEngineFallback": "Enabled"
+}

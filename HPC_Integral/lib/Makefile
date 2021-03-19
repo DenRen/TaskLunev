@@ -5,7 +5,7 @@ LD = g++
 
 OPTIM_FLAGS = -Ofast -flto -ffast-math
 DEBUG_FLAGS = #-g
-WARNING_FLAGS = -Wall -Wcomment
+WARNING_FLAGS = #-Wall
 
 CFLAGS   = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS) $(WARNING_FLAGS) -D_GNU_SOURCE
 CXXFLAGS = $(CFLAGS)
@@ -13,15 +13,26 @@ LDFLAGS  = $(CFLAGS) -lm
 
 RM = rm -rf
 
-OBJS = cpu_topology.o debug_func.o hpc.o
+LIB_HPC_NAME = hpc
+LIB_HPC_OBJS = cpu_topology.o debug_func.o hpc.o
 
-# Main --------------------------
+# Main --------------------------------
 
-all: $(OBJS)
+all: $(LIB_HPC_OBJS)
 
-clean:
+lib_hpc: build_lib_hpc clean_temp
+
+build_lib_hpc: all
+	$(AR) rc lib$(LIB_HPC_NAME).a $(LIB_HPC_OBJS)
+
+# Clean -------------------------------
+
+clean: clean_temp
+	$(RM) *.a
+
+clean_temp:
 	$(RM) *.o *.d *.gch
 
--include $(OBJS:.o=.d)
+-include $(LIB_HPC_OBJS:.o=.d)
 
-.PHONY: clean all
+.PHONY: all lib_hpc clean_temp clean

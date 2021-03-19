@@ -7,13 +7,14 @@ RM = rm -rf
 
 OPTIM_FLAGS = -Ofast -flto -ffast-math
 DEBUG_FLAGS = #-g
-WARNING_FLAGS = -Wall
+WARNING_FLAGS = #-Wall
 
 CFLAGS   = $(OPTIM_FLAGS) -MD -pthread $(DEBUG_FLAGS) $(WARNING_FLAGS) -D_GNU_SOURCE
 CXXFLAGS = $(CFLAGS)
 LDFLAGS  = $(CFLAGS) -lm
 
 LIB_HPC_DIR = lib
+LIB_HPC_NAME = hpc
 LIB_HPC_OBJS = cpu_topology.o debug_func.o hpc.o
 LIB_HPC_OBJS_PATH = $(LIB_HPC_OBJS:%.o=$(LIB_HPC_DIR)/%.o)
 
@@ -25,18 +26,18 @@ EXEC_FILE = main.out
 # Main ----------------------------------------------------
 
 # Required to build the executable file
-ALL_EXEC_OBJS = $(OBJS) $(LIB_HPC_OBJS_PATH)
+ALL_EXEC_OBJS = $(OBJS)# $(LIB_HPC_OBJS_PATH)
 
 all: $(EXEC_FILE)
 
 $(EXEC_FILE): hpc_lib $(OBJS)
-	$(LD) -o $@ $(ALL_EXEC_OBJS) $(LDFLAGS)
+	$(LD) -o $@ $(ALL_EXEC_OBJS) $(LDFLAGS) -L./$(LIB_HPC_DIR) -l$(LIB_HPC_NAME)
 	strip $@
 
 # HPC library ---------------------------------------------
 
 hpc_lib:
-	$(MAKE) -C $(LIB_HPC_DIR) all
+	$(MAKE) -C $(LIB_HPC_DIR) build_lib_hpc
 
 # HPC test library ----------------------------------------
 
