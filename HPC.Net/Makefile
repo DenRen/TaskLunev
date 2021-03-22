@@ -25,6 +25,8 @@ LIB_HPC_NET_OBJS_PATH = $(LIB_HPC_NET_OBJS:%.o=$(LIB_HPC_NET_DIR)/%.o)
 
 LIB_HPC_NET_TEST_DIR = test
 
+LEARN_DIR = learn
+
 OBJS = main.o
 EXEC_FILE = main.out
 
@@ -63,7 +65,10 @@ clean_temp:
 	$(RM) *.o *.d *.gch
 	$(MAKE) -C $(LIB_HPC_NET_DIR) clean
 
-clean: clean_temp
+clean_learn:
+	$(MAKE) -C $(LEARN_DIR) clean
+
+clean: clean_temp clean_learn
 	$(RM) $(EXEC_FILE)
 
 -include $(ALL_EXEC_OBJS:.o=.d)

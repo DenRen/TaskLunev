@@ -6,7 +6,13 @@
         "strings.h": "c",
         "inet.h": "c",
         "in.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "string.h": "c",
+        "stdbool.h": "c",
+        "unistd.h": "c",
+        "tcp.h": "c",
+        "net_wrapper.h": "c",
+        "socket.h": "c"
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }

@@ -1,7 +1,8 @@
 #https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html
 
-CC = g++
-LD = g++
+CC  = g++
+CXX = g++
+LD  = g++
 
 RM = rm -rf
 
@@ -18,16 +19,28 @@ LIB_HPC_NAME = hpc
 LIB_HPC_NET_DIR = lib
 LIB_HPC_NET_NAME = hpcnet
 
-SRCS = 1.1.client.c 1.1.server.c
+LIB_NET_WRAPPER_DIR = .
+LIB_NET_WRAPPER_SRCS = net_wrapper.c
+LIB_NET_WRAPPER_OBJS = $(LIB_NET_WRAPPER_SRCS:%.c=%.o)
+
+SRCS = msgr_client.c msgr_server.c tcp_param.c #1.1.client.c 1.1.server.c 
 
 EXEC_FILE = $(SRCS:%.c=%.out)
 
 # Main ----------------------------------------------------
 
 all: $(EXEC_FILE)
+	$(MAKE) clean_temp
 
-%.out: %.c lib_hpc
-	$(LD) -o $@ $< $(LDFLAGS) -L$(LIB_HPC_DIR) -l$(LIB_HPC_NAME)
+%.out: %.c all_lib
+	$(LD) -o $@ $< $(LDFLAGS)										\
+		$(LIB_NET_WRAPPER_OBJS) -L$(LIB_HPC_DIR) -l$(LIB_HPC_NAME)
+
+all_lib: lib_hpc lib_net_wrapper
+
+# Net Wrapper library -------------------------------------
+
+lib_net_wrapper: $(LIB_NET_WRAPPER_OBJS)
 
 # HPC library ---------------------------------------------
 
@@ -43,7 +56,7 @@ clean_temp:
 	$(RM) *.o *.d *.gch
 
 clean: clean_temp
-	$(RM) $(EXEC_FILE)
+	$(RM) *.out
 
 #-include $(:.o=.d)
 
