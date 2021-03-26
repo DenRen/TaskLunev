@@ -45,12 +45,11 @@ int main (int argc, char* argv[]) {
             case IPPROTO_TCP:
                 CHECK_ERR (fd = socket (AF_INET, SOCK_STREAM, 0), );
                 break;
-
             default:
                 CHECK_ERR (-1, );
             }
         }
-
+        
         #define ERR_ACT close (fd);
 
         len = sizeof (val);

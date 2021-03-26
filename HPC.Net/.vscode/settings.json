@@ -12,7 +12,11 @@
         "unistd.h": "c",
         "tcp.h": "c",
         "net_wrapper.h": "c",
-        "socket.h": "c"
+        "socket.h": "c",
+        "hpc_net.h": "c",
+        "errno.h": "c",
+        "signal.h": "c",
+        "stdint.h": "c"
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }

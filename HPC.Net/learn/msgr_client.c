@@ -1,11 +1,9 @@
 #include "unp.h"
-
-const int port = 13;
-char serv_str_ip[INET_ADDRSTRLEN] = "127.0.0.1";
+#include "net_wrapper.h"
 
 int main (int argc, char* argv[]) {
     
-    char* str_ip = serv_str_ip;
+    char* str_ip = serv_def_ip_str;
 
     if (argc == 2)
         str_ip = argv[1];
@@ -14,7 +12,7 @@ int main (int argc, char* argv[]) {
     bzero (&servaddr, sizeof (servaddr));
 
     servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons (13);
+    servaddr.sin_port = htons (SERV_PORT);
     CHECK_ERR (inet_pton (AF_INET, str_ip, &servaddr.sin_addr) - 1,
         char str_err[MAX_LINE] = "";
         snprintf (str_err, sizeof (str_err), "inet_pton: %s", argv[1]);

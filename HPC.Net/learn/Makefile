@@ -23,7 +23,7 @@ LIB_NET_WRAPPER_DIR = .
 LIB_NET_WRAPPER_SRCS = net_wrapper.c
 LIB_NET_WRAPPER_OBJS = $(LIB_NET_WRAPPER_SRCS:%.c=%.o)
 
-SRCS = msgr_client.c msgr_server.c tcp_param.c #1.1.client.c 1.1.server.c 
+SRCS = udp_client.c udp_server.c msgr_client.c msgr_server.c tcp_param.c  #1.1.client.c 1.1.server.c 
 
 EXEC_FILE = $(SRCS:%.c=%.out)
 
@@ -34,7 +34,7 @@ all: $(EXEC_FILE)
 
 %.out: %.c all_lib
 	$(LD) -o $@ $< $(LDFLAGS)										\
-		$(LIB_NET_WRAPPER_OBJS) -L$(LIB_HPC_DIR) -l$(LIB_HPC_NAME)
+		 -L$(LIB_HPC_DIR) -l$(LIB_HPC_NAME) $(LIB_NET_WRAPPER_OBJS)
 
 all_lib: lib_hpc lib_net_wrapper
 

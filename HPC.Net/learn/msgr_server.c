@@ -15,15 +15,13 @@ int Write (int fd, char* buf, size_t size) {
     return 0;
 }
 
-const int port = 13;
 const int max_listen = 20;
-const char serv_ip_str[INET_ADDRSTRLEN] = "";
 
 int main (int argc, char* argv[]) {
     struct sockaddr_in servaddr = {0};
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl (INADDR_ANY);
-    servaddr.sin_port = htons (port);
+    servaddr.sin_port = htons (SERV_PORT);
 
     int listenfd = socket (AF_INET, SOCK_STREAM, 0);
     CHECK_ERR (listenfd, );
@@ -31,6 +29,7 @@ int main (int argc, char* argv[]) {
     #define ERR_ACT close (listenfd)
 
     CHECK_ERR (bind (listenfd, (SA*) &servaddr, sizeof (servaddr)), ERR_ACT);
+    
     CHECK_ERR (listen (listenfd, max_listen), ERR_ACT);
 
     printf ("Server started\n");

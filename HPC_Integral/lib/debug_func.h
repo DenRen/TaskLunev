@@ -17,7 +17,7 @@ void print_error_line (const char strerr[], const char name_file[], int line);
 
 #ifdef DEBUG
     #define IF_DEBUG(act) do {                          \
-                              printf ("DEBUG LOG: ");   \
+                              printf ("\tDebug LOG: ");   \
                               act;                      \
                              } while (0)
 #else

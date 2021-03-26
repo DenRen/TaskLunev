@@ -1,5 +1,24 @@
 #include "net_wrapper.h"
-#include "unp.h"
+
+#define DEBUG
+#include "../../HPC_Integral/lib/debug_func.h"
+
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
+
+#include <sys/types.h>
+#include <sys/time.h>
+#include <arpa/inet.h>
+
+#include <stdbool.h>
+
+#include <strings.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
 
 char* sock_ntop (const struct sockaddr* sa, socklen_t salen) {
     if (sa == NULL) {
