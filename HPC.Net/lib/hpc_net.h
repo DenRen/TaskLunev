@@ -1,7 +1,7 @@
 #ifndef HPC_NET_H
 #define HPC_NET_H
 
-//#define DEBUG
+#define DEBUG
 #include "../../HPC_Integral/lib/debug_func.h"
 #include <stdint.h>
 #include <sys/socket.h>
@@ -23,13 +23,17 @@ const uint16_t UDP_BROADCAST_PORT = 8000;
 
 const char LAN_IP_SERVER[] = "192.168.0.1";
 
+int StartClient ();
+int StartServer (int clients_limit, const char* if_name, sa_family_t sa_family_t);
+
+int getAddr (struct sockaddr_in* paddr);
 int addrGetPort (const void* paddr);
 
 int hpcnetBroadcastServerInit (struct sockaddr_in* pservaddr);
 int hpcnetBroadcastClientInit (struct sockaddr_in* pservaddr);
 int hpcnetTcpServerInit (char* host, int clients_limit, struct sockaddr_in* pservaddr);
-int hpcnetTcpLanClientInit (uint16_t tcpserv_port);
+int hpcnetTcpClientInit (const struct sockaddr_in* servaddr);
 
-int GetStaticIP (char* if_name, sa_family_t family, char host[]);
+int GetStaticAddr (const char* if_name, sa_family_t family, char str_host[], uint32_t len_host);
 
 #endif // HPC_NET_H

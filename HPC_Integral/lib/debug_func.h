@@ -3,6 +3,9 @@
 
 void print_error_line (const char strerr[], const char name_file[], int line);
 
+const int MAXLEN_ERRSTR = 256;
+const int MAXLEN_LOGSTR = 512;
+
 //#define DEBUG
 
 #ifdef DEBUG
