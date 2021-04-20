@@ -17,10 +17,8 @@
 #define _POSIX_PRIORITY_SCHEDULING
 #include <unistd.h>
 
-const double eps = 1e-10;
-
 // ============\\ 
-// Main structs ---------------------------------------------------------------
+// Main structs ------------------------------------------------------------------------------
 // ============//
 
 typedef struct {
@@ -30,7 +28,7 @@ typedef struct {
 } int_pth_arg_t;
 
 // ===================\\ 
-// Secondary functions ------------------------------------------------------------
+// Secondary functions -----------------------------------------------------------------------
 // ===================//
 
 static void swap_double (double* first, double* second) {
@@ -46,8 +44,8 @@ static bool _verifier_int_pth_arg (const int_pth_arg_t int_arg) {
 }
 
 static bool _verifier_int_arg (hpc_int_arg_t* int_arg) {
-    if ((isfinite (int_arg->a) && isfinite (int_arg->b) &&
-        int_arg->func != NULL && int_arg->num_threads > 0) == false) {
+    if ((isfinite (int_arg->a) && isfinite (int_arg->b) && (int_arg->eps) &&
+        int_arg->func != NULL && int_arg->num_threads > 0 && int_arg->eps != 0) == false) {
         errno = EINVAL;
         IF_DEBUG (
             printf ("\n");
@@ -203,7 +201,7 @@ static int _distributeAttrThreads (pthread_attr_t tid_attr_arr[], unsigned num_t
 
 // If error, that return NAN and errno != 0
 // a, b is number, func != NULL, num_threads > 0 and cputop != NULL
-static double _integral (double a, double b, double (* func) (double),
+static double _integral (double a, double b, double (* func) (double), double eps,
                          const int num_threads, cpu_topology_t* cputop) {
     
     IF_DEBUG_NON_PRINT (
@@ -283,7 +281,7 @@ static double _integral (double a, double b, double (* func) (double),
 
 // If error, that return NAN and errno != 0
 // a, b is number, func != NULL, num_threads > 0 and cputop != NULL
-static double _integral_linear (double a, double b, double (* func) (double),
+static double _integral_linear (double a, double b, double (* func) (double), double eps,
                                 int num_threads, cpu_topology_t* cputop) {
     IF_DEBUG_NON_PRINT (
         if ((isfinite (a) && isfinite (b) && func != NULL && num_threads > 0) == false) {
@@ -428,14 +426,14 @@ double hpcIntegral (hpc_int_arg_t* hpc_int_arg) {
     
     // Less than 0.01 seconds passed
 
-    double a = hpc_int_arg->a, b = hpc_int_arg->b;
+    double a = hpc_int_arg->a, b = hpc_int_arg->b, eps = hpc_int_arg->eps;
     double (*func) (double) = hpc_int_arg->func;
     int num_threads = hpc_int_arg->num_threads;
 
 #ifdef LINEAR_TIME_CALC
-    double result = _integral_linear (a, b, func, num_threads, cputop);
+    double result = _integral_linear (a, b, func, eps, num_threads, cputop);
 #else
-    double result = _integral (a, b, func, num_threads, cputop);
+    double result = _integral (a, b, func, eps, num_threads, cputop);
 #endif
 
     if (cputopDestroy (&cputop) == -1) {
@@ -446,7 +444,7 @@ double hpcIntegral (hpc_int_arg_t* hpc_int_arg) {
     return result;
 }
 
-double hpcSimpleIntegral (double a, double b, double (* func) (double)) {
+double hpcSimpleIntegral (double a, double b, double (* func) (double), double eps) {
     bool sign_int = a <= b;
 
     if (!sign_int)

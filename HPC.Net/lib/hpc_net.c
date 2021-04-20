@@ -189,7 +189,7 @@ static int _bindFreePort (int sockfd, struct sockaddr_in* paddr,
 }
 
 int hpcnetTcpServerInit (char* host, int clients_limit, struct sockaddr_in* pservaddr) {
-    CHECK_PTR (pservaddr);
+    CHECK_NULL (pservaddr, );
 
     // Create socket servfd
     int servfd = socket (AF_INET, SOCK_STREAM, 0);
@@ -211,6 +211,11 @@ int hpcnetTcpServerInit (char* host, int clients_limit, struct sockaddr_in* pser
     CHECK_ERR (listen (servfd, clients_limit), ERR_ACT);
 
     #undef ERR_ACT
+
+    IF_DEBUG (
+        printf ("TCP server HPC Net started\n");
+        printf ("TCP server address: %s:%d\n", host, ntohs (addrGetPort (pservaddr)))
+    );
 
     return servfd;
 }
@@ -236,21 +241,6 @@ int hpcnetTcpClientInit (const struct sockaddr_in* servaddr) {
 // System functions -------------------------------------------------------------
 // ================//
 
-static int sigalarm_flag = 0;
-// Only for call EINT from accept
-static void callback_alarm (int signum) {
-    sigalarm_flag = 1;
-    return;
-}
-
-static void callback_sigio (int signum) {
-    printf ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa\n");
-    perror ("");
-
-    fflush (stdout);
-    fflush (stderr);
-}
-
 // Only for AF_INET and AF_INET6
 int GetStaticAddr (const char* if_name, sa_family_t family, char str_host[], uint32_t len_host) {
     struct ifaddrs* ifaddr = NULL;
@@ -272,6 +262,8 @@ int GetStaticAddr (const char* if_name, sa_family_t family, char str_host[], uin
                          str_host, len_host,
                          NULL, 0, NI_NUMERICHOST),
         );
+
+        IF_DEBUG (printf ("Getted static host server (interface: %s): %s\n", if_name, str_host));
 
         return 0;
     }
@@ -307,19 +299,6 @@ static int CheckServAttr (serv_attr_t* serv_attr, bool print_err) {
     return 0;
 }
 
-// In sockfd set SO_SNDTIMEO
-static int SendKeepAliveProbe (int sockfd) {
-    int buf = 0;
-    printf ("S_\n");
-    int state = write (sockfd, &buf, 0);
-    printf ("F_\n");
-    perror ("AAA");
-    if (state == 0 || state == -1)
-        return -1;
-    
-    return 0;
-}
-
 int writen (int fd, void* data, size_t len) {
     if (fd < 0 || data == NULL) {
         PRINT_ERROR ("fd < 0 || buf == NULL");
@@ -329,8 +308,10 @@ int writen (int fd, void* data, size_t len) {
     int num_written = 0;
     do {
         num_written = write (fd, data, len);
-        if (num_written == -1 || num_written == 0)
+        if (num_written == -1 || num_written == 0) {
+            IF_DEBUG (printf ("write is returned %d\n", num_written));
             CHECK_ERR (-1, )
+        }
         
         *((char**) &data) += num_written;
 
@@ -348,8 +329,10 @@ int readn (int fd, void* data, size_t len) {
     int num_readden = 0;
     do {
         num_readden = read (fd, data, len);
-        if (num_readden == -1 || num_readden == 0)
+        if (num_readden == -1 || num_readden == 0) {
+            IF_DEBUG (printf ("read is returned %d\n", num_readden));
             CHECK_ERR (-1, )
+        }
 
         *((char**) &data) += num_readden;
 
@@ -381,7 +364,7 @@ static int SetSocketKeepAlive (int sockfd) {
     CHECK_ERR (setsockopt (sockfd, IPPROTO_TCP, TCP_KEEPINTVL, (const void*) &use, sizeof (use)), );
     CHECK_ERR (setsockopt (sockfd, IPPROTO_TCP, TCP_KEEPCNT,   (const void*) &cnt, sizeof (cnt)), );
 
-    CHECK_ERR (setsockopt (sockfd, IPPROTO_IP, IP_RECVERR,   (const void*) &cnt, sizeof (cnt)), );
+    // CHECK_ERR (setsockopt (sockfd, IPPROTO_IP, IP_RECVERR,   (const void*) &cnt, sizeof (cnt)), );
 
     //fcntl(sockfd, F_SETFL, O_ASYNC | fcntl(sockfd, F_GETFL));
     //fcntl(sockfd, F_SETOWN, getpid());
@@ -410,19 +393,64 @@ int StartClient () {
     return tcpcli_fd;
 }
 
-static int SetSignalHandlers () {
-    struct sigaction alaram_act = {0};
-    bzero (&alaram_act, sizeof (alaram_act));
-    alaram_act.sa_handler = callback_alarm;
-    sigfillset (&alaram_act.sa_mask);
+static int SetInSocketTimeout (int sockfd, __time_t recvtimeo, __time_t sendtimeo) {
+    struct timeval timeo = {
+        .tv_sec = recvtimeo, 
+        .tv_usec = 0
+    };
 
-    struct sigaction sigio_act = {0};
-    bzero (&sigio_act, sizeof (sigio_act));
-    sigio_act.sa_handler = callback_sigio;
-    sigfillset (&sigio_act.sa_mask);
-    
-    //CHECK_ERR (sigaction (SIGIO,   &sigio_act,  NULL), );
-    CHECK_ERR (sigaction (SIGALRM, &alaram_act, NULL), );
+    CHECK_ERR (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeo, sizeof (timeo)), );
+    timeo.tv_sec = sendtimeo;
+    CHECK_ERR (setsockopt (sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeo, sizeof (timeo)), );
+
+    return 0;
+}
+
+// serv_param != NULL
+static int AcceptAndInitClients (serv_param_t* serv_param, unsigned num_cli_limit) {   
+    // Allocate memory for client file descriptors
+    int* clifds = (int*) calloc (num_cli_limit, sizeof (int));
+    CHECK_NULL (clifds, );
+    #define ERR_ACT free (clifds)
+
+    // Set timeout for check error in number enabled clients --------------------------------------
+    unsigned tcpserv_fd = serv_param->serv_fd;
+    CHECK_ERR (SetInSocketTimeout (tcpserv_fd, CHECK_TIMEOUT, CHECK_TIMEOUT), ERR_ACT);
+
+    // Accert available clients
+    int numcli = 0;
+    for (; numcli < num_cli_limit; ++numcli) {
+        if ((clifds[numcli] = accept (tcpserv_fd, NULL, NULL)) == -1) {
+            IF_DEBUG (if (errno == EWOULDBLOCK) {
+                printf ("Find only %d from %d\n", numcli, num_cli_limit);
+            });
+
+            CHECK_ERR (-1, ERR_ACT);
+        }
+
+        CHECK_ERR (SetInSocketTimeout (clifds[numcli], 0, 0), ERR_ACT);
+
+        CHECK_ERR (SetSocketKeepAlive (clifds[numcli]), ERR_ACT);
+    }
+
+    serv_param->num_clients = numcli;
+
+    // Set default timeouts 
+    CHECK_ERR (SetInSocketTimeout (tcpserv_fd, 0, 0), ERR_ACT);
+
+    IF_DEBUG (printf ("All %d clients accepted\n", num_cli_limit));
+
+    // Preparation and save of values -------------------------------------------------------------   
+    if ((serv_param->comp_units = (comp_unit_t*) calloc (numcli, sizeof (comp_unit_t))) == NULL)
+        CHECK_ERR (-1, ERR_ACT);
+
+    // Get and set in comput unit number of logic cpu for each client
+    CHECK_ERR (InitCompUnits (serv_param->comp_units, numcli, clifds), ERR_ACT);
+
+    free (clifds);
+    #undef ERR_ACT
+
+    IF_DEBUG (_dumpCompUnits (serv_param->comp_units, numcli));
 
     return 0;
 }
@@ -440,83 +468,17 @@ int StartServer (serv_attr_t* serv_attr, serv_param_t* serv_param) {
     char host[NI_MAXHOST] = {0};
     CHECK_ERR (GetStaticAddr (if_name, sa_family, host, sizeof (host)), );
 
-    IF_DEBUG (printf ("Getted static host server: %s\n", host));
-
     // Start TCP server
     struct sockaddr_in tcpserv_addr = {0};
     int tcpserv_fd = hpcnetTcpServerInit (host, clients_limit, &tcpserv_addr);
     CHECK_ERR (tcpserv_fd, );
-    printf ("TCP server HPC Net started\n");
-
-    #define ERR_ACT close (tcpserv_fd)
-
-    IF_DEBUG (printf ("TCP server address: %s:%d\n", host, ntohs (addrGetPort (&tcpserv_addr))));
+    serv_param->serv_fd = tcpserv_fd;
 
     // Send server static address to broadcast
-    CHECK_ERR (SendDataBroadcast (&tcpserv_addr, sizeof (tcpserv_addr)), ERR_ACT);
+    CHECK_ERR (SendDataBroadcast (&tcpserv_addr, sizeof (tcpserv_addr)), close (tcpserv_fd));
 
-    // Block all signals except SIGALARM for next step
-    sigset_t sigset_noalarm = {0}, sigset_old = {0};
-    sigfillset (&sigset_noalarm);
-    sigdelset  (&sigset_noalarm, SIGALRM);  // Unblock only SIGALRM
-
-    //CHECK_ERR (sigprocmask (SIG_BLOCK, &sigset_noalarm, &sigset_old), ERR_ACT);
-    CHECK_ERR (SetSignalHandlers (), ERR_ACT);
-    
-    // Accept of clients
-    int* clifds = (int*) calloc (clients_limit, sizeof (int));
-    CHECK_NULL (clifds, ERR_ACT);
-    
-    alarm (5);  // Max time wait loop of accept
-
-    #undef ERR_ACT
-    #define ERR_ACT close (tcpserv_fd); free (clifds)
-
-    int numcli = 0;
-    for (; numcli < clients_limit; ++numcli) {
-        if ((clifds[numcli] = accept (tcpserv_fd, NULL, NULL)) == -1) {
-            if (errno == EINTR) {
-                if (sigalarm_flag)
-                    break;
-                else {
-                    numcli--;
-                    continue;
-                }
-            }
-            else
-                CHECK_ERR (-1, ERR_ACT);
-        }
-
-        CHECK_ERR (SetSocketKeepAlive (clifds[numcli]), ERR_ACT);
-    }
-
-    alarm (0);
-    errno = 0;
-
-    //CHECK_ERR (sigprocmask (SIG_SETMASK, &sigset_old, NULL), ERR_ACT);
-
-    IF_DEBUG (printf ("Number clients: %d\n", numcli));
-
-    // Preparation and save of values
-    int* tmp_clifds = (int*) realloc (clifds, numcli * sizeof (int));
-    if (tmp_clifds == NULL)
-        CHECK_ERR (-1, printf ("Realloc failed! May be number clients is zero\n"); 
-                       close (tcpserv_fd); free (tmp_clifds));
-    clifds = tmp_clifds;
-
-    if ((serv_param->comp_units = (comp_unit_t*) calloc (numcli, sizeof (comp_unit_t))) == NULL)
-        CHECK_ERR (-1, ERR_ACT);
-
-    CHECK_ERR (InitCompUnits (serv_param->comp_units, numcli, clifds), ERR_ACT);
-
-    IF_DEBUG (_dumpCompUnits (serv_param->comp_units, numcli));
-
-    serv_param->num_clients = numcli;
-    serv_param->serv_fd = tcpserv_fd;
-    
-    free (tmp_clifds);
-
-    #undef ERR_ACT
+    // Accept of clients -------------------------------------------------------------
+    CHECK_ERR (AcceptAndInitClients (serv_param, clients_limit), close (tcpserv_fd));
 
     return 0;
 }
@@ -542,6 +504,7 @@ static hpc_int_arg_t CompUnitTask2IntArg (comp_unit_task_t* ptask) {
         .a = ptask->a,
         .b = ptask->b,
         .func = NULL,
+        .eps = ptask->eps,
         .num_threads = ptask->num_threads
     };
 
@@ -551,6 +514,15 @@ static hpc_int_arg_t CompUnitTask2IntArg (comp_unit_task_t* ptask) {
     }
 
     return int_arg;
+}
+
+static int _dumpIntArg (hpc_int_arg_t* int_arg) {
+    CHECK_NULL (int_arg, );
+
+    printf ("a: %g, b: %g, eps: %g, num_threads: %d, func: %p\n", 
+            int_arg->a, int_arg->b, int_arg->eps, int_arg->num_threads, int_arg->func);
+
+    return 0;
 }
 
 int hpcnetStartComputeUnit (int client_fd) {
@@ -566,6 +538,11 @@ int hpcnetStartComputeUnit (int client_fd) {
     IF_DEBUG (printf ("Client recieve task from server\n"));
     
     hpc_int_arg_t int_arg = CompUnitTask2IntArg (&task);
+    if (int_arg.num_threads == 0)
+        return 0;
+
+    IF_DEBUG (CHECK_ERR (_dumpIntArg (&int_arg), ));
+    
     double result = hpcIntegral (&int_arg);
 
     // Send answer
@@ -575,7 +552,7 @@ int hpcnetStartComputeUnit (int client_fd) {
 }
 
 int hpcnetCalcIntegral (serv_param_t* serv_param, unsigned num_threads,
-                        double (*func) (double), double a, double b, double* result) {
+                        double (*func) (double), double a, double b, double eps, double* result) {
     if (ServParamIsFull (serv_param) == false) {
         PRINT_ERROR ("ServParamIsFull (serv_param) is false\n");
         errno = EINVAL;
@@ -585,27 +562,46 @@ int hpcnetCalcIntegral (serv_param_t* serv_param, unsigned num_threads,
     int num_clients = serv_param->num_clients;
     comp_unit_t *comp_units = serv_param->comp_units;
 
-    double len = (b - a) / num_clients;
+    double len = (b - a) / num_threads;
+    const int num_calc_units = num_clients + 1;
+    const int num_extra_threads = num_threads % num_calc_units;
+    const int num_full_threads  = num_threads / num_calc_units;
 
     comp_unit_task_t task = {
         .a = a,
         .b = a,
+        .eps = eps * num_threads,
         .type_func = X,
-        .num_threads = num_threads
+        .num_threads = 0
     };
 
-    for (int i = 0; i < num_clients; ++i) {
+    // Send task clients
+    for (int numcli = 0; numcli < num_clients; ++numcli) {
+        const int num_local_threads = num_full_threads + (numcli < num_extra_threads);
+
         task.a = task.b;
-        task.b = task.a + len;
-        CHECK_ERR (writen (comp_units[i].sock_fd, &task,  sizeof (task)), );
+        task.b = task.a + len * num_local_threads;
+        task.num_threads = num_local_threads;
+        
+        CHECK_ERR (writen (comp_units[numcli].sock_fd, &task,  sizeof (task)), );
         IF_DEBUG (printf ("A task has been sent to the client[%d]\n"););
     }
 
-    *result = 0;
+    // Youself task
+    if (num_full_threads != 0) {
+        task.a = task.b;
+        task.b = task.a + len * num_full_threads;
+        task.num_threads = num_full_threads;
+        
+        hpc_int_arg_t int_arg = CompUnitTask2IntArg (&task);
+        IF_DEBUG (CHECK_ERR (_dumpIntArg (&int_arg), ));
+        if (isfinite ((*result = hpcIntegral (&int_arg))) == 0)
+            CHECK_ERR (-1, );
+    }
 
-    for (int i = 0; i < num_clients; ++i) {
+    for (int numcli = 0; numcli < num_clients; ++numcli) {
         double cli_res = 0.0f;
-        CHECK_ERR (readn (comp_units[i].sock_fd, (void*) &cli_res, sizeof (cli_res)), );
+        CHECK_ERR (readn (comp_units[numcli].sock_fd, (void*) &cli_res, sizeof (cli_res)), );
         *result += cli_res;
     }
     

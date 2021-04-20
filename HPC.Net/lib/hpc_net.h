@@ -67,7 +67,7 @@ typedef struct {
 } serv_param_t;
 
 typedef struct {
-    double a, b;
+    double a, b, eps;
     int type_func;
     unsigned num_threads;
 } comp_unit_task_t;
@@ -95,7 +95,7 @@ int hpcnetStartComputeUnit (int client_fd);
 int InitCompUnits (comp_unit_t* comp_units, int num_units, int* fds);
 
 int hpcnetCalcIntegral (serv_param_t* serv_param, unsigned num_threads,
-                        double (*func) (double), double a, double b, double* result);
+                        double (*func) (double), double a, double b, double eps, double* result);
 
 // ===========================\\
 // UDP Client/Server functions -------------------------------------------------------------

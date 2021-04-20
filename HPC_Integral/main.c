@@ -31,6 +31,7 @@ int main (int argc, char* argv[]) {
         .a = 0,
         .b = 90,
         .func = func,
+        .eps = 1e-10,
         .num_threads = num_threads
     };
     res += hpcIntegral (&int_arg);
