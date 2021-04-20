@@ -29,6 +29,8 @@
         "ranges": "c",
         "thread": "c",
         "type_traits": "c",
-        "cpu-set.h": "c"
+        "cpu-set.h": "c",
+        "stdio.h": "c",
+        "strings.h": "c"
     }
 }

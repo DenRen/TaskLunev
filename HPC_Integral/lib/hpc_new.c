@@ -15,12 +15,12 @@ typedef struct {
     double (* func) (double x);
     double result;
     int id;
-} integral_arg_t;
+} int_pth_arg_t;
 
 static void* _pthread_int_calc (void* pointer_int_arg) {
     assert (pointer_int_arg != NULL);
 
-    integral_arg_t int_arg = *(integral_arg_t*) pointer_int_arg;
+    int_pth_arg_t int_arg = *(int_pth_arg_t*) pointer_int_arg;
 
     cpu_set_t cpuset = {0};
     CPU_ZERO (&cpuset);
@@ -38,7 +38,7 @@ static void* _pthread_int_calc (void* pointer_int_arg) {
         int_arg.a += int_arg.dx;
     }
 
-    ((integral_arg_t*) pointer_int_arg)->result = res;
+    ((int_pth_arg_t*) pointer_int_arg)->result = res;
 
     return NULL;
 }
@@ -62,7 +62,7 @@ double integral (double a, double b, double (*func) (double), const unsigned num
     }*/
 
     pthread_t pid_arr[num_threads];
-    integral_arg_t int_args[num_threads];
+    int_pth_arg_t int_args[num_threads];
 
     const double len = (b - a) / (double) num_threads;
     const double dx  = (b - a) * eps;

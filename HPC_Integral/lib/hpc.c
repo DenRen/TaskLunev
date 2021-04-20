@@ -1,5 +1,6 @@
 #include "hpc.h"
 #include "cpu_topology.h"
+
 //#define DEBUG
 #include "debug_func.h"
 
@@ -9,6 +10,9 @@
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
+
+#include <signal.h>
+#include <strings.h>
 
 #define _POSIX_PRIORITY_SCHEDULING
 #include <unistd.h>
@@ -23,7 +27,7 @@ typedef struct {
     double a, b, dx;
     double (* func) (double x);
     double result;
-} integral_arg_t;
+} int_pth_arg_t;
 
 // ===================\\ 
 // Secondary functions ------------------------------------------------------------
@@ -35,10 +39,29 @@ static void swap_double (double* first, double* second) {
     *second = temp;
 }
 
-static bool _verifier_int_arg (const integral_arg_t int_arg) {
+static bool _verifier_int_pth_arg (const int_pth_arg_t int_arg) {
     return (int_arg.a    <= int_arg.b) &&
            (int_arg.dx   >= 0)         &&
            (int_arg.func != NULL);
+}
+
+static bool _verifier_int_arg (hpc_int_arg_t* int_arg) {
+    if ((isfinite (int_arg->a) && isfinite (int_arg->b) &&
+        int_arg->func != NULL && int_arg->num_threads > 0) == false) {
+        errno = EINVAL;
+        IF_DEBUG (
+            printf ("\n");
+            printf ("\tisfinite (a): %d\n", isfinite (int_arg->a));
+            printf ("\tisfinite (b): %d\n", isfinite (int_arg->b));
+            printf ("\tfunc: %p\n", int_arg->func);
+            printf ("\tnum_threads: %d\n", int_arg->num_threads)
+        );
+        PRINT_ERROR ("(isfinite (a) && isfinite (b) && func == NULL && num_threads > 0) is false");
+
+        return false;
+    }
+
+    return true;
 }
 
 // =============================\\ 
@@ -48,10 +71,10 @@ static bool _verifier_int_arg (const integral_arg_t int_arg) {
 // a, b is number, func != NULL, num_threads > 0 and cputop != NULL
 // a <= b
 static void* _pthread_calc_integral (void* pointer_int_arg) {
-    register integral_arg_t int_arg = *(integral_arg_t*) pointer_int_arg;
+    register int_pth_arg_t int_arg = *(int_pth_arg_t*) pointer_int_arg;
 
     IF_DEBUG_NON_PRINT (
-        if (_verifier_int_arg (int_arg) == false) {
+        if (_verifier_int_pth_arg (int_arg) == false) {
             errno = EINVAL;
             PRINT_ERROR ("Invalid input arguments for calculating the integral!\n"
                         "Maybe a, b is NAN");
@@ -91,7 +114,7 @@ static void* _pthread_calc_integral (void* pointer_int_arg) {
         x[3] += dx;
     }
 
-    ((integral_arg_t*) pointer_int_arg)->result = res[0] + res[1] + res[2] + res[3];
+    ((int_pth_arg_t*) pointer_int_arg)->result = res[0] + res[1] + res[2] + res[3];
 
 #else
 
@@ -101,7 +124,7 @@ static void* _pthread_calc_integral (void* pointer_int_arg) {
         int_arg.a += int_arg.dx;
     }
 
-    ((integral_arg_t*) pointer_int_arg)->result = int_arg.result;
+    ((int_pth_arg_t*) pointer_int_arg)->result = int_arg.result;
 
 #endif
 
@@ -205,7 +228,6 @@ static double _integral (double a, double b, double (* func) (double),
         return NAN;
     }
 
-
     // Set a < b
     bool sign_int = a <= b;
     if (!sign_int)
@@ -214,12 +236,12 @@ static double _integral (double a, double b, double (* func) (double),
     const double dx  = (b - a) * eps;
     const double len = (b - a) / num_threads;
 
-    pthread_t      tid_arr [num_threads];
-    integral_arg_t int_args[num_threads];
+    pthread_t      tid_arr[num_threads];
+    int_pth_arg_t int_args[num_threads];
     
     // Create pthreads with special attributs
     for (int i = 0; i < num_threads; ++i) {
-        integral_arg_t* int_arg = &int_args[i];
+        int_pth_arg_t* int_arg = &int_args[i];
         int_arg->dx   = dx;
         int_arg->func = func;
         int_arg->a    = a;
@@ -276,15 +298,18 @@ static double _integral_linear (double a, double b, double (* func) (double),
             return NAN;
         }
     );
-    
+
     int num_dummy = 0, num_logic_cpu = cputopGetNumLogicCPU (cputop);
     if (num_threads < num_logic_cpu)
         num_dummy = num_logic_cpu - num_threads;
-    else if (num_threads > num_logic_cpu)
-        num_threads = num_logic_cpu;
 
     // Distribute threads to core and hyperthreads
-    pthread_attr_t tid_attr_arr[num_threads + num_dummy];
+    //pthread_attr_t tid_attr_arr[num_threads + num_dummy];
+    pthread_attr_t* tid_attr_arr = (pthread_attr_t*) calloc (num_threads + num_dummy, sizeof (pthread_attr_t));
+    if (tid_attr_arr == NULL) {
+        PRINT_ERROR ("calloc");
+        return -1;
+    }
     int state = _distributeAttrThreads (tid_attr_arr, num_threads + num_dummy, cputop);
     if (state) {
         PRINT_ERROR ("_distributeAttrThreads");
@@ -299,12 +324,12 @@ static double _integral_linear (double a, double b, double (* func) (double),
     const double dx  = (b - a) * eps;
     const double len = (b - a) / num_threads;
 
-    pthread_t      tid_arr [num_threads + num_dummy];
-    integral_arg_t int_args[num_threads + num_dummy];
+    pthread_t*     tid_arr  = (pthread_t*)     calloc (num_threads + num_dummy, sizeof (*tid_arr));
+    int_pth_arg_t* int_args = (int_pth_arg_t*) calloc (num_threads + num_dummy, sizeof (*int_args));
     
     // Create pthreads with special attributs
     for (int i = 0; i < num_threads; ++i) {
-        integral_arg_t* int_arg = &int_args[i];
+        int_pth_arg_t* int_arg = &int_args[i];
         int_arg->dx   = dx;
         int_arg->func = func;
         int_arg->a    = a;
@@ -330,7 +355,7 @@ static double _integral_linear (double a, double b, double (* func) (double),
 
         // Create dummy pthreads with special attributs
         for (int i = num_threads; i < num_threads + num_dummy; ++i) {
-            integral_arg_t* int_arg = &int_args[i];
+            int_pth_arg_t* int_arg = &int_args[i];
             int_arg->dx   = dx_dummy;
             int_arg->func = func;
             int_arg->a    = a;
@@ -376,20 +401,12 @@ static double _integral_linear (double a, double b, double (* func) (double),
 // Calc integral functions -------------------------------------------------------------
 // =======================//
 
-double hpcIntegral (double a, double b, double (* func) (double), const unsigned num_threads) {
+double hpcIntegral (hpc_int_arg_t* hpc_int_arg) {
 
-    if ((isfinite (a) && isfinite (b) && func != NULL && num_threads > 0) == false) {
-        errno = EINVAL;
-        IF_DEBUG (
-            printf ("\n");
-            printf ("\tisfinite (a): %d\n", isfinite (a));
-            printf ("\tisfinite (b): %d\n", isfinite (b));
-            printf ("\tfunc: %p\n", func);
-            printf ("\tnum_threads: %d\n", num_threads)
-        );
-        PRINT_ERROR ("(isfinite (a) && isfinite (b) && func == NULL && num_threads > 0) is false");
-        return NAN;
-    }
+     if (_verifier_int_arg (hpc_int_arg) == false) {
+         PRINT_ERROR ("_verifier_int_arg (hpc_int_arg) == false");
+         return NAN;
+     }
 
     cpu_topology_t* cputop = cputopCreate ();
     if (cputop == NULL) {
@@ -411,10 +428,14 @@ double hpcIntegral (double a, double b, double (* func) (double), const unsigned
     
     // Less than 0.01 seconds passed
 
-#ifndef LINEAR_TIME_CALC
-    double result = _integral (a, b, func, num_threads, cputop);
-#else
+    double a = hpc_int_arg->a, b = hpc_int_arg->b;
+    double (*func) (double) = hpc_int_arg->func;
+    int num_threads = hpc_int_arg->num_threads;
+
+#ifdef LINEAR_TIME_CALC
     double result = _integral_linear (a, b, func, num_threads, cputop);
+#else
+    double result = _integral (a, b, func, num_threads, cputop);
 #endif
 
     if (cputopDestroy (&cputop) == -1) {

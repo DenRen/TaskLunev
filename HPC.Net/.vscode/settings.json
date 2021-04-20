@@ -16,7 +16,11 @@
         "hpc_net.h": "c",
         "errno.h": "c",
         "signal.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "internet": "c",
+        "hpc.h": "c",
+        "executor": "c",
+        "functional": "c"
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }
