@@ -562,7 +562,7 @@ int hpcnetCalcIntegral (serv_param_t* serv_param, unsigned num_threads,
     int num_clients = serv_param->num_clients;
     comp_unit_t *comp_units = serv_param->comp_units;
 
-    double len = (b - a) / num_threads;
+    const double len = (b - a) / num_threads;
     const int num_calc_units = num_clients + 1;
     const int num_extra_threads = num_threads % num_calc_units;
     const int num_full_threads  = num_threads / num_calc_units;
@@ -574,6 +574,11 @@ int hpcnetCalcIntegral (serv_param_t* serv_param, unsigned num_threads,
         .type_func = X,
         .num_threads = 0
     };
+
+    const double eps_full = eps * num_threads;
+    const double eps_extra = num_full_threads != 0 ?
+                             eps * num_threads / (1 + 1 / ((double) num_full_threads)) :
+                             eps_full;
 
     // Send task clients
     for (int numcli = 0; numcli < num_clients; ++numcli) {
@@ -593,6 +598,11 @@ int hpcnetCalcIntegral (serv_param_t* serv_param, unsigned num_threads,
         task.b = task.a + len * num_full_threads;
         task.num_threads = num_full_threads;
         
+        if (num_clients < num_extra_threads)
+            task.eps = eps_extra;
+        else
+            task.eps = eps_full;
+
         hpc_int_arg_t int_arg = CompUnitTask2IntArg (&task);
         IF_DEBUG (CHECK_ERR (_dumpIntArg (&int_arg), ));
         if (isfinite ((*result = hpcIntegral (&int_arg))) == 0)

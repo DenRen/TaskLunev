@@ -35,7 +35,7 @@ const uint16_t UDP_BROADCAST_PORT = 8000;
 
 const char LAN_IP_SERVER[] = "192.168.0.1";
 
-const int CHECK_TIMEOUT = 2;
+const int CHECK_TIMEOUT = 30;
 
 double funcX (double x);
 double funcX_mult_X (double x);
