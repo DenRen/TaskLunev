@@ -67,7 +67,7 @@ typedef struct {
 } serv_param_t;
 
 typedef struct {
-    double a, b, eps;
+    double a, b, dx;
     int type_func;
     unsigned num_threads;
 } comp_unit_task_t;

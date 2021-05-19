@@ -273,7 +273,7 @@ int GetStaticAddr (const char* if_name, sa_family_t family, char str_host[], uin
 }
 
 static int CheckServAttr (serv_attr_t* serv_attr, bool print_err) {
-    if (serv_attr->clients_limit <= 0 || serv_attr->if_name == NULL) {
+    if (serv_attr->clients_limit < 0 || serv_attr->if_name == NULL) {
 
         IF_DEBUG (print_err = true);
         if (print_err) {
@@ -504,7 +504,7 @@ static hpc_int_arg_t CompUnitTask2IntArg (comp_unit_task_t* ptask) {
         .a = ptask->a,
         .b = ptask->b,
         .func = NULL,
-        .eps = ptask->eps,
+        .eps = ptask->dx / fabs (ptask->b - ptask->a),
         .num_threads = ptask->num_threads
     };
 
@@ -570,14 +570,14 @@ int hpcnetCalcIntegral (serv_param_t* serv_param, unsigned num_threads,
     comp_unit_task_t task = {
         .a = a,
         .b = a,
-        .eps = eps * num_threads,
+        .dx = fabs (b - a) * eps,
         .type_func = X,
         .num_threads = 0
     };
 
-    const double eps_full = eps * num_threads;
+    const double eps_full = eps;
     const double eps_extra = num_full_threads != 0 ?
-                             eps * num_threads / (1 + 1 / ((double) num_full_threads)) :
+                             eps * (1 + 1 / ((double) num_full_threads)) :
                              eps_full;
 
     // Send task clients
@@ -597,12 +597,12 @@ int hpcnetCalcIntegral (serv_param_t* serv_param, unsigned num_threads,
         task.a = task.b;
         task.b = task.a + len * num_full_threads;
         task.num_threads = num_full_threads;
-        
+        /*
         if (num_clients < num_extra_threads)
             task.eps = eps_extra;
         else
             task.eps = eps_full;
-
+        */
         hpc_int_arg_t int_arg = CompUnitTask2IntArg (&task);
         IF_DEBUG (CHECK_ERR (_dumpIntArg (&int_arg), ));
         if (isfinite ((*result = hpcIntegral (&int_arg))) == 0)
@@ -641,6 +641,6 @@ bool ServAttrIsFull (serv_attr_t* serv_attr) {
 bool ServParamIsFull (serv_param_t* serv_param) {
     return serv_param              != NULL  &&
            serv_param->serv_fd     >= 0     &&
-           serv_param->num_clients > 0      &&
+           serv_param->num_clients >= 0     &&
            serv_param->comp_units  != NULL;
 }

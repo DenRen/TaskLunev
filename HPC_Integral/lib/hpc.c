@@ -478,8 +478,8 @@ static int _printPolicy (int pid) {
         case SCHED_RR:       printf ("policy: RR\n");       break;
         case SCHED_BATCH:    printf ("policy: BATCH\n");    break;
         case SCHED_IDLE:     printf ("policy: IDLE\n");     break;
-        case SCHED_ISO:      printf ("policy: ISO\n");      break;
-        case SCHED_DEADLINE: printf ("policy: DEADLINE\n"); break;
+        //case SCHED_ISO:      printf ("policy: ISO\n");      break;
+        //case SCHED_DEADLINE: printf ("policy: DEADLINE\n"); break;
         default: {
             printf ("policy: %d\n", policy);
             perror ("policy not found");

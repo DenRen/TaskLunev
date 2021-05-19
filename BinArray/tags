@@ -1,0 +1,219 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BINARRAY_H	BinArray.h	2;"	d
+BINLIB_H	sandbox/binlib.h	2;"	d
+BROWSER	Makefile	/^BROWSER = yandex-browser$/;"	m
+BinArray	BinArray.c	/^} BinArray;$/;"	t	typeref:struct:bin_array	file:
+BinArray	BinArray.h	/^typedef struct bin_array BinArray;$/;"	t	typeref:struct:bin_array
+CC	Makefile	/^CC  = g++$/;"	m
+CC	sandbox/Makefile	/^CC  = g++$/;"	m
+CC	tests/Makefile	/^CC  = g++$/;"	m
+CC	wrapper/Makefile	/^CC  = g++$/;"	m
+CFLAGS	Makefile	/^CFLAGS 	 = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS) $(OTHER_FLAGS)$/;"	m
+CFLAGS	tests/Makefile	/^CFLAGS   = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(GCOV_FLAGS) $(OTHER_FLAGS)$/;"	m
+CFLAGS	wrapper/Makefile	/^CFLAGS 	 = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS)$/;"	m
+CGLAGS	sandbox/Makefile	/^CGLAGS 	 = $(OPTIM_FLAGS)$/;"	m
+CHECK_BA	BinArray.c	135;"	d	file:
+CHECK_PBA	BinArray.c	126;"	d	file:
+CXX	Makefile	/^CXX = g++$/;"	m
+CXX	sandbox/Makefile	/^CXX = g++$/;"	m
+CXX	tests/Makefile	/^CXX = g++$/;"	m
+CXX	wrapper/Makefile	/^CXX = g++$/;"	m
+CXXFLAGS	Makefile	/^CXXFLAGS = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS) $(OTHER_FLAGS)$/;"	m
+CXXFLAGS	sandbox/Makefile	/^CXXFLAGS = $(OPTIM_FLAGS)$/;"	m
+CXXFLAGS	tests/Makefile	/^CXXFLAGS = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(GCOV_FLAGS) $(OTHER_FLAGS)$/;"	m
+CXXFLAGS	wrapper/Makefile	/^CXXFLAGS = $(OPTIM_FLAGS) $(GTEST_FLAGS) $(GCOV_FLAGS)$/;"	m
+CheckFillOneBA	tests/TestFunc.cpp	/^void CheckFillOneBA (size_t num_bits, size_t begin, ssize_t len) {$/;"	f
+CheckFillZeroBA	tests/TestFunc.cpp	/^void CheckFillZeroBA (size_t num_bits, size_t begin, ssize_t len) {$/;"	f
+CheckFind	tests/TestFunc.cpp	/^void CheckFind (BinArray* arrs[], size_t num, const float koef_num_check) {$/;"	f
+CheckFindOne	tests/TestFunc.cpp	/^void CheckFindOne  (BinArray* arrs[], size_t num, const float koef_num_check) {$/;"	f
+CheckFindZero	tests/TestFunc.cpp	/^void CheckFindZero (BinArray* arrs[], size_t num, const float koef_num_check) {$/;"	f
+CheckNumBits	wrapper/BinArray.cpp	/^    void binarray::CheckNumBits (const binarray& other) const {$/;"	f	class:ba::binarray
+CheckOneFullArrayBA	tests/TestFunc.cpp	/^void CheckOneFullArrayBA (BinArray* arrs[], size_t num) {$/;"	f
+CheckOneFullBA	tests/TestFunc.cpp	/^void CheckOneFullBA (BinArray* arr) {$/;"	f
+CheckSetAndGetOneArrayBA	tests/TestFunc.cpp	/^void CheckSetAndGetOneArrayBA (BinArray* arrs[], size_t num) {$/;"	f
+CheckSetAndGetZeroArrayBA	tests/TestFunc.cpp	/^void CheckSetAndGetZeroArrayBA (BinArray* arrs[], size_t num) {$/;"	f
+CheckZeroFullArrayBA	tests/TestFunc.cpp	/^void CheckZeroFullArrayBA (BinArray* arrs[], size_t num) {$/;"	f
+CheckZeroFullBA	tests/TestFunc.cpp	/^void CheckZeroFullBA (BinArray* arr) {$/;"	f
+Check_Dump	tests/TestFunc.cpp	/^int Check_Dump (BinArray* arr, size_t begin, ssize_t len, const char* str) {$/;"	f
+Check_bprint	tests/TestFunc.cpp	/^bool Check_bprint (uint8_t* byte, size_t num_bytes, const char* str) {$/;"	f
+Check_print_byte	tests/TestFunc.cpp	/^bool Check_print_byte (uint8_t byte, const char* str) {$/;"	f
+Check_print_byte_nl	tests/TestFunc.cpp	/^bool Check_print_byte_nl (uint8_t byte, const char* str) {$/;"	f
+DestroyArrayBA	tests/TestFunc.cpp	/^void DestroyArrayBA (BinArray* arrs[], size_t num) {$/;"	f
+FLAGS	Makefile	/^FLAGS  = OPTIM_FLAGS=$(OPTIM_FLAGS)$/;"	m
+FillOneFullArrayBA	tests/TestFunc.cpp	/^void FillOneFullArrayBA (BinArray* arrs[], size_t num) {$/;"	f
+FillRandArrayBA	tests/TestFunc.cpp	/^void FillRandArrayBA (BinArray* arrs[], size_t num) {$/;"	f
+FillZeroFullArrayBA	tests/TestFunc.cpp	/^void FillZeroFullArrayBA (BinArray* arrs[], size_t num) {$/;"	f
+GCOV_FLAGS	Makefile	/^GCOV_FLAGS = -fprofile-arcs -ftest-coverage$/;"	m
+GCOV_FLAGS	tests/Makefile	/^GCOV_FLAGS = -fprofile-arcs -ftest-coverage$/;"	m
+GCOV_FLAGS	wrapper/Makefile	/^GCOV_FLAGS = -fprofile-arcs -ftest-coverage$/;"	m
+GTEST_FLAGS	Makefile	/^GTEST_FLAGS = -lgtest -pthread -g$/;"	m
+GTEST_FLAGS	tests/Makefile	/^GTEST_FLAGS = -lgtest -pthread -g$/;"	m
+GTEST_FLAGS	wrapper/Makefile	/^GTEST_FLAGS = -lgtest -pthread -g $/;"	m
+GetArrayBA	tests/TestFunc.cpp	/^BinArray** GetArrayBA (size_t num) {$/;"	f
+KILL_ALLOCATOR	BinArray.h	34;"	d
+LCOV_OUT_FOLDER	Makefile	/^LCOV_OUT_FOLDER = out$/;"	m
+LD	Makefile	/^LD  = g++$/;"	m
+LD	sandbox/Makefile	/^LD  = g++$/;"	m
+LD	tests/Makefile	/^LD  = g++$/;"	m
+LD	wrapper/Makefile	/^LD  = g++$/;"	m
+LDFLAGS	Makefile	/^LDFLAGS  = $(LD_GCOV_FLAGS) $(OTHER_FLAGS)$/;"	m
+LDFLAGS	sandbox/Makefile	/^LDFLAGS  = $(OPTIM_FLAGS)$/;"	m
+LDFLAGS	tests/Makefile	/^LDFLAGS  = $(GTEST_FLAGS) $(OPTIM_FLAGS) $(LD_GCOV_FLAGS) $(OTHER_FLAGS)$/;"	m
+LDFLAGS	wrapper/Makefile	/^LDFLAGS  = $(LD_GCOV_FLAGS)$/;"	m
+LD_GCOV_FLAGS	Makefile	/^LD_GCOV_FLAGS = -lgcov$/;"	m
+LD_GCOV_FLAGS	tests/Makefile	/^LD_GCOV_FLAGS = -lgcov$/;"	m
+LD_GCOV_FLAGS	wrapper/Makefile	/^LD_GCOV_FLAGS = -flto -lgcov$/;"	m
+LINE_EXAMPLE	sandbox/Tutorials.h	4;"	d
+OBJS	Makefile	/^OBJS = main.o BinArray.o$/;"	m
+OBJS	sandbox/Makefile	/^OBJS = main.o binlib.o Tutorials.o ..\/BinArray.o$/;"	m
+OBJS	tests/Makefile	/^OBJS = main.o ..\/BinArray.o TestFunc.o$/;"	m
+OBJS	wrapper/Makefile	/^OBJS = main.o BinArray.o$/;"	m
+OPTIM_FLAGS	Makefile	/^OPTIM_FLAGS = -Os -flto$/;"	m
+OPTIM_FLAGS	sandbox/Makefile	/^OPTIM_FLAGS = -O0$/;"	m
+OPTIM_FLAGS	tests/Makefile	/^OPTIM_FLAGS = -Os -flto$/;"	m
+OPTIM_FLAGS	wrapper/Makefile	/^OPTIM_FLAGS = -O3$/;"	m
+OTHER_FLAGS	Makefile	/^OTHER_FLAGS = -MD$/;"	m
+OTHER_FLAGS	tests/Makefile	/^OTHER_FLAGS = -MD$/;"	m
+PROBABLE_FAULT_ALLOCATORS	BinArray.h	31;"	d
+RM	Makefile	/^RM = rm -rf$/;"	m
+RM	wrapper/Makefile	/^RM = rm -rf$/;"	m
+RandCreateArrayBA	tests/TestFunc.cpp	/^void RandCreateArrayBA (BinArray* arrs[], size_t num, $/;"	f
+RandResizeArrayBA	tests/TestFunc.cpp	/^void RandResizeArrayBA (BinArray* arrs[], size_t num, $/;"	f
+ReadFromStdoutToBuf	tests/TestFunc.cpp	/^void ReadFromStdoutToBuf (char* buf, uint8_t size) {$/;"	f
+SANDBOX_DIR	Makefile	/^SANDBOX_DIR = sandbox$/;"	m
+SANDBOX_DIR	wrapper/Makefile	/^SANDBOX_DIR = sandbox$/;"	m
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Create_Resize_Release) { $/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Dump) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Fault_Allocate) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Filling_And_Getting_One_And_Zero) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Find) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, FindFull) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Foreach_On_Max_Min_Functions) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, GetCLone) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, GetNumBits) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, GetSubArray) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Invert_And_GetInvert) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Rand_Create_Resize_Release) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Rand_Filling_And_Getting_One_And_Zero) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Rand_GetCLone) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Rand_Invert_And_GetInvert) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Secondary_Functions) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, Setting_And_GettingOne_OrZero) {$/;"	f
+TEST	tests/BinArray_Tests.cpp	/^TEST (BIN_ARRAY, baCheckCalcArg) {$/;"	f
+TESTFUNC_HPP	tests/TestFunc.hpp	2;"	d
+TEST_BPRINT16	tests/BinArray_Tests.cpp	111;"	d	file:
+TEST_BPRINT16	tests/BinArray_Tests.cpp	72;"	d	file:
+TEST_BPRINT8	tests/BinArray_Tests.cpp	112;"	d	file:
+TEST_BPRINT8	tests/BinArray_Tests.cpp	68;"	d	file:
+TEST_DIR	Makefile	/^TEST_DIR = tests$/;"	m
+TEST_DIR	wrapper/Makefile	/^TEST_DIR = tests$/;"	m
+TEST_PRINTS	tests/BinArray_Tests.cpp	39;"	d	file:
+TEST_PRINTS	tests/BinArray_Tests.cpp	61;"	d	file:
+TEST_PRINT_BYTE	tests/BinArray_Tests.cpp	37;"	d	file:
+TEST_PRINT_BYTE	tests/BinArray_Tests.cpp	62;"	d	file:
+TEST_PRINT_BYTE_NL	tests/BinArray_Tests.cpp	38;"	d	file:
+TEST_PRINT_BYTE_NL	tests/BinArray_Tests.cpp	63;"	d	file:
+TUTORIALS_H	sandbox/Tutorials.h	2;"	d
+Tutorial_BinShift	sandbox/Tutorials.c	/^void Tutorial_BinShift () {$/;"	f
+Tutorial_BinShift_Casting	sandbox/Tutorials.c	/^void Tutorial_BinShift_Casting () {$/;"	f
+WRAPPER_DIR	wrapper/Makefile	/^WRAPPER_DIR = wrapper$/;"	m
+_baFindBitOneInQWord	BinArray.c	/^static \/* inline*\/ int8_t _baFindBitOneInQWord (uint64_t qword) {$/;"	f	file:
+_baFindBitZeroInQWord	BinArray.c	/^static \/* inline*\/ int8_t _baFindBitZeroInQWord (uint64_t qword) {$/;"	f	file:
+_baGetBitFromByte	BinArray.c	/^static bool _baGetBitFromByte (uint8_t byte, uint8_t num_bit) {$/;"	f	file:
+_baGetByte	BinArray.c	/^static uint8_t _baGetByte (buf_t buf, size_t num_byte) {$/;"	f	file:
+_baGetMaskBitFromByte	BinArray.c	/^static uint8_t _baGetMaskBitFromByte (uint8_t num_bit) {$/;"	f	file:
+_baGetMaskFirtsQWord	BinArray.c	/^static uint64_t _baGetMaskFirtsQWord (uint8_t rshift, uint8_t len) {$/;"	f	file:
+_baGetMaskLastQWord	BinArray.c	/^static uint64_t _baGetMaskLastQWord (uint8_t len) {$/;"	f	file:
+_baGetNumBits	BinArray.c	/^static size_t _baGetNumBits (BinArray* arr) {$/;"	f	file:
+_baGetPtrByte	BinArray.c	/^static uint8_t* _baGetPtrByte (buf_t buf, size_t num_byte) {$/;"	f	file:
+_baGetValue	BinArray.c	/^static \/* inline*\/ bool _baGetValue (buf_t buf, size_t num_bit) {$/;"	f	file:
+_baSetOne	BinArray.c	/^static \/* inline*\/ void _baSetOne (buf_t buf, size_t num_bit) {$/;"	f	file:
+_baSetValue	BinArray.c	/^static \/* inline*\/ void _baSetValue (buf_t buf, size_t num_bit, bool val) {$/;"	f	file:
+_baSetZero	BinArray.c	/^static \/* inline*\/ void _baSetZero (buf_t buf, size_t num_bit) {$/;"	f	file:
+_mynop	BinArray.c	/^static void _mynop() {}$/;"	f	file:
+arr_	wrapper/BinArray.hpp	/^    BinArray* arr_;$/;"	m	class:ba::binarray
+ba	wrapper/BinArray.cpp	/^namespace ba {$/;"	n	file:
+ba	wrapper/BinArray.hpp	/^namespace ba {$/;"	n
+baBits2Bytes	BinArray.c	/^size_t baBits2Bytes (size_t num_bits) {$/;"	f
+baCheckArr	BinArray.c	/^static bool baCheckArr (BinArray arr) {$/;"	f	file:
+baCheckCalcArg	BinArray.c	/^static bool baCheckCalcArg (BinArray* arr, size_t begin, ssize_t* len) {$/;"	f	file:
+baCheckPtr	BinArray.c	/^static bool baCheckPtr (BinArray* arr) {$/;"	f	file:
+baCreate	BinArray.c	/^BinArray* baCreate (size_t num_bits) {$/;"	f
+baDestroy	BinArray.c	/^int baDestroy (BinArray** arr) {$/;"	f
+baDumpBuf	BinArray.c	/^int baDumpBuf (BinArray* arr, size_t begin, ssize_t len) {$/;"	f
+baDumpBufFull	BinArray.c	/^int baDumpBufFull (BinArray* arr) {$/;"	f
+baFillOne	BinArray.c	/^int baFillOne  (BinArray* arr, size_t begin, ssize_t len) {$/;"	f
+baFillOneFull	BinArray.c	/^int baFillOneFull (BinArray* arr) {$/;"	f
+baFillZero	BinArray.c	/^int baFillZero (BinArray* arr, size_t begin, ssize_t len) {$/;"	f
+baFillZeroFull	BinArray.c	/^int baFillZeroFull (BinArray* arr) {$/;"	f
+baFind	BinArray.c	/^ssize_t baFind (BinArray* arr, size_t begin, ssize_t len, bool val) {$/;"	f
+baFindOne	BinArray.c	/^ssize_t baFindOne  (BinArray* arr, size_t begin, ssize_t len) {$/;"	f
+baFindZero	BinArray.c	/^ssize_t baFindZero (BinArray* arr, size_t begin, ssize_t len) {$/;"	f
+baForeach	BinArray.c	/^int baForeach (BinArray* arr,$/;"	f
+baGetClone	BinArray.c	/^BinArray* baGetClone (BinArray* arr) {$/;"	f
+baGetInvert	BinArray.c	/^BinArray* baGetInvert (BinArray* arr) {$/;"	f
+baGetNumBits	BinArray.c	/^size_t baGetNumBits (BinArray* arr) {$/;"	f
+baGetSizeArrayIn8Byte	BinArray.c	/^size_t baGetSizeArrayIn8Byte (size_t num_bits) {$/;"	f
+baGetSubArray	BinArray.c	/^BinArray *baGetSubArray (BinArray* arr, size_t begin, ssize_t len) {$/;"	f
+baGetValue	BinArray.c	/^int baGetValue (BinArray *arr, size_t num_bit) {$/;"	f
+baInvert	BinArray.c	/^int baInvert (BinArray* arr, size_t begin, ssize_t len) {$/;"	f
+baResize	BinArray.c	/^int baResize (BinArray* arr, size_t new_num_bits) {$/;"	f
+baSetOne	BinArray.c	/^int baSetOne   (BinArray* arr, size_t num_bit) {$/;"	f
+baSetValue	BinArray.c	/^int baSetValue (BinArray* arr, size_t num_bit, bool val) {$/;"	f
+baSetZero	BinArray.c	/^int baSetZero  (BinArray* arr, size_t num_bit) {$/;"	f
+ba_calloc	BinArray.c	/^void* ba_calloc (size_t nmemb, size_t size) {$/;"	f
+ba_reallocarray	BinArray.c	/^void* ba_reallocarray (void* ptr, size_t nmemb, size_t size) {$/;"	f
+bin_array	BinArray.c	/^typedef struct bin_array {$/;"	s	file:
+binarr_	wrapper/BinArray.hpp	/^        binarray& binarr_;$/;"	m	class:ba::binarray::proxyBit
+binarray	wrapper/BinArray.cpp	/^    binarray::binarray (const binarray& other) :$/;"	f	class:ba::binarray
+binarray	wrapper/BinArray.cpp	/^    binarray::binarray (size_t size) :$/;"	f	class:ba::binarray
+binarray	wrapper/BinArray.hpp	/^class binarray {$/;"	c	namespace:ba
+bprint	BinArray.c	/^void bprint (uint8_t* bytes, size_t num_bytes) {$/;"	f
+bprint	sandbox/binlib.c	/^void bprint (uint8_t* bytes, size_t num_bytes) {$/;"	f
+buf_	BinArray.c	/^    buf_t buf_;$/;"	m	struct:bin_array	file:
+buf_t	BinArray.c	/^typedef uint8_t* buf_t;$/;"	t	file:
+el_t	main.c	/^typedef int el_t;$/;"	t	file:
+find_max	main.c	/^int find_max (BinArray* c, bool el, void* data) {$/;"	f
+find_max	tests/BinArray_Tests.cpp	/^static int find_max (BinArray* arr, bool el, void* data) {$/;"	f	file:
+find_min	tests/BinArray_Tests.cpp	/^static int find_min (BinArray* arr, bool el, void* data) {$/;"	f	file:
+global_id	wrapper/BinArray.hpp	/^    static int global_id;$/;"	m	class:ba::binarray
+global_id_max	wrapper/BinArray.hpp	/^    static int global_id_max;$/;"	m	class:ba::binarray
+id_	wrapper/BinArray.hpp	/^    int id_;$/;"	m	class:ba::binarray
+invert	wrapper/BinArray.cpp	/^    void binarray::invert () {$/;"	f	class:ba::binarray
+logicAnd	wrapper/BinArray.cpp	/^    void binarray::logicAnd (const binarray& other) {$/;"	f	class:ba::binarray
+main	main.c	/^int main () {$/;"	f
+main	sandbox/main.cpp	/^int main () {$/;"	f
+main	tests/main.cpp	/^int main (int argc, char *argv[]) {$/;"	f
+main	wrapper/main.cpp	/^int main () {$/;"	f
+max_size_arr_g	tests/BinArray_Tests.cpp	/^const size_t max_size_arr_g = UINT16_MAX * 4 \/ 1;$/;"	v
+noexcept	wrapper/BinArray.hpp	/^    binarray (binarray&& other) noexcept;$/;"	m	class:ba::binarray
+noexcept	wrapper/BinArray.hpp	/^    binarray& operator= (binarray   other) noexcept;$/;"	m	class:ba::binarray
+noexcept	wrapper/BinArray.hpp	/^    binarray& operator= (binarray&& other) noexcept;$/;"	m	class:ba::binarray
+noexcept	wrapper/BinArray.hpp	/^    size_t getNumBits () const noexcept;$/;"	m	class:ba::binarray
+noexcept	wrapper/BinArray.hpp	/^    void swap (binarray& other) noexcept;$/;"	m	class:ba::binarray
+noexcept	wrapper/BinArray.hpp	/^    ~binarray () noexcept;$/;"	m	class:ba::binarray
+num_arr_g	tests/BinArray_Tests.cpp	/^const size_t num_arr_g = 5000                \/ 1;$/;"	v
+num_bit_	wrapper/BinArray.hpp	/^        size_t num_bit_;$/;"	m	class:ba::binarray::proxyBit
+num_bits_	BinArray.c	/^    size_t num_bits_;$/;"	m	struct:bin_array	file:
+operator &	wrapper/BinArray.cpp	/^    binarray operator & (const binarray& lhs, const binarray& rhs) {$/;"	f	namespace:ba
+operator &&	wrapper/BinArray.cpp	/^    binarray operator && (const binarray& lhs, const binarray& rhs) {$/;"	f	namespace:ba
+operator &=	wrapper/BinArray.cpp	/^    binarray& binarray::operator&= (const binarray& rhs) {$/;"	f	class:ba::binarray
+operator &=	wrapper/BinArray.cpp	/^    binarray::proxyBit& binarray::proxyBit::operator&= (const bool val) {$/;"	f	class:ba::binarray::proxyBit
+operator =	wrapper/BinArray.cpp	/^    binarray::proxyBit& binarray::proxyBit::operator= (const bool val) {$/;"	f	class:ba::binarray::proxyBit
+operator []	wrapper/BinArray.cpp	/^    binarray::proxyBit binarray::operator[] (size_t num_bit) {$/;"	f	class:ba::binarray
+operator []	wrapper/BinArray.cpp	/^    bool binarray::operator[] (size_t num_bit) const {$/;"	f	class:ba::binarray
+operator bool	wrapper/BinArray.cpp	/^    binarray::proxyBit::operator bool () {$/;"	f	class:ba::binarray::proxyBit
+operator |	wrapper/BinArray.cpp	/^    binarray operator | (const binarray& lhs, const binarray& rhs) {$/;"	f	namespace:ba
+operator |=	wrapper/BinArray.cpp	/^    binarray& binarray::operator|= (const binarray& other) {$/;"	f	class:ba::binarray
+operator |=	wrapper/BinArray.cpp	/^    binarray::proxyBit& binarray::proxyBit::operator|= (const bool val) {$/;"	f	class:ba::binarray::proxyBit
+print_byte	BinArray.c	/^void print_byte (uint8_t byte) {$/;"	f
+print_byte	sandbox/binlib.c	/^void print_byte (uint8_t byte) {$/;"	f
+print_byte_nl	BinArray.c	/^void print_byte_nl (uint8_t byte) {$/;"	f
+print_byte_nl	sandbox/binlib.c	/^void print_byte_nl (uint8_t byte) {$/;"	f
+proxyBit	wrapper/BinArray.hpp	/^        proxyBit (binarray& binarr, size_t num_bit) :$/;"	f	class:ba::binarray::proxyBit
+proxyBit	wrapper/BinArray.hpp	/^    class proxyBit {$/;"	c	class:ba::binarray

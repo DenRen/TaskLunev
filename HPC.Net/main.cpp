@@ -26,18 +26,18 @@ int main (int argc, char* argv[]) {
         const unsigned num_threads = atoi (argv[3]);
         serv_attr_t serv_attr = {
             .clients_limit = atoi (argv[2]),
-            .if_name       = "wlo1",    // Wi-Fi
+            .if_name       = "eth0",    // Wi-Fi
             .sa_family     = AF_INET    // IPv4
         };
         serv_param_t serv_param = {0};
         double result = 0.0;
 
-        if (num_threads == 0 || serv_attr.clients_limit == 0)
+        if (num_threads == 0 || serv_attr.clients_limit < 0)
             CHECK_ERR (-1, ErrorInput (argv));
 
         // Satrt TCP server with connected clients
         CHECK_ERR (StartServer (&serv_attr, &serv_param), );
-        CHECK_ERR (hpcnetCalcIntegral (&serv_param, num_threads, func, 0, 90, 1e-10, &result),
+        CHECK_ERR (hpcnetCalcIntegral (&serv_param, num_threads, func, 0, 90, 1e-9 / 5, &result),
                    CloseServer (&serv_param));
         CHECK_ERR (CloseServer (&serv_param), );
 
